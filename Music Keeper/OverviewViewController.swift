@@ -17,13 +17,21 @@ class OverviewViewController: UIViewController, UITableViewDelegate, UITableView
         }
     }
     
-    static let reuseID = "OverviewViewController"
     private var artists: [Artist] = []
     var token: String?
+    
+    weak var databaseController: DatabaseProtocol?
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        print("overview token:", token)
+        
+        // get a reference to the database from the appDelegate
+        let appDelegate = (UIApplication.shared.delegate as? AppDelegate)
+        databaseController = appDelegate?.databaseController
+        
+        // Retrieve the token from Core Data
+        token = databaseController?.fetchAccessToken()
+        print("overview token:", token!)
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -42,21 +50,6 @@ class OverviewViewController: UIViewController, UITableViewDelegate, UITableView
             }
         }
     }
-    
-    func getAccessToken() -> String? {
-        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else { return nil }
-        let context = appDelegate.persistentContainer.viewContext
-        
-        let fetchRequest = NSFetchRequest<NSManagedObject>(entityName: "AccessToken")
-        
-        do {
-            let accessToken = try context.fetch(fetchRequest).first?.value(forKeyPath: "token") as? String
-            return accessToken
-        } catch let error as NSError {
-            print("Could not fetch access token. \(error), \(error.userInfo)")
-            return nil
-        }
-    }
 
     
 // MARK: - UITableViewDataSource
@@ -66,9 +59,11 @@ class OverviewViewController: UIViewController, UITableViewDelegate, UITableView
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "librarySongCell", for: indexPath)
+//        cell.contentView.backgroundColor = .black
         var content = cell.defaultContentConfiguration()
         let artist = artists[indexPath.row]
         content.text = artist.name
+        content.textProperties.color = .white
         cell.contentConfiguration = content
         return cell
     }

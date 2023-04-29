@@ -9,9 +9,9 @@ import UIKit
 import StoreKit
 import CoreData
 
-class NetworkManager: DatabaseListener {
+class NetworkManager {
     static let shared   = NetworkManager()
-    let controller      = SKCloudServiceController()
+//    let controller      = SKCloudServiceController()
     let cache           = NSCache<NSString, UIImage>()
     
     private init() { }
@@ -79,16 +79,8 @@ class NetworkManager: DatabaseListener {
                     print("accessToken:", accessToken)
                     completion(accessToken)
                 }
-                
-                // get a reference to the database from the appDelegate
-                let appDelegate = (UIApplication.shared.delegate as? AppDelegate)
-                databaseController = appDelegate?.databaseController
-                
-                databaseController?.saveAccessToken(token: token.accessToken!)
-                
 //                PersistenceManager.saveAccessToken(accessToken: token.accessToken!)
 //                PersistenceManager.saveRefreshToken(refreshToken: token.refreshToken!)
-
                 return
             } catch {
                 print("catch: ", error)

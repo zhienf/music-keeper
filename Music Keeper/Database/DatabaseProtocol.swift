@@ -17,6 +17,9 @@ protocol DatabaseProtocol: AnyObject {  // defines all the behaviour that a data
     func addListener(listener: DatabaseListener)
     func removeListener(listener: DatabaseListener)
     
+    func saveAccessToken(token: String)
+    func fetchAccessToken() -> String
+    
 //    func addBook(bookData: BookData) -> Book
 //    func removeBook(book: Book)
 }

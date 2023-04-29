@@ -17,7 +17,7 @@ class CoreDataController: NSObject, DatabaseProtocol, NSFetchedResultsController
     var token: String?
     
     override init() {
-        persistentContainer = NSPersistentContainer(name: "BookDataModel")
+        persistentContainer = NSPersistentContainer(name: "AccessTokenDataModel")
         persistentContainer.loadPersistentStores() { (description, error ) in
             if let error = error {
                 fatalError("Failed to load Core Data Stack with error: \(error)")
@@ -40,6 +40,27 @@ class CoreDataController: NSObject, DatabaseProtocol, NSFetchedResultsController
         } catch {
             print("Failed to save access token with error: \(error)")
         }
+    }
+    
+    func fetchAccessToken() -> String {
+        // Fetch the AccessToken entity from the Core Data store
+        let fetchRequest: NSFetchRequest<AccessToken> = AccessToken.fetchRequest()
+        let sortDescriptor = NSSortDescriptor(key: "token", ascending: false)
+        fetchRequest.sortDescriptors = [sortDescriptor]
+        let context = persistentContainer.viewContext
+        let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: context, sectionNameKeyPath: nil, cacheName: nil)
+
+        do {
+            try fetchedResultsController.performFetch()
+            if let tokens = fetchedResultsController.fetchedObjects, let lastToken = tokens.first {
+                // Retrieve the token value from the AccessToken entity
+                return lastToken.token!
+                // Do something with the access token
+            }
+        } catch {
+            print("Failed to fetch access token: \(error)")
+        }
+        return "no token"
     }
 
     
@@ -103,9 +124,9 @@ class CoreDataController: NSObject, DatabaseProtocol, NSFetchedResultsController
     
     // MARK: - Fetched Results Controller Protocol methods
     
-    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        listeners.invoke() { listener in
-            listener.onBookListChange(bookList: fetchAllBooks())
-        }
-    }
+//    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+//        listeners.invoke() { listener in
+//            listener.onBookListChange(bookList: fetchAllBooks())
+//        }
+//    }
 }
