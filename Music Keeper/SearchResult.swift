@@ -9,7 +9,7 @@ import Foundation
 
 struct SearchResults {
     var tracks: TrackResult?
-    var artists: ArtistResult?
+    var artists: ArtistItem?
     var albums: AlbumResult?
     // Add additional search result types as needed
     
@@ -25,7 +25,7 @@ extension SearchResults: Decodable {
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         tracks = try container.decodeIfPresent(TrackResult.self, forKey: .tracks)
-        artists = try container.decodeIfPresent(ArtistResult.self, forKey: .artists)
+        artists = try container.decodeIfPresent(ArtistItem.self, forKey: .artists)
         albums = try container.decodeIfPresent(AlbumResult.self, forKey: .albums)
         // Decode additional search result types as needed
     }

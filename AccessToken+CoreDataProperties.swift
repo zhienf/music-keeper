@@ -2,7 +2,7 @@
 //  AccessToken+CoreDataProperties.swift
 //  Music Keeper
 //
-//  Created by Zhi'en Foo on 29/04/2023.
+//  Created by Zhi'en Foo on 30/04/2023.
 //
 //
 
@@ -16,7 +16,9 @@ extension AccessToken {
         return NSFetchRequest<AccessToken>(entityName: "AccessToken")
     }
 
+    @NSManaged public var refreshToken: String?
     @NSManaged public var token: String?
+    @NSManaged public var timestamp: Date?
 
 }
 

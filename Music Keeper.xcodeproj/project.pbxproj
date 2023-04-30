@@ -16,7 +16,7 @@
 		F26A899129EE3EDE00FF3A59 /* SpotifyAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = F26A899029EE3EDE00FF3A59 /* SpotifyAPIClient.swift */; };
 		F26A899329EE43C100FF3A59 /* SearchResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = F26A899229EE43C100FF3A59 /* SearchResult.swift */; };
 		F26A899529EE49C100FF3A59 /* TrackResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = F26A899429EE49C100FF3A59 /* TrackResult.swift */; };
-		F26A899729EE4A0600FF3A59 /* ArtistResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = F26A899629EE4A0600FF3A59 /* ArtistResult.swift */; };
+		F26A899729EE4A0600FF3A59 /* Artist.swift in Sources */ = {isa = PBXBuildFile; fileRef = F26A899629EE4A0600FF3A59 /* Artist.swift */; };
 		F26A899929EE4A1500FF3A59 /* AlbumResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = F26A899829EE4A1500FF3A59 /* AlbumResult.swift */; };
 		F28EFAD029FBFC8A00B942C8 /* LoginAccountViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F28EFACF29FBFC8A00B942C8 /* LoginAccountViewController.swift */; };
 		F28EFAD229FBFE3900B942C8 /* NetworkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F28EFAD129FBFE3900B942C8 /* NetworkManager.swift */; };
@@ -47,7 +47,7 @@
 		F26A899029EE3EDE00FF3A59 /* SpotifyAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpotifyAPIClient.swift; sourceTree = "<group>"; };
 		F26A899229EE43C100FF3A59 /* SearchResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchResult.swift; sourceTree = "<group>"; };
 		F26A899429EE49C100FF3A59 /* TrackResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackResult.swift; sourceTree = "<group>"; };
-		F26A899629EE4A0600FF3A59 /* ArtistResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArtistResult.swift; sourceTree = "<group>"; };
+		F26A899629EE4A0600FF3A59 /* Artist.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Artist.swift; sourceTree = "<group>"; };
 		F26A899829EE4A1500FF3A59 /* AlbumResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumResult.swift; sourceTree = "<group>"; };
 		F28EFACF29FBFC8A00B942C8 /* LoginAccountViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginAccountViewController.swift; sourceTree = "<group>"; };
 		F28EFAD129FBFE3900B942C8 /* NetworkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkManager.swift; sourceTree = "<group>"; };
@@ -111,7 +111,7 @@
 				F26A899029EE3EDE00FF3A59 /* SpotifyAPIClient.swift */,
 				F26A899229EE43C100FF3A59 /* SearchResult.swift */,
 				F26A899429EE49C100FF3A59 /* TrackResult.swift */,
-				F26A899629EE4A0600FF3A59 /* ArtistResult.swift */,
+				F26A899629EE4A0600FF3A59 /* Artist.swift */,
 				F26A899829EE4A1500FF3A59 /* AlbumResult.swift */,
 				F2BC696B29FB868300F13AA9 /* LibraryViewController.swift */,
 				F28EFACF29FBFC8A00B942C8 /* LoginAccountViewController.swift */,
@@ -241,7 +241,7 @@
 				F28EFAD629FC02E400B942C8 /* OverviewViewController.swift in Sources */,
 				F2BC696C29FB868300F13AA9 /* LibraryViewController.swift in Sources */,
 				F26A897D29EE1EB200FF3A59 /* SceneDelegate.swift in Sources */,
-				F26A899729EE4A0600FF3A59 /* ArtistResult.swift in Sources */,
+				F26A899729EE4A0600FF3A59 /* Artist.swift in Sources */,
 				F28EFADA29FC11E700B942C8 /* ArtistTableViewCell.swift in Sources */,
 				F26A899129EE3EDE00FF3A59 /* SpotifyAPIClient.swift in Sources */,
 				F29762FE29FCC43F0013FC8D /* DatabaseProtocol.swift in Sources */,

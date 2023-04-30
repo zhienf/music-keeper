@@ -27,13 +27,15 @@ class CoreDataController: NSObject, DatabaseProtocol, NSFetchedResultsController
         super.init()
     }
     
-    func saveAccessToken(token: String) {
+    func saveTokens(token: String, refreshToken: String) {
         guard let entity = NSEntityDescription.entity(forEntityName: "AccessToken", in: persistentContainer.viewContext) else {
             fatalError("Failed to create entity description")
         }
         
         let accessToken = NSManagedObject(entity: entity, insertInto: persistentContainer.viewContext)
         accessToken.setValue(token, forKey: "token")
+        accessToken.setValue(refreshToken, forKey: "refreshToken")
+        accessToken.setValue(Date(), forKey: "timestamp") // Set the timestamp property to the current date and time
         
         do {
             try persistentContainer.viewContext.save()
@@ -45,7 +47,7 @@ class CoreDataController: NSObject, DatabaseProtocol, NSFetchedResultsController
     func fetchAccessToken() -> String {
         // Fetch the AccessToken entity from the Core Data store
         let fetchRequest: NSFetchRequest<AccessToken> = AccessToken.fetchRequest()
-        let sortDescriptor = NSSortDescriptor(key: "token", ascending: false)
+        let sortDescriptor = NSSortDescriptor(key: "timestamp", ascending: false)
         fetchRequest.sortDescriptors = [sortDescriptor]
         let context = persistentContainer.viewContext
         let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: context, sectionNameKeyPath: nil, cacheName: nil)
@@ -55,10 +57,29 @@ class CoreDataController: NSObject, DatabaseProtocol, NSFetchedResultsController
             if let tokens = fetchedResultsController.fetchedObjects, let lastToken = tokens.first {
                 // Retrieve the token value from the AccessToken entity
                 return lastToken.token!
-                // Do something with the access token
             }
         } catch {
             print("Failed to fetch access token: \(error)")
+        }
+        return "no token"
+    }
+    
+    func fetchRefreshToken() -> String {
+        // Fetch the AccessToken entity from the Core Data store
+        let fetchRequest: NSFetchRequest<AccessToken> = AccessToken.fetchRequest()
+        let sortDescriptor = NSSortDescriptor(key: "timestamp", ascending: false)
+        fetchRequest.sortDescriptors = [sortDescriptor]
+        let context = persistentContainer.viewContext
+        let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: context, sectionNameKeyPath: nil, cacheName: nil)
+
+        do {
+            try fetchedResultsController.performFetch()
+            if let tokens = fetchedResultsController.fetchedObjects, let lastToken = tokens.first {
+                // Retrieve the token value from the AccessToken entity
+                return lastToken.refreshToken!
+            }
+        } catch {
+            print("Failed to fetch refresh token: \(error)")
         }
         return "no token"
     }

@@ -18,6 +18,7 @@ class OverviewViewController: UIViewController, UITableViewDelegate, UITableView
     }
     
     private var artists: [Artist] = []
+
     var token: String?
     
     weak var databaseController: DatabaseProtocol?
@@ -31,7 +32,9 @@ class OverviewViewController: UIViewController, UITableViewDelegate, UITableView
         
         // Retrieve the token from Core Data
         token = databaseController?.fetchAccessToken()
+        let refreshToken = databaseController?.fetchRefreshToken()
         print("overview token:", token!)
+        print("overview refresh token:", refreshToken)
     }
     
     override func viewDidAppear(_ animated: Bool) {
