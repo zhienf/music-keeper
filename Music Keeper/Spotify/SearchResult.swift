@@ -8,9 +8,9 @@
 import Foundation
 
 struct SearchResults {
-    var tracks: TrackResult?
-    var artists: ArtistItem?
-    var albums: AlbumResult?
+//    var tracks: TrackItem?
+    var artists: ArtistItems?
+    var albums: AlbumItem?
     // Add additional search result types as needed
     
     enum CodingKeys: String, CodingKey {
@@ -24,9 +24,9 @@ struct SearchResults {
 extension SearchResults: Decodable {
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        tracks = try container.decodeIfPresent(TrackResult.self, forKey: .tracks)
-        artists = try container.decodeIfPresent(ArtistItem.self, forKey: .artists)
-        albums = try container.decodeIfPresent(AlbumResult.self, forKey: .albums)
+//        tracks = try container.decodeIfPresent(TrackItem.self, forKey: .tracks)
+        artists = try container.decodeIfPresent(ArtistItems.self, forKey: .artists)
+        albums = try container.decodeIfPresent(AlbumItem.self, forKey: .albums)
         // Decode additional search result types as needed
     }
 }

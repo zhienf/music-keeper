@@ -7,6 +7,12 @@
 
 import UIKit
 
+enum ImageError: Error {
+    case invalidServerResponse
+    case invalidShowURL
+    case invalidBookImageURL
+}
+
 class OverviewViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
 
     @IBOutlet private weak var tableView: UITableView! {
@@ -16,8 +22,13 @@ class OverviewViewController: UIViewController, UITableViewDelegate, UITableView
             tableView.tableFooterView = UIView()
         }
     }
+    @IBOutlet weak var currentlyPlayingTrackTitle: UILabel!
+    @IBOutlet weak var currentlyPlayingTrackArtist: UILabel!
+    @IBOutlet weak var currentlyPlayingTrackAlbum: UILabel!
+    @IBOutlet weak var currentlyPlayingTrackImage: UIImageView!
     
     private var artists: [Artist] = []
+    private var currentlyPlayingTrack: Track?
 
     var token: String?
     
@@ -41,6 +52,7 @@ class OverviewViewController: UIViewController, UITableViewDelegate, UITableView
         super.viewDidAppear(animated)
         
         fetchArtists()
+        fetchCurrentlyPlayingTrack()
     }
     
     private func fetchArtists() {
@@ -50,6 +62,38 @@ class OverviewViewController: UIViewController, UITableViewDelegate, UITableView
             self.artists = artistResult.items
             DispatchQueue.main.async {
                 self.tableView.reloadData()
+            }
+        }
+    }
+    
+    private func fetchCurrentlyPlayingTrack() {
+        guard let token = token else { return }
+        NetworkManager.shared.getCurrentlyPlayingTrack(with: token) { trackResult in
+            guard let trackResult = trackResult else { return }
+            self.currentlyPlayingTrack = trackResult
+            
+            let currentSongTitle = trackResult.name
+            let currentAlbum = trackResult.album.name
+            let currentArtist = trackResult.artists[0].name
+            let currentImageURL = trackResult.album.images?[2].url
+
+            // set UILabels and UIImageView with the result obtained
+            DispatchQueue.main.async {
+                self.currentlyPlayingTrackTitle.text = currentSongTitle
+                self.currentlyPlayingTrackArtist.text = currentArtist
+                self.currentlyPlayingTrackAlbum.text = currentAlbum
+                
+                // Download image url
+                guard let imageURL = currentImageURL, let url = URL(string: imageURL) else { return }
+                URLSession.shared.dataTask(with: url) { (data, response, error) in
+                    guard let data = data, error == nil else {
+                        print("Failed to download album image: \(error?.localizedDescription ?? "Unknown error")")
+                        return
+                    }
+                    DispatchQueue.main.async {
+                        self.currentlyPlayingTrackImage.image = UIImage(data: data)
+                    }
+                }.resume()
             }
         }
     }

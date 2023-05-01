@@ -11,7 +11,6 @@ import CoreData
 
 class NetworkManager {
     static let shared   = NetworkManager()
-//    let controller      = SKCloudServiceController()
     let cache           = NSCache<NSString, UIImage>()
     
     private init() {
@@ -26,11 +25,10 @@ class NetworkManager {
     private let clientSecret    = "***REMOVED***"
     
     private let encodedID  = "***REMOVED***"
-    // For this you are required to Base64 Encode your Client ID
-    // I recomend using this site https://www.base64encode.org/
+    // Base64 Encoded Client ID:Client secret
+
     
     private let redirectUrl = "https://www.google.com"
-    // For example: "https%3A%2F%2Fgoogle.com%2F"
     
     weak var databaseController: DatabaseProtocol?
     
@@ -93,60 +91,9 @@ class NetworkManager {
             }
         }.resume()
     }
-    
-//    func authoriseUser(with code: String, completion: @escaping (Token?) -> Void) {
-//        var bodyComponents = URLComponents()
-//        let requestHeader: [String: String] = [
-//            "Authorization": "Basic \(encodedID)",
-//            "Content-Type": "application/x-www-form-urlencoded"
-//        ]
-//
-//        bodyComponents.queryItems = [
-//            URLQueryItem(name: "grant_type", value: "authorization_code"),
-//            URLQueryItem(name: "code", value: code),
-//            URLQueryItem(name: "redirect_uri", value: redirectUrl)
-//        ]
-//
-//        guard let url = URL(string: "https://accounts.spotify.com/api/token") else { return }
-//        var request = URLRequest(url: url)
-//        request.httpMethod = "POST"
-//        request.allHTTPHeaderFields = requestHeader
-//        request.httpBody            = bodyComponents.query?.data(using: .utf8)
-//
-//        URLSession.shared.dataTask(with: request) { data, response, error in
-//            guard error == nil else {
-//                print("getArtistRequest: error")
-//                return
-//            }
-//
-//            guard let response = response as? HTTPURLResponse else {
-//                print("NO RESPONSE")
-//                return
-//            }
-//
-//            guard response.statusCode == 200 else {
-//                print("BAD RESPONSE: ", response.statusCode)
-//                return
-//            }
-//
-//            guard let data = data else {
-//                print("NO DATA")
-//                return
-//            }
-//
-//            do {
-//                let decoder = JSONDecoder()
-//                decoder.keyDecodingStrategy = .convertFromSnakeCase
-//                let token = try decoder.decode(Token.self, from: data)
-//                completion(token)
-//            } catch {
-//                print("catch: ", error)
-//            }
-//        }.resume()
-//    }
 
     func refreshAccessToken(completion: @escaping (String?) -> Void) {
-        let refreshToken = databaseController?.fetchRefreshToken() // TODO: fetch from coredata
+        let refreshToken = databaseController?.fetchRefreshToken()
         print("current refresh token:",refreshToken)
         if refreshToken == "" {
             print("could not refresh token")
@@ -284,11 +231,10 @@ class NetworkManager {
 //    }
 //
     // MARK: - FETCH MUSIC DATA
-//
-    func getArtists(with token: String, completion: @escaping (ArtistItem?) -> Void)
-    {
+
+    func getArtists(with token: String, completion: @escaping (ArtistItems?) -> Void) {
         let type        = "artists"
-        let timeRange   = "long_term"
+        let timeRange   = "short_term" // last 4 weeks
 
         guard let url = URL(string: "https://api.spotify.com/v1/me/top/\(type)?time_range=\(timeRange)&limit=\(limit)&offset=\(offset)") else { print("getArtistRequest: url"); return }
 
@@ -298,8 +244,6 @@ class NetworkManager {
         request.addValue("application/json", forHTTPHeaderField: "Accept")
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.addValue("Bearer \(token))", forHTTPHeaderField: "Authorization")
-        
-        print(request)
 
         // creates a URLSessionDataTask object and calls its resume() method to start the network request.
         URLSession.shared.dataTask(with: request) { data, response, error in
@@ -326,12 +270,73 @@ class NetworkManager {
             do {
                 let decoder                 = JSONDecoder()
                 decoder.keyDecodingStrategy = .convertFromSnakeCase
-                let artists                 = try decoder.decode(ArtistItem.self, from: data)
+                let artists                 = try decoder.decode(ArtistItems.self, from: data)
                 print("artists:", artists)
                 completion(artists)
             } catch {
                 print("getArtistRequest: catch", error);
             }
+        }.resume()
+    }
+    
+    func getCurrentlyPlayingTrack(with token: String, completion: @escaping (Track?) -> Void) {
+        // Set up the request URL
+        guard let url = URL(string: "https://api.spotify.com/v1/me/player/currently-playing") else { print("getCurrentlyPlayingTrack: url"); return }
+
+        // Create the request object
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        // Send the request
+        URLSession.shared.dataTask(with: request) { (data, response, error) in
+            guard error == nil else {
+                print("getCurrentlyPlayingTrack: error", error!)
+                return
+            }
+            
+            guard let response = response as? HTTPURLResponse else {
+                print("NO RESPONSE")
+                return
+            }
+            
+            guard response.statusCode == 200 else {
+                print("BAD RESPONSE: ", response.statusCode)
+                return
+            }
+            
+            guard let data = data else {
+                print("NO DATA")
+                return
+            }
+            
+            do {
+                let decoder = JSONDecoder()
+                decoder.keyDecodingStrategy = .convertFromSnakeCase
+                let trackItem = try decoder.decode(TrackItem.self, from: data)
+                completion(trackItem.item)
+            } catch let error {
+                print("getCurrentlyPlayingTrack: JSON decoding error", error)
+                completion(nil)
+            }
+            
+            // Deserialize the JSON response
+//            do {
+//                let json = try JSONSerialization.jsonObject(with: data, options: [])
+//                if let track = json as? [String: Any] {
+//                    // Extract information about the currently playing track
+////                    print("track:", track["item"])
+//                    if let name = track["name"] as? String, let artist = track["artist"] as? String {
+//                        print("Currently playing: \(name) by \(artist)")
+//                    } else {
+//                        print("No track currently playing")
+//                    }
+//                } else {
+//                    print("Invalid response format for currently playing track request")
+//                }
+//            } catch {
+//                print("Error deserializing currently playing track response: \(error.localizedDescription)")
+//            }
         }.resume()
     }
 
