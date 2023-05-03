@@ -33,6 +33,7 @@
 		F2E3944A29FE58F3001CD918 /* Player.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E3944929FE58F3001CD918 /* Player.swift */; };
 		F2E3944C29FFA779001CD918 /* Image.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E3944B29FFA779001CD918 /* Image.swift */; };
 		F2E3944E29FFA87E001CD918 /* RecentlyPlayed.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E3944D29FFA87E001CD918 /* RecentlyPlayed.swift */; };
+		F2E394522A00E148001CD918 /* TopArtistCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = F2E394512A00E148001CD918 /* TopArtistCell.xib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -64,6 +65,7 @@
 		F2E3944929FE58F3001CD918 /* Player.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Player.swift; sourceTree = "<group>"; };
 		F2E3944B29FFA779001CD918 /* Image.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Image.swift; sourceTree = "<group>"; };
 		F2E3944D29FFA87E001CD918 /* RecentlyPlayed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentlyPlayed.swift; sourceTree = "<group>"; };
+		F2E394512A00E148001CD918 /* TopArtistCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = TopArtistCell.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -112,6 +114,7 @@
 				F26A899029EE3EDE00FF3A59 /* SpotifyAPIClient.swift */,
 				F28EFAD129FBFE3900B942C8 /* NetworkManager.swift */,
 				F28EFAD729FC092700B942C8 /* Token.swift */,
+				F2E394512A00E148001CD918 /* TopArtistCell.xib */,
 			);
 			path = "Music Keeper";
 			sourceTree = "<group>";
@@ -226,6 +229,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F26A898729EE1EB400FF3A59 /* LaunchScreen.storyboard in Resources */,
+				F2E394522A00E148001CD918 /* TopArtistCell.xib in Resources */,
 				F26A898429EE1EB400FF3A59 /* Assets.xcassets in Resources */,
 				F2BC697129FB8AE900F13AA9 /* OverLayerPopUp.xib in Resources */,
 				F26A898229EE1EB200FF3A59 /* Main.storyboard in Resources */,

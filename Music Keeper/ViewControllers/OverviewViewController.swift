@@ -7,14 +7,21 @@
 
 import UIKit
 
-enum ImageError: Error {
-    case invalidServerResponse
-    case invalidShowURL
-    case invalidBookImageURL
+struct ArtistTop5 {
+    var artistName: String
+    var rank: Int
+    var artistImage: UIImage
 }
 
-class OverviewViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
-
+class OverviewViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+    
+    @IBOutlet weak var collectionView: UICollectionView! {
+        didSet {
+            collectionView.delegate = self
+            collectionView.dataSource = self
+//            collectionView.register(TopArtistCell.self, forCellWithReuseIdentifier: "topArtistCell")
+        }
+    }
     @IBOutlet private weak var tableView: UITableView! {
         didSet {
             tableView.delegate = self
@@ -27,8 +34,10 @@ class OverviewViewController: UIViewController, UITableViewDelegate, UITableView
     @IBOutlet weak var currentlyPlayingTrackAlbum: UILabel!
     @IBOutlet weak var currentlyPlayingTrackImage: UIImageView!
     
-    private var artists: [Artist] = []
+    private var topArtists: [Artist] = []
     private var currentlyPlayingTrack: Track?
+    private var recentlyPlayedTracks: [PlayHistory] = []
+    private var artistTop5Data: [ArtistTop5] = []
 
     var token: String?
     
@@ -53,17 +62,7 @@ class OverviewViewController: UIViewController, UITableViewDelegate, UITableView
         
         fetchArtists()
         fetchCurrentlyPlayingTrack()
-    }
-    
-    private func fetchArtists() {
-        guard let token = token else { return }
-        NetworkManager.shared.getArtists(with: token) { artistResult in
-            guard let artistResult = artistResult else { return }
-            self.artists = artistResult.items
-            DispatchQueue.main.async {
-                self.tableView.reloadData()
-            }
-        }
+        fetchRecentlyPlayedTracks()
     }
     
     private func fetchCurrentlyPlayingTrack() {
@@ -97,32 +96,200 @@ class OverviewViewController: UIViewController, UITableViewDelegate, UITableView
             }
         }
     }
+    
+//    private func fetchArtists() {
+//        guard let token = token else { return }
+//        NetworkManager.shared.getArtists(with: token) { artistResult in
+//            guard let artistResult = artistResult else { return }
+//            self.topArtists = artistResult.items
+//            DispatchQueue.main.async {
+//
+//                for index in 0..<self.topArtists.count {
+//                    let artist = self.topArtists[index]
+//                    let artistImageURL = artist.images?[2].url
+//                    // Download image url
+//                    guard let imageURL = artistImageURL, let url = URL(string: imageURL) else { return }
+//                    URLSession.shared.dataTask(with: url) { (data, response, error) in
+//                        guard let data = data, error == nil else {
+//                            print("Failed to download album image: \(error?.localizedDescription ?? "Unknown error")")
+//                            return
+//                        }
+//                        DispatchQueue.main.async {
+//                            let top5Artist = ArtistTop5(artistName: artist.name, rank: index+1, artistImage: UIImage(data: data)!)
+//                            self.artistTop5Data.append(top5Artist)
+//                            self.collectionView.reloadData()
+//                        }
+//                    }.resume()
+//                }
+//            }
+//        }
+//    }
+    
+    private func fetchArtists() {
+        guard let token = token else { return }
+        NetworkManager.shared.getArtists(with: token) { artistResult in
+            guard let artistResult = artistResult else { return }
+            self.topArtists = artistResult.items
+
+            let dispatchGroup = DispatchGroup()
+
+            for index in 0..<self.topArtists.count {
+                let artist = self.topArtists[index]
+                let artistImageURL = artist.images?[2].url
+
+                // Download image url
+                guard let imageURL = artistImageURL, let url = URL(string: imageURL) else { return }
+
+                dispatchGroup.enter()
+                URLSession.shared.dataTask(with: url) { (data, response, error) in
+                    guard let data = data, error == nil else {
+                        print("Failed to download album image: \(error?.localizedDescription ?? "Unknown error")")
+                        dispatchGroup.leave()
+                        return
+                    }
+                    DispatchQueue.main.async {
+                        let top5Artist = ArtistTop5(artistName: artist.name, rank: index+1, artistImage: UIImage(data: data)!)
+                        self.artistTop5Data.append(top5Artist)
+                        dispatchGroup.leave()
+                    }
+                }.resume()
+            }
+
+            dispatchGroup.notify(queue: .main) {
+                print("image downloaded")
+                print(self.artistTop5Data)
+                self.collectionView.reloadData()
+            }
+        }
+    }
 
     
-// MARK: - UITableViewDataSource
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return artists.count
+    private func fetchRecentlyPlayedTracks() {
+        guard let token = token else { return }
+        NetworkManager.shared.getRecentlyPlayedTracks(with: token) { playHistoryResults in
+            guard let playHistoryResults = playHistoryResults else { return }
+            self.recentlyPlayedTracks = playHistoryResults.items
+            DispatchQueue.main.async {
+                self.tableView.reloadData()
+            }
+        }
     }
     
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "librarySongCell", for: indexPath)
-//        cell.contentView.backgroundColor = .black
-        var content = cell.defaultContentConfiguration()
-        let artist = artists[indexPath.row]
-        content.text = artist.name
-        content.textProperties.color = .white
-        cell.contentConfiguration = content
+    // MARK: - UICollectionViewDataSource
+
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return artistTop5Data.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "topArtistCell", for: indexPath) as! TopArtistCell
+        let top5Artist = artistTop5Data[indexPath.row]
+//        print("imageView: \(cell.imageView)")
+//        print("artistTitle: \(cell.artistTitle)")
+        cell.artistTitle.text = "#" + String(top5Artist.rank) + " " + top5Artist.artistName
+        cell.imageView.image = top5Artist.artistImage
+//        cell.data = self.artistTop5Data[indexPath.row]
         return cell
     }
     
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        return CGSize(width: 100, height: collectionView.bounds.height)
     }
-    */
-
+    
+    // MARK: - UITableViewDataSource
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return recentlyPlayedTracks.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "recentlyPlayedCell", for: indexPath)
+        let recentlyPlayedTrack = recentlyPlayedTracks[indexPath.row]
+        cell.textLabel?.text = recentlyPlayedTrack.track.name
+        cell.detailTextLabel?.text = recentlyPlayedTrack.track.artists[0].name
+        return cell
+    }
 }
+
+class TopArtistCell: UICollectionViewCell {
+    @IBOutlet weak var imageView: UIImageView!
+    @IBOutlet weak var artistTitle: UILabel!
+
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        imageView.contentMode = .scaleAspectFill
+        imageView.clipsToBounds = true
+//        imageView.layer.cornerRadius = 16
+        imageView.layer.masksToBounds = true
+        
+        imageView.topAnchor.constraint(equalTo: contentView.topAnchor).isActive = true
+        imageView.leftAnchor.constraint(equalTo: contentView.leftAnchor).isActive = true
+        imageView.rightAnchor.constraint(equalTo: contentView.rightAnchor).isActive = true
+        imageView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor).isActive = true
+        
+        let overlayView = UIView()
+        overlayView.backgroundColor = .black
+        overlayView.alpha = 0.4
+        imageView.addSubview(overlayView)
+
+        // Add constraints to make the overlay view cover the image view
+        overlayView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            overlayView.topAnchor.constraint(equalTo: imageView.topAnchor),
+            overlayView.leadingAnchor.constraint(equalTo: imageView.leadingAnchor),
+            overlayView.trailingAnchor.constraint(equalTo: imageView.trailingAnchor),
+            overlayView.bottomAnchor.constraint(equalTo: imageView.bottomAnchor)
+        ])
+    }
+}
+
+//class TopArtistCell: UICollectionViewCell {
+//
+//    var data: ArtistTop5? {
+//        didSet {
+//            guard let data = data else { return }
+//            artistTitle.text = "#" + String(data.rank) + " " + data.artistName
+//            imageView.image = data.artistImage
+//
+//        }
+//    }
+//    @IBOutlet weak var imageView: UIImageView! {
+//        didSet {
+//            imageView.translatesAutoresizingMaskIntoConstraints = false
+//            imageView.contentMode = .scaleAspectFill
+//            imageView.clipsToBounds = true
+//            imageView.layer.cornerRadius = 16
+//            imageView.layer.masksToBounds = true
+//        }
+//    }
+//    @IBOutlet weak var artistTitle: UILabel!
+//
+////    let imageView: UIImageView = {
+////        let iv = UIImageView()
+////        iv.translatesAutoresizingMaskIntoConstraints = false
+////        iv.contentMode = .scaleAspectFill
+////        iv.clipsToBounds = true
+////        iv.layer.cornerRadius = 16
+////        iv.layer.masksToBounds = true
+////        return iv
+////    }()
+//
+//    override init(frame: CGRect) {
+//        super.init(frame: frame)
+////        setupViews()
+//    }
+//
+//    required init?(coder aDecoder: NSCoder) {
+//        fatalError("init(coder:) has not been implemented")
+//    }
+    
+//    func setupViews() {
+////        contentView.addSubview(imageView)
+//
+//        imageView.topAnchor.constraint(equalTo: contentView.topAnchor).isActive = true
+//        imageView.leftAnchor.constraint(equalTo: contentView.leftAnchor).isActive = true
+//        imageView.rightAnchor.constraint(equalTo: contentView.rightAnchor).isActive = true
+//        imageView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor).isActive = true
+//    }
+//
+//}

@@ -7,8 +7,13 @@
 
 import Foundation
 
-struct RecentlyPlayed: Codable {
-  let played_at: Date
-  let context: String
+struct RecentlyPlayedItems: Codable {
+    let items: [PlayHistory]
+}
+
+struct PlayHistory: Codable {
+  let played_at: Date?
+//  let context: Context?
   let track: Track
 }
+

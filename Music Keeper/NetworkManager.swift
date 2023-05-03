@@ -19,7 +19,7 @@ class NetworkManager {
         databaseController = appDelegate?.databaseController
     }
     
-    private let limit           = "50"
+//    private let limit           = "50"
     private let offset          = "0"
     private let clientID        = "***REMOVED***"
     private let clientSecret    = "***REMOVED***"
@@ -235,6 +235,7 @@ class NetworkManager {
     func getArtists(with token: String, completion: @escaping (ArtistItems?) -> Void) {
         let type        = "artists"
         let timeRange   = "short_term" // last 4 weeks
+        let limit       = "5"
 
         guard let url = URL(string: "https://api.spotify.com/v1/me/top/\(type)?time_range=\(timeRange)&limit=\(limit)&offset=\(offset)") else { print("getArtistRequest: url"); return }
 
@@ -319,24 +320,92 @@ class NetworkManager {
                 print("getCurrentlyPlayingTrack: JSON decoding error", error)
                 completion(nil)
             }
+        }.resume()
+    }
+    
+    func getRecentlyPlayedTracks(with token: String, completion: @escaping (RecentlyPlayedItems?) -> Void) {
+        // Set up the request URL
+        guard let url = URL(string: "https://api.spotify.com/v1/me/player/recently-played") else { print("getRecentlyPlayedTracks: url"); return }
+
+        // Create the request object
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        // Send the request
+        URLSession.shared.dataTask(with: request) { (data, response, error) in
+            guard error == nil else {
+                print("getRecentlyPlayedTracks: error", error!)
+                return
+            }
             
-            // Deserialize the JSON response
-//            do {
-//                let json = try JSONSerialization.jsonObject(with: data, options: [])
-//                if let track = json as? [String: Any] {
-//                    // Extract information about the currently playing track
-////                    print("track:", track["item"])
-//                    if let name = track["name"] as? String, let artist = track["artist"] as? String {
-//                        print("Currently playing: \(name) by \(artist)")
-//                    } else {
-//                        print("No track currently playing")
-//                    }
-//                } else {
-//                    print("Invalid response format for currently playing track request")
-//                }
-//            } catch {
-//                print("Error deserializing currently playing track response: \(error.localizedDescription)")
-//            }
+            guard let response = response as? HTTPURLResponse else {
+                print("NO RESPONSE")
+                return
+            }
+            
+            guard response.statusCode == 200 else {
+                print("BAD RESPONSE: ", response.statusCode)
+                return
+            }
+            
+            guard let data = data else {
+                print("NO DATA")
+                return
+            }
+            
+            do {
+                let decoder = JSONDecoder()
+                decoder.keyDecodingStrategy = .convertFromSnakeCase
+                let recentlyPlayedItems = try decoder.decode(RecentlyPlayedItems.self, from: data)
+                completion(recentlyPlayedItems)
+            } catch let error {
+                print("getRecentlyPlayedTracks: JSON decoding error", error)
+                completion(nil)
+            }
+        }.resume()
+    }
+    
+    func getLibrary(with token: String, completion: @escaping (RecentlyPlayedItems?) -> Void) {
+        // Set up the request URL
+        guard let url = URL(string: "https://api.spotify.com/v1/me/player/recently-played") else { print("getRecentlyPlayedTracks: url"); return }
+
+        // Create the request object
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        // Send the request
+        URLSession.shared.dataTask(with: request) { (data, response, error) in
+            guard error == nil else {
+                print("getRecentlyPlayedTracks: error", error!)
+                return
+            }
+            
+            guard let response = response as? HTTPURLResponse else {
+                print("NO RESPONSE")
+                return
+            }
+            
+            guard response.statusCode == 200 else {
+                print("BAD RESPONSE: ", response.statusCode)
+                return
+            }
+            
+            guard let data = data else {
+                print("NO DATA")
+                return
+            }
+            
+            do {
+                let decoder = JSONDecoder()
+                decoder.keyDecodingStrategy = .convertFromSnakeCase
+                let recentlyPlayedItems = try decoder.decode(RecentlyPlayedItems.self, from: data)
+                completion(recentlyPlayedItems)
+            } catch let error {
+                print("getRecentlyPlayedTracks: JSON decoding error", error)
+                completion(nil)
+            }
         }.resume()
     }
 
