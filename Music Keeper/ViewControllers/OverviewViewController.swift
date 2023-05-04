@@ -77,7 +77,7 @@ class OverviewViewController: UIViewController, UITableViewDelegate, UITableView
             let currentSongTitle = trackResult.name
             let currentAlbum = trackResult.album.name
             let currentArtist = trackResult.artists[0].name
-            let currentImageURL = trackResult.album.images?[2].url
+            let currentImageURL = trackResult.album.images?[1].url
 
             // set UILabels and UIImageView with the result obtained
             DispatchQueue.main.async {
@@ -111,7 +111,7 @@ class OverviewViewController: UIViewController, UITableViewDelegate, UITableView
 
             for index in 0..<topArtists.count {
                 let artist = topArtists[index]
-                let artistImageURL = artist.images?[2].url
+                let artistImageURL = artist.images?[1].url
 
                 // Download image url
                 guard let imageURL = artistImageURL, let url = URL(string: imageURL) else { return }

@@ -33,6 +33,8 @@ class ReportViewController: UIViewController, UITableViewDelegate, UITableViewDa
     
     weak var databaseController: DatabaseProtocol?
     
+    var timeRangeSelected: Int = 0
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -46,26 +48,46 @@ class ReportViewController: UIViewController, UITableViewDelegate, UITableViewDa
         print("report token:", token!)
         print("report refresh token:", refreshToken)
         
+        // setup view
         topItemsView.layer.cornerRadius = 10
+        timeRangeSegmentedControl.setTitleTextAttributes([NSAttributedString.Key.foregroundColor: UIColor.white], for: .normal)
+        timeRangeSegmentedControl.setTitleTextAttributes([NSAttributedString.Key.foregroundColor: UIColor.white], for: .selected)
+        
+        // fetch data from API
+        fetchArtist(timeRangeIndex: timeRangeSelected)
+        fetchTracks(timeRangeIndex: timeRangeSelected)
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        
-        fetchArtist()
-        fetchTracks()
-//        fetchCurrentlyPlayingTrack()
-//        fetchRecentlyPlayedTracks()
     }
     
-    private func fetchArtist() {
+    @IBAction func timeRangeValueChanged(_ sender: Any) {
+        timeRangeSelected = timeRangeSegmentedControl.selectedSegmentIndex
+        viewDidLoad()
+    }
+    
+    private func fetchArtist(timeRangeIndex: Int) {
         guard let token = token else { return }
-        NetworkManager.shared.getArtists(with: token, timeRange: "short_term", limit: "1") { artistResult in
+        
+        var timeRange = ""
+        switch timeRangeIndex {
+        case 0:
+            timeRange = "short_term"
+        case 1:
+            timeRange = "medium_term"
+        case 2:
+            timeRange = "long_term"
+        default:
+            timeRange = "short_term"
+        }
+        
+        NetworkManager.shared.getArtists(with: token, timeRange: timeRange, limit: "1") { artistResult in
             guard let artistResult = artistResult else { return }
             let topArtist = artistResult.items
 
             let artist = topArtist[0]
-            let artistImageURL = artist.images?[2].url
+            let artistImageURL = artist.images?[1].url
 
             // set UILabel and UIImageView with the result obtained
             DispatchQueue.main.async {
@@ -85,14 +107,27 @@ class ReportViewController: UIViewController, UITableViewDelegate, UITableViewDa
         }
     }
     
-    private func fetchTracks() {
+    private func fetchTracks(timeRangeIndex: Int) {
         guard let token = token else { return }
-        NetworkManager.shared.getTopTracks(with: token, timeRange: "short_term", limit: "50") { tracksResult in
+        
+        var timeRange = ""
+        switch timeRangeIndex {
+        case 0:
+            timeRange = "short_term"
+        case 1:
+            timeRange = "medium_term"
+        case 2:
+            timeRange = "long_term"
+        default:
+            timeRange = "short_term"
+        }
+        
+        NetworkManager.shared.getTopTracks(with: token, timeRange: timeRange, limit: "50") { tracksResult in
             guard let tracksResult = tracksResult else { return }
             self.topTracks = tracksResult.items
             
             let top1stTrack = self.topTracks[0]
-            let trackImageURL = top1stTrack.album.images?[2].url
+            let trackImageURL = top1stTrack.album.images?[1].url
             
             DispatchQueue.main.async {
                 self.tableView.reloadData()
