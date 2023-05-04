@@ -29,11 +29,15 @@ class OverviewViewController: UIViewController, UITableViewDelegate, UITableView
             tableView.tableFooterView = UIView()
         }
     }
+    
+    // properties for Currently Playing Track view
     @IBOutlet weak var currentlyPlayingTrackTitle: UILabel!
     @IBOutlet weak var currentlyPlayingTrackArtist: UILabel!
     @IBOutlet weak var currentlyPlayingTrackAlbum: UILabel!
     @IBOutlet weak var currentlyPlayingTrackImage: UIImageView!
+    @IBOutlet weak var currentlyPlayingView: UIView!
     
+    // properties to store data fetched from API
     private var topArtists: [Artist] = []
     private var currentlyPlayingTrack: Track?
     private var recentlyPlayedTracks: [PlayHistory] = []
@@ -55,6 +59,7 @@ class OverviewViewController: UIViewController, UITableViewDelegate, UITableView
         let refreshToken = databaseController?.fetchRefreshToken()
         print("overview token:", token!)
         print("overview refresh token:", refreshToken)
+        currentlyPlayingView.layer.cornerRadius = 10
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -97,36 +102,9 @@ class OverviewViewController: UIViewController, UITableViewDelegate, UITableView
         }
     }
     
-//    private func fetchArtists() {
-//        guard let token = token else { return }
-//        NetworkManager.shared.getArtists(with: token) { artistResult in
-//            guard let artistResult = artistResult else { return }
-//            self.topArtists = artistResult.items
-//            DispatchQueue.main.async {
-//
-//                for index in 0..<self.topArtists.count {
-//                    let artist = self.topArtists[index]
-//                    let artistImageURL = artist.images?[2].url
-//                    // Download image url
-//                    guard let imageURL = artistImageURL, let url = URL(string: imageURL) else { return }
-//                    URLSession.shared.dataTask(with: url) { (data, response, error) in
-//                        guard let data = data, error == nil else {
-//                            print("Failed to download album image: \(error?.localizedDescription ?? "Unknown error")")
-//                            return
-//                        }
-//                        DispatchQueue.main.async {
-//                            let top5Artist = ArtistTop5(artistName: artist.name, rank: index+1, artistImage: UIImage(data: data)!)
-//                            self.artistTop5Data.append(top5Artist)
-//                            self.collectionView.reloadData()
-//                        }
-//                    }.resume()
-//                }
-//            }
-//        }
-//    }
-    
     private func fetchArtists() {
         guard let token = token else { return }
+        artistTop5Data = []
         NetworkManager.shared.getArtists(with: token) { artistResult in
             guard let artistResult = artistResult else { return }
             self.topArtists = artistResult.items
@@ -184,11 +162,8 @@ class OverviewViewController: UIViewController, UITableViewDelegate, UITableView
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "topArtistCell", for: indexPath) as! TopArtistCell
         let top5Artist = artistTop5Data[indexPath.row]
-//        print("imageView: \(cell.imageView)")
-//        print("artistTitle: \(cell.artistTitle)")
         cell.artistTitle.text = "#" + String(top5Artist.rank) + " " + top5Artist.artistName
         cell.imageView.image = top5Artist.artistImage
-//        cell.data = self.artistTop5Data[indexPath.row]
         return cell
     }
     
@@ -217,9 +192,10 @@ class TopArtistCell: UICollectionViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        // set attributes and constraints to image view
         imageView.contentMode = .scaleAspectFill
         imageView.clipsToBounds = true
-//        imageView.layer.cornerRadius = 16
+        imageView.layer.cornerRadius = 10
         imageView.layer.masksToBounds = true
         
         imageView.topAnchor.constraint(equalTo: contentView.topAnchor).isActive = true
@@ -227,9 +203,10 @@ class TopArtistCell: UICollectionViewCell {
         imageView.rightAnchor.constraint(equalTo: contentView.rightAnchor).isActive = true
         imageView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor).isActive = true
         
+        // add overlay to make image view appear darker
         let overlayView = UIView()
         overlayView.backgroundColor = .black
-        overlayView.alpha = 0.4
+        overlayView.alpha = 0.2
         imageView.addSubview(overlayView)
 
         // Add constraints to make the overlay view cover the image view
@@ -242,54 +219,3 @@ class TopArtistCell: UICollectionViewCell {
         ])
     }
 }
-
-//class TopArtistCell: UICollectionViewCell {
-//
-//    var data: ArtistTop5? {
-//        didSet {
-//            guard let data = data else { return }
-//            artistTitle.text = "#" + String(data.rank) + " " + data.artistName
-//            imageView.image = data.artistImage
-//
-//        }
-//    }
-//    @IBOutlet weak var imageView: UIImageView! {
-//        didSet {
-//            imageView.translatesAutoresizingMaskIntoConstraints = false
-//            imageView.contentMode = .scaleAspectFill
-//            imageView.clipsToBounds = true
-//            imageView.layer.cornerRadius = 16
-//            imageView.layer.masksToBounds = true
-//        }
-//    }
-//    @IBOutlet weak var artistTitle: UILabel!
-//
-////    let imageView: UIImageView = {
-////        let iv = UIImageView()
-////        iv.translatesAutoresizingMaskIntoConstraints = false
-////        iv.contentMode = .scaleAspectFill
-////        iv.clipsToBounds = true
-////        iv.layer.cornerRadius = 16
-////        iv.layer.masksToBounds = true
-////        return iv
-////    }()
-//
-//    override init(frame: CGRect) {
-//        super.init(frame: frame)
-////        setupViews()
-//    }
-//
-//    required init?(coder aDecoder: NSCoder) {
-//        fatalError("init(coder:) has not been implemented")
-//    }
-    
-//    func setupViews() {
-////        contentView.addSubview(imageView)
-//
-//        imageView.topAnchor.constraint(equalTo: contentView.topAnchor).isActive = true
-//        imageView.leftAnchor.constraint(equalTo: contentView.leftAnchor).isActive = true
-//        imageView.rightAnchor.constraint(equalTo: contentView.rightAnchor).isActive = true
-//        imageView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor).isActive = true
-//    }
-//
-//}
