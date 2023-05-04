@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F20377162A03C06900553183 /* ReportViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F20377152A03C06900553183 /* ReportViewController.swift */; };
 		F26A897B29EE1EB200FF3A59 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F26A897A29EE1EB200FF3A59 /* AppDelegate.swift */; };
 		F26A897D29EE1EB200FF3A59 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F26A897C29EE1EB200FF3A59 /* SceneDelegate.swift */; };
 		F26A898229EE1EB200FF3A59 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F26A898029EE1EB200FF3A59 /* Main.storyboard */; };
@@ -16,7 +17,7 @@
 		F26A899329EE43C100FF3A59 /* SearchResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = F26A899229EE43C100FF3A59 /* SearchResult.swift */; };
 		F26A899529EE49C100FF3A59 /* Track.swift in Sources */ = {isa = PBXBuildFile; fileRef = F26A899429EE49C100FF3A59 /* Track.swift */; };
 		F26A899729EE4A0600FF3A59 /* Artist.swift in Sources */ = {isa = PBXBuildFile; fileRef = F26A899629EE4A0600FF3A59 /* Artist.swift */; };
-		F26A899929EE4A1500FF3A59 /* AlbumResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = F26A899829EE4A1500FF3A59 /* AlbumResult.swift */; };
+		F26A899929EE4A1500FF3A59 /* Album.swift in Sources */ = {isa = PBXBuildFile; fileRef = F26A899829EE4A1500FF3A59 /* Album.swift */; };
 		F28EFAD029FBFC8A00B942C8 /* LoginAccountViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F28EFACF29FBFC8A00B942C8 /* LoginAccountViewController.swift */; };
 		F28EFAD229FBFE3900B942C8 /* NetworkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F28EFAD129FBFE3900B942C8 /* NetworkManager.swift */; };
 		F28EFAD629FC02E400B942C8 /* OverviewViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F28EFAD529FC02E400B942C8 /* OverviewViewController.swift */; };
@@ -37,6 +38,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		F20377152A03C06900553183 /* ReportViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportViewController.swift; sourceTree = "<group>"; };
 		F26A897729EE1EB200FF3A59 /* Music Keeper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Music Keeper.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		F26A897A29EE1EB200FF3A59 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		F26A897C29EE1EB200FF3A59 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -48,7 +50,7 @@
 		F26A899229EE43C100FF3A59 /* SearchResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchResult.swift; sourceTree = "<group>"; };
 		F26A899429EE49C100FF3A59 /* Track.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Track.swift; sourceTree = "<group>"; };
 		F26A899629EE4A0600FF3A59 /* Artist.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Artist.swift; sourceTree = "<group>"; };
-		F26A899829EE4A1500FF3A59 /* AlbumResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumResult.swift; sourceTree = "<group>"; };
+		F26A899829EE4A1500FF3A59 /* Album.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Album.swift; sourceTree = "<group>"; };
 		F28EFACF29FBFC8A00B942C8 /* LoginAccountViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginAccountViewController.swift; sourceTree = "<group>"; };
 		F28EFAD129FBFE3900B942C8 /* NetworkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkManager.swift; sourceTree = "<group>"; };
 		F28EFAD529FC02E400B942C8 /* OverviewViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverviewViewController.swift; sourceTree = "<group>"; };
@@ -152,7 +154,7 @@
 				F26A899229EE43C100FF3A59 /* SearchResult.swift */,
 				F26A899429EE49C100FF3A59 /* Track.swift */,
 				F26A899629EE4A0600FF3A59 /* Artist.swift */,
-				F26A899829EE4A1500FF3A59 /* AlbumResult.swift */,
+				F26A899829EE4A1500FF3A59 /* Album.swift */,
 				F2E3944929FE58F3001CD918 /* Player.swift */,
 				F2E3944B29FFA779001CD918 /* Image.swift */,
 				F2E3944D29FFA87E001CD918 /* RecentlyPlayed.swift */,
@@ -166,6 +168,7 @@
 				F2BC696B29FB868300F13AA9 /* LibraryViewController.swift */,
 				F28EFACF29FBFC8A00B942C8 /* LoginAccountViewController.swift */,
 				F28EFAD529FC02E400B942C8 /* OverviewViewController.swift */,
+				F20377152A03C06900553183 /* ReportViewController.swift */,
 			);
 			path = ViewControllers;
 			sourceTree = "<group>";
@@ -255,8 +258,9 @@
 				F29762FC29FCC4390013FC8D /* MulticastDelegate.swift in Sources */,
 				F28EFAD829FC092700B942C8 /* Token.swift in Sources */,
 				F26A899329EE43C100FF3A59 /* SearchResult.swift in Sources */,
+				F20377162A03C06900553183 /* ReportViewController.swift in Sources */,
 				F2E3944E29FFA87E001CD918 /* RecentlyPlayed.swift in Sources */,
-				F26A899929EE4A1500FF3A59 /* AlbumResult.swift in Sources */,
+				F26A899929EE4A1500FF3A59 /* Album.swift in Sources */,
 				F29762F529FCC1410013FC8D /* AccessTokenDataModel.xcdatamodeld in Sources */,
 				F28EFAD029FBFC8A00B942C8 /* LoginAccountViewController.swift in Sources */,
 				F28EFAD629FC02E400B942C8 /* OverviewViewController.swift in Sources */,

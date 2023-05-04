@@ -19,7 +19,6 @@ class OverviewViewController: UIViewController, UITableViewDelegate, UITableView
         didSet {
             collectionView.delegate = self
             collectionView.dataSource = self
-//            collectionView.register(TopArtistCell.self, forCellWithReuseIdentifier: "topArtistCell")
         }
     }
     @IBOutlet private weak var tableView: UITableView! {
@@ -39,7 +38,6 @@ class OverviewViewController: UIViewController, UITableViewDelegate, UITableView
     
     // properties to store data fetched from API
     private var topArtists: [Artist] = []
-    private var currentlyPlayingTrack: Track?
     private var recentlyPlayedTracks: [PlayHistory] = []
     private var artistTop5Data: [ArtistTop5] = []
 
@@ -59,6 +57,7 @@ class OverviewViewController: UIViewController, UITableViewDelegate, UITableView
         let refreshToken = databaseController?.fetchRefreshToken()
         print("overview token:", token!)
         print("overview refresh token:", refreshToken)
+        
         currentlyPlayingView.layer.cornerRadius = 10
     }
     
@@ -74,7 +73,6 @@ class OverviewViewController: UIViewController, UITableViewDelegate, UITableView
         guard let token = token else { return }
         NetworkManager.shared.getCurrentlyPlayingTrack(with: token) { trackResult in
             guard let trackResult = trackResult else { return }
-            self.currentlyPlayingTrack = trackResult
             
             let currentSongTitle = trackResult.name
             let currentAlbum = trackResult.album.name
@@ -105,14 +103,14 @@ class OverviewViewController: UIViewController, UITableViewDelegate, UITableView
     private func fetchArtists() {
         guard let token = token else { return }
         artistTop5Data = []
-        NetworkManager.shared.getArtists(with: token) { artistResult in
+        NetworkManager.shared.getArtists(with: token, timeRange: "short_term", limit: "5") { artistResult in
             guard let artistResult = artistResult else { return }
-            self.topArtists = artistResult.items
+            let topArtists = artistResult.items
 
             let dispatchGroup = DispatchGroup()
 
-            for index in 0..<self.topArtists.count {
-                let artist = self.topArtists[index]
+            for index in 0..<topArtists.count {
+                let artist = topArtists[index]
                 let artistImageURL = artist.images?[2].url
 
                 // Download image url

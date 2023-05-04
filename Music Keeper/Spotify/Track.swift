@@ -12,6 +12,10 @@ struct TrackItem: Codable {
     let item: Track
 }
 
+struct TrackItems: Codable {
+    let items: [Track]
+}
+
 struct Track: Codable {
     let album: Album
     let artists: [Artist]
