@@ -232,10 +232,8 @@ class NetworkManager {
 //
     // MARK: - FETCH MUSIC DATA
 
-    func getArtists(with token: String, timeRange: String, limit: String, completion: @escaping (ArtistItems?) -> Void) {
+    func getTopArtists(with token: String, timeRange: String, limit: String, completion: @escaping (ArtistItems?) -> Void) {
         let type        = "artists"
-//        let timeRange   = "short_term" // last 4 weeks
-//        let limit       = "5"
 
         guard let url = URL(string: "https://api.spotify.com/v1/me/top/\(type)?time_range=\(timeRange)&limit=\(limit)&offset=\(offset)") else { print("getArtistRequest: url"); return }
 
@@ -272,7 +270,7 @@ class NetworkManager {
                 let decoder                 = JSONDecoder()
                 decoder.keyDecodingStrategy = .convertFromSnakeCase
                 let artists                 = try decoder.decode(ArtistItems.self, from: data)
-                print("artists:", artists)
+//                print("artists:", artists)
                 completion(artists)
             } catch {
                 print("getArtistRequest: catch", error);
@@ -314,11 +312,21 @@ class NetworkManager {
                 return
             }
 
+//            do {
+//                let json = try JSONSerialization.jsonObject(with: data, options: [])
+//                let jsonData = try JSONSerialization.data(withJSONObject: json, options: .prettyPrinted)
+//                if let jsonString = String(data: jsonData, encoding: .utf8) {
+//                    print(jsonString)
+//                }
+//            } catch {
+//                print("JSON serialization failed: \(error)")
+//            }
+            
             do {
                 let decoder                 = JSONDecoder()
                 decoder.keyDecodingStrategy = .convertFromSnakeCase
                 let tracks                  = try decoder.decode(TrackItems.self, from: data)
-                print("tracks:", tracks)
+//                print("tracks:", tracks)
                 completion(tracks)
             } catch {
                 print("getTopTracksRequest: catch", error);
@@ -455,71 +463,6 @@ class NetworkManager {
         }.resume()
     }
 
-//    func getTrackRequest(OAuthtoken: String, completed: @escaping (TrackItem?) -> Void)
-//    {
-//        let type        = "tracks"
-//        let timeRange   = "long_term"
-//
-//        guard let url = URL(string: "\(baseURL.spotifyAPI)v1/me/top/\(type)?time_range=\(timeRange)&limit=\(limit)&offset=\(offset)") else { print("getTrackRequest: url"); return }
-//
-//        var request         = URLRequest(url: url)
-//        request.httpMethod  = "GET"
-//        request.addValue("application/json", forHTTPHeaderField: HeaderField.accept)
-//        request.addValue("application/json", forHTTPHeaderField: HeaderField.contentType)
-//        request.addValue("Bearer \(String(OAuthtoken))", forHTTPHeaderField: HeaderField.authorization)
-//
-//        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-//
-//            if let _            = error { print("getTrackRequest: error:"); return }
-//            guard let response  = response as? HTTPURLResponse, response.statusCode == 200 else { print("getTrackRequest: response:"); return }
-//            guard let data      = data else { print("getTrackRequest: data:"); return }
-//
-//            do {
-//                let decoder                 = JSONDecoder()
-//                decoder.keyDecodingStrategy = .convertFromSnakeCase
-//                let tracks                  = try decoder.decode(TrackItem.self, from: data)
-//
-//                completed(tracks); return
-//            } catch {
-//                print("getTrackRequest: catch")
-//            }
-//        }
-//        task.resume()
-//    }
-//
-//    func getRecentTracks(OAuthtoken: String, completed: @escaping (TrackItem?) -> Void)
-//    {
-//        let type        = "tracks"
-//        let timeRange   = "short_term" /// 4 weeks
-//        let limit       = "50"
-//
-//        guard let url = URL(string: "https://api.spotify.com/v1/me/top/\(type)?time_range=\(timeRange)&limit=\(limit)&offset=\(offset)") else { print("getRecentTracks: url"); return }
-//
-//        var request         = URLRequest(url: url)
-//        request.httpMethod  = "GET"
-//        request.addValue("application/json", forHTTPHeaderField: "Accept")
-//        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-//        request.addValue("Bearer \(String(OAuthtoken))", forHTTPHeaderField: "Authorization")
-//
-//        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-//
-//            if let _            = error { print("getRecentTracks: error"); return }
-//            guard let response  = response as? HTTPURLResponse, response.statusCode == 200 else { print("getRecentTracks: bad/no response"); return }
-//            guard let data      = data else { print("getRecentTracks: no data"); return }
-//
-//            do {
-//                let decoder                 = JSONDecoder()
-//                decoder.keyDecodingStrategy = .convertFromSnakeCase
-//                let tracks                  = try decoder.decode(TrackItem.self, from: data)
-//                print("tracks:", tracks)
-//                completed(tracks); return
-//            } catch {
-//                print("getRecentTracks: url")
-//            }
-//        }
-//        task.resume()
-//    }
-
 //    func getNewTrackRequest(OAuthtoken: String, completed: @escaping (NewReleases?) -> Void)
 //    {
 //        guard let url = URL(string: "\(baseURL.spotifyAPI)v1/browse/new-releases?country=US") else { print("getNewTrackRequest: url"); return }
@@ -548,6 +491,79 @@ class NetworkManager {
 //        }
 //        task.resume()
 //    }
+    
+    // MARK: - FETCH MUSICAL ANALYSIS
+    func getAudioFeatures(with token: String, ids: String, completion: @escaping ([AudioFeatures]?) -> Void) {
+        guard let url = URL(string: "https://api.spotify.com/v1/audio-features?ids=\(ids)") else { print("getAudioFeaturesRequest: url"); return }
+        
+        // Create the request object
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        // Send the request
+        URLSession.shared.dataTask(with: request) { (data, response, error) in
+            guard error == nil else {
+                print("getAudioFeaturesRequest: error", error!)
+                return
+            }
+            
+            guard let response = response as? HTTPURLResponse else {
+                print("NO RESPONSE")
+                return
+            }
+            
+            guard response.statusCode == 200 else {
+                print("BAD RESPONSE: ", response.statusCode)
+                return
+            }
+            
+            guard let data = data else {
+                print("NO DATA")
+                return
+            }
+            
+//            do {
+//                let json = try JSONSerialization.jsonObject(with: data, options: [])
+//                let jsonData = try JSONSerialization.data(withJSONObject: json, options: .prettyPrinted)
+//                if let jsonString = String(data: jsonData, encoding: .utf8) {
+//                    print(jsonString)
+//                    let jsonData = jsonString.data(using: .utf8)!
+//
+//                    do {
+//                        let jsonDictionary = try JSONSerialization.jsonObject(with: jsonData, options: []) as! [String:Any]
+//                        let keys = jsonDictionary.keys
+//                        print(keys) // ["name", "age", "city"]
+//                    } catch {
+//                        print("Error decoding JSON: \(error)")
+//                    }
+//                }
+//            } catch {
+//                print("JSON serialization failed: \(error)")
+//            }
+            
+            do {
+//                let decoder = JSONDecoder()
+//                decoder.keyDecodingStrategy = .convertFromSnakeCase
+//                let audioFeatures = try decoder.decode(AudioFeaturesItems.self, from: data)
+//                print("JSON data: ", String(describing: audioFeatures))
+                guard let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+                      let audioFeaturesArray = json["audio_features"] as? [[String: Any]]
+                else {
+                    print("Failed to decode JSON")
+                    return
+                }
+
+                let audioFeatures = audioFeaturesArray.compactMap { AudioFeatures(dictionary: $0) }
+
+                completion(audioFeatures)
+            } catch let error {
+                print("getAudioFeaturesRequest: JSON decoding error", error)
+                completion(nil)
+            }
+        }.resume()
+    }
+    
 //
 //    // MARK: - DOWNLOAD IMAGES
 //

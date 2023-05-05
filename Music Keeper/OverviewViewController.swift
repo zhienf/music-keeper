@@ -103,7 +103,7 @@ class OverviewViewController: UIViewController, UITableViewDelegate, UITableView
     private func fetchArtists() {
         guard let token = token else { return }
         artistTop5Data = []
-        NetworkManager.shared.getArtists(with: token, timeRange: "short_term", limit: "5") { artistResult in
+        NetworkManager.shared.getTopArtists(with: token, timeRange: "short_term", limit: "5") { artistResult in
             guard let artistResult = artistResult else { return }
             let topArtists = artistResult.items
 

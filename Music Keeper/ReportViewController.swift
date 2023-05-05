@@ -11,6 +11,12 @@ class ReportViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
     @IBOutlet weak var timeRangeSegmentedControl: UISegmentedControl!
     
+    // properties for taste analysis
+    @IBOutlet weak var energyLabel: UILabel!
+    @IBOutlet weak var happinessLabel: UILabel!
+    @IBOutlet weak var obscurityLabel: UILabel!
+    @IBOutlet weak var genreDecadeLabel: UILabel!
+    
     // properties for top artist and top track view
     @IBOutlet weak var topItemsView: UIView!
     @IBOutlet weak var topArtistImageView: UIImageView!
@@ -33,7 +39,7 @@ class ReportViewController: UIViewController, UITableViewDelegate, UITableViewDa
     
     weak var databaseController: DatabaseProtocol?
     
-    var timeRangeSelected: Int = 0
+    var timeRangeSelected: Int = 0  // default is 'last month'
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -54,8 +60,10 @@ class ReportViewController: UIViewController, UITableViewDelegate, UITableViewDa
         timeRangeSegmentedControl.setTitleTextAttributes([NSAttributedString.Key.foregroundColor: UIColor.white], for: .selected)
         
         // fetch data from API
-        fetchArtist(timeRangeIndex: timeRangeSelected)
-        fetchTracks(timeRangeIndex: timeRangeSelected)
+        fetchArtist()
+        fetchTracks()
+        fetchEnergy()
+        fetchValence()
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -67,11 +75,9 @@ class ReportViewController: UIViewController, UITableViewDelegate, UITableViewDa
         viewDidLoad()
     }
     
-    private func fetchArtist(timeRangeIndex: Int) {
-        guard let token = token else { return }
-        
+    private func getTimeRange() -> String {
         var timeRange = ""
-        switch timeRangeIndex {
+        switch timeRangeSelected {
         case 0:
             timeRange = "short_term"
         case 1:
@@ -81,8 +87,94 @@ class ReportViewController: UIViewController, UITableViewDelegate, UITableViewDa
         default:
             timeRange = "short_term"
         }
+        return timeRange
+    }
+    
+    private func fetchEnergy() {
+        guard let token = token else { return }
         
-        NetworkManager.shared.getArtists(with: token, timeRange: timeRange, limit: "1") { artistResult in
+        let timeRange = getTimeRange()
+        let limit = "50"
+        
+        NetworkManager.shared.getTopTracks(with: token, timeRange: timeRange, limit: limit) { tracksResult in
+            guard let tracksResult = tracksResult else { return }
+            let tracks = tracksResult.items
+            
+            DispatchQueue.main.async {
+                // append track IDs into a list
+                var trackIDs = tracks[0].id
+                for track in tracks.dropFirst() {
+                    trackIDs += ",\(track.id)"
+                }
+                
+                NetworkManager.shared.getAudioFeatures(with: token, ids: trackIDs) { audioFeaturesResult in
+                    guard let audioFeaturesResult = audioFeaturesResult else { return }
+                    let audioFeaturesItems = audioFeaturesResult
+                    DispatchQueue.main.async {
+                        var totalEnergy: Double = 0
+                        for audioFeatures in audioFeaturesItems {
+                            totalEnergy += audioFeatures.energy
+                        }
+                        let averageEnergy = totalEnergy / Double(audioFeaturesItems.count)
+                        print("Average energy: \(averageEnergy)")
+                        
+                        if averageEnergy >= 0.5 {
+                            self.energyLabel.text = "You listen to a lot of energetic music,"
+                        } else {
+                            self.energyLabel.text = "You listen to a lot of mellow music,"
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    private func fetchValence() {
+        guard let token = token else { return }
+        
+        let timeRange = getTimeRange()
+        let limit = "50"
+        
+        NetworkManager.shared.getTopTracks(with: token, timeRange: timeRange, limit: limit) { tracksResult in
+            guard let tracksResult = tracksResult else { return }
+            let tracks = tracksResult.items
+            
+            DispatchQueue.main.async {
+                // append track IDs into a list
+                var trackIDs = tracks[0].id
+                for track in tracks.dropFirst() {
+                    trackIDs += ",\(track.id)"
+                }
+                
+                NetworkManager.shared.getAudioFeatures(with: token, ids: trackIDs) { audioFeaturesResult in
+                    guard let audioFeaturesResult = audioFeaturesResult else { return }
+                    let audioFeaturesItems = audioFeaturesResult
+                    DispatchQueue.main.async {
+                        var totalValence: Double = 0
+                        for audioFeatures in audioFeaturesItems {
+                            totalValence += audioFeatures.valence
+                        }
+                        let averageValence = totalValence / Double(audioFeaturesItems.count)
+                        print("Average valence: \(averageValence)")
+                        
+                        if averageValence >= 0.5 {
+                            self.happinessLabel.text = "Your music mood is happy,"
+                        } else {
+                            self.happinessLabel.text = "Your music mood is sentimental,"
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    private func fetchArtist() {
+        guard let token = token else { return }
+        
+        let timeRange = getTimeRange()
+        let limit = "1"
+        
+        NetworkManager.shared.getTopArtists(with: token, timeRange: timeRange, limit: limit) { artistResult in
             guard let artistResult = artistResult else { return }
             let topArtist = artistResult.items
 
@@ -107,22 +199,13 @@ class ReportViewController: UIViewController, UITableViewDelegate, UITableViewDa
         }
     }
     
-    private func fetchTracks(timeRangeIndex: Int) {
+    private func fetchTracks() {
         guard let token = token else { return }
         
-        var timeRange = ""
-        switch timeRangeIndex {
-        case 0:
-            timeRange = "short_term"
-        case 1:
-            timeRange = "medium_term"
-        case 2:
-            timeRange = "long_term"
-        default:
-            timeRange = "short_term"
-        }
+        let timeRange = getTimeRange()
+        let limit = "50"
         
-        NetworkManager.shared.getTopTracks(with: token, timeRange: timeRange, limit: "50") { tracksResult in
+        NetworkManager.shared.getTopTracks(with: token, timeRange: timeRange, limit: limit) { tracksResult in
             guard let tracksResult = tracksResult else { return }
             self.topTracks = tracksResult.items
             

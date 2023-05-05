@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		F20377162A03C06900553183 /* ReportViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F20377152A03C06900553183 /* ReportViewController.swift */; };
+		F203771B2A03F61300553183 /* AudioFeatures.swift in Sources */ = {isa = PBXBuildFile; fileRef = F203771A2A03F61300553183 /* AudioFeatures.swift */; };
 		F26A897B29EE1EB200FF3A59 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F26A897A29EE1EB200FF3A59 /* AppDelegate.swift */; };
 		F26A897D29EE1EB200FF3A59 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F26A897C29EE1EB200FF3A59 /* SceneDelegate.swift */; };
 		F26A898229EE1EB200FF3A59 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F26A898029EE1EB200FF3A59 /* Main.storyboard */; };
@@ -39,6 +40,7 @@
 
 /* Begin PBXFileReference section */
 		F20377152A03C06900553183 /* ReportViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportViewController.swift; sourceTree = "<group>"; };
+		F203771A2A03F61300553183 /* AudioFeatures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioFeatures.swift; sourceTree = "<group>"; };
 		F26A897729EE1EB200FF3A59 /* Music Keeper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Music Keeper.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		F26A897A29EE1EB200FF3A59 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		F26A897C29EE1EB200FF3A59 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -81,6 +83,32 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		F20377182A03F5A400553183 /* ViewControllers */ = {
+			isa = PBXGroup;
+			children = (
+				F2BC696B29FB868300F13AA9 /* LibraryViewController.swift */,
+				F28EFACF29FBFC8A00B942C8 /* LoginAccountViewController.swift */,
+				F28EFAD529FC02E400B942C8 /* OverviewViewController.swift */,
+				F20377152A03C06900553183 /* ReportViewController.swift */,
+			);
+			name = ViewControllers;
+			sourceTree = "<group>";
+		};
+		F20377192A03F5BB00553183 /* Spotify */ = {
+			isa = PBXGroup;
+			children = (
+				F26A899229EE43C100FF3A59 /* SearchResult.swift */,
+				F26A899429EE49C100FF3A59 /* Track.swift */,
+				F26A899629EE4A0600FF3A59 /* Artist.swift */,
+				F26A899829EE4A1500FF3A59 /* Album.swift */,
+				F2E3944929FE58F3001CD918 /* Player.swift */,
+				F2E3944B29FFA779001CD918 /* Image.swift */,
+				F2E3944D29FFA87E001CD918 /* RecentlyPlayed.swift */,
+				F203771A2A03F61300553183 /* AudioFeatures.swift */,
+			);
+			name = Spotify;
+			sourceTree = "<group>";
+		};
 		F26A896E29EE1EB200FF3A59 = {
 			isa = PBXGroup;
 			children = (
@@ -102,8 +130,8 @@
 		F26A897929EE1EB200FF3A59 /* Music Keeper */ = {
 			isa = PBXGroup;
 			children = (
-				F2E3945029FFA8CA001CD918 /* ViewControllers */,
-				F2E3944F29FFA8A7001CD918 /* Spotify */,
+				F20377192A03F5BB00553183 /* Spotify */,
+				F20377182A03F5A400553183 /* ViewControllers */,
 				F29762FA29FCC39A0013FC8D /* Database */,
 				F29762F229FCC1070013FC8D /* DataModel */,
 				F2BC696D29FB8AB600F13AA9 /* OverLayerPopUp */,
@@ -146,31 +174,6 @@
 				F2BC696F29FB8AE900F13AA9 /* OverLayerPopUp.xib */,
 			);
 			path = OverLayerPopUp;
-			sourceTree = "<group>";
-		};
-		F2E3944F29FFA8A7001CD918 /* Spotify */ = {
-			isa = PBXGroup;
-			children = (
-				F26A899229EE43C100FF3A59 /* SearchResult.swift */,
-				F26A899429EE49C100FF3A59 /* Track.swift */,
-				F26A899629EE4A0600FF3A59 /* Artist.swift */,
-				F26A899829EE4A1500FF3A59 /* Album.swift */,
-				F2E3944929FE58F3001CD918 /* Player.swift */,
-				F2E3944B29FFA779001CD918 /* Image.swift */,
-				F2E3944D29FFA87E001CD918 /* RecentlyPlayed.swift */,
-			);
-			path = Spotify;
-			sourceTree = "<group>";
-		};
-		F2E3945029FFA8CA001CD918 /* ViewControllers */ = {
-			isa = PBXGroup;
-			children = (
-				F2BC696B29FB868300F13AA9 /* LibraryViewController.swift */,
-				F28EFACF29FBFC8A00B942C8 /* LoginAccountViewController.swift */,
-				F28EFAD529FC02E400B942C8 /* OverviewViewController.swift */,
-				F20377152A03C06900553183 /* ReportViewController.swift */,
-			);
-			path = ViewControllers;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -261,6 +264,7 @@
 				F20377162A03C06900553183 /* ReportViewController.swift in Sources */,
 				F2E3944E29FFA87E001CD918 /* RecentlyPlayed.swift in Sources */,
 				F26A899929EE4A1500FF3A59 /* Album.swift in Sources */,
+				F203771B2A03F61300553183 /* AudioFeatures.swift in Sources */,
 				F29762F529FCC1410013FC8D /* AccessTokenDataModel.xcdatamodeld in Sources */,
 				F28EFAD029FBFC8A00B942C8 /* LoginAccountViewController.swift in Sources */,
 				F28EFAD629FC02E400B942C8 /* OverviewViewController.swift in Sources */,
