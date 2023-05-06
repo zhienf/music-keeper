@@ -1,5 +1,5 @@
 //
-//  AlbumResult.swift
+//  Album.swift
 //  Music Keeper
 //
 //  Created by Zhi'en Foo on 18/04/2023.
@@ -7,81 +7,26 @@
 
 import UIKit
 
-struct AlbumItem: Codable {
-    let albums: [Album]
-}
-
 struct Album: Codable {
-    let album_type: String?
-    let total_tracks: Int?
-//    let external_urls: ExternalUrls
-    let href: String?
-    let id: String?
-    let images: [Image]?
+    let external_urls: ExternalURLs
+    let id: String
+    let images: [Image]
     let name: String
-    let release_date: String?
-    let type: String?
-    let uri: String?
-    let genres: [String]?
-    let popularity: Int?
+    let release_date: String
+    let uri: String
+    let genres: [String]
+    let popularity: Int
     let artists: [Artist]
+    
+    init(dictionary: [String: Any]) {
+        external_urls = ExternalURLs(dictionary: dictionary["external_urls"] as? [String: Any] ?? [:])
+        id = dictionary["id"] as? String ?? ""
+        images = (dictionary["images"] as? [[String: Any]])?.map { Image(dictionary: $0) } ?? []
+        name = dictionary["name"] as? String ?? ""
+        release_date = dictionary["release_date"] as? String ?? ""
+        uri = dictionary["uri"] as? String ?? ""
+        genres = dictionary["genres"] as? [String] ?? []
+        popularity = dictionary["popularity"] as? Int ?? 0
+        artists = (dictionary["artists"] as? [[String: Any]])?.map { Artist(dictionary: $0) } ?? []
+    }
 }
-
-//class AlbumItem: NSObject, Codable {
-//    let albums: [Album]
-//
-//    enum CodingKeys: String, CodingKey {
-//        case albums
-//    }
-//
-//    required init(from decoder: Decoder) throws {
-//        let container = try decoder.container(keyedBy: CodingKeys.self)
-//        albums = try container.decode([Album].self, forKey: .albums)
-//    }
-//
-//    let id: String
-//    let name: String
-//    let artistName: String
-//    let imageURL: URL?
-//
-//    init?(dictionary: [String: Any]) {
-//        guard let id = dictionary["id"] as? String,
-//            let name = dictionary["name"] as? String,
-//            let artistDictionary = dictionary["artists"] as? [[String: Any]],
-//            let artistName = artistDictionary.first?["name"] as? String
-//            else { return nil }
-//
-//        self.id = id
-//        self.name = name
-//        self.artistName = artistName
-//        if let images = dictionary["images"] as? [[String: Any]],
-//            let urlString = images.first?["url"] as? String,
-//            let imageURL = URL(string: urlString) {
-//            self.imageURL = imageURL
-//        } else {
-//            self.imageURL = nil
-//        }
-//    }
-//}
-//
-//class Album: Codable {
-//    let name: String
-//    let id: String
-//    let uri: String
-//    let images: [Image]
-//
-//    enum CodingKeys: String, CodingKey {
-//        case name
-//        case id
-//        case uri
-//        case images
-//    }
-//
-//    required init(from decoder: Decoder) throws {
-//        let container = try decoder.container(keyedBy: CodingKeys.self)
-//        name = try container.decode(String.self, forKey: .name)
-//        id = try container.decode(String.self, forKey: .id)
-//        uri = try container.decode(String.self, forKey: .uri)
-//        images = try container.decode([Image].self, forKey: .images)
-//    }
-//}

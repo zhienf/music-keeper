@@ -56,7 +56,7 @@ class OverviewViewController: UIViewController, UITableViewDelegate, UITableView
         token = databaseController?.fetchAccessToken()
         let refreshToken = databaseController?.fetchRefreshToken()
         print("overview token:", token!)
-        print("overview refresh token:", refreshToken)
+        print("overview refresh token:", refreshToken ?? "error")
         
         currentlyPlayingView.layer.cornerRadius = 10
     }
@@ -77,7 +77,7 @@ class OverviewViewController: UIViewController, UITableViewDelegate, UITableView
             let currentSongTitle = trackResult.name
             let currentAlbum = trackResult.album.name
             let currentArtist = trackResult.artists[0].name
-            let currentImageURL = trackResult.album.images?[1].url
+            let currentImageURL = trackResult.album.images[1].url
 
             // set UILabels and UIImageView with the result obtained
             DispatchQueue.main.async {
@@ -86,7 +86,7 @@ class OverviewViewController: UIViewController, UITableViewDelegate, UITableView
                 self.currentlyPlayingTrackAlbum.text = currentAlbum
                 
                 // Download image url
-                guard let imageURL = currentImageURL, let url = URL(string: imageURL) else { return }
+                guard let url = URL(string: currentImageURL) else { return }
                 URLSession.shared.dataTask(with: url) { (data, response, error) in
                     guard let data = data, error == nil else {
                         print("Failed to download album image: \(error?.localizedDescription ?? "Unknown error")")
@@ -105,16 +105,16 @@ class OverviewViewController: UIViewController, UITableViewDelegate, UITableView
         artistTop5Data = []
         NetworkManager.shared.getTopArtists(with: token, timeRange: "short_term", limit: "5") { artistResult in
             guard let artistResult = artistResult else { return }
-            let topArtists = artistResult.items
+            let topArtists = artistResult
 
             let dispatchGroup = DispatchGroup()
 
             for index in 0..<topArtists.count {
                 let artist = topArtists[index]
-                let artistImageURL = artist.images?[1].url
+                let artistImageURL = artist.images[1].url
 
                 // Download image url
-                guard let imageURL = artistImageURL, let url = URL(string: imageURL) else { return }
+                guard let url = URL(string: artistImageURL) else { return }
 
                 dispatchGroup.enter()
                 URLSession.shared.dataTask(with: url) { (data, response, error) in
@@ -142,9 +142,9 @@ class OverviewViewController: UIViewController, UITableViewDelegate, UITableView
     
     private func fetchRecentlyPlayedTracks() {
         guard let token = token else { return }
-        NetworkManager.shared.getRecentlyPlayedTracks(with: token) { playHistoryResults in
-            guard let playHistoryResults = playHistoryResults else { return }
-            self.recentlyPlayedTracks = playHistoryResults.items
+        NetworkManager.shared.getRecentlyPlayedTracks(with: token) { playHistoryResult in
+            guard let playHistoryResult = playHistoryResult else { return }
+            self.recentlyPlayedTracks = playHistoryResult
             DispatchQueue.main.async {
                 self.tableView.reloadData()
             }

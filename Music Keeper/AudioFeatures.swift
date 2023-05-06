@@ -7,14 +7,6 @@
 
 import Foundation
 
-struct AudioFeaturesItems: Codable {
-    let audioFeatures: [AudioFeatures]
-
-    enum CodingKeys: String, CodingKey {
-        case audioFeatures = "audio_features"
-    }
-}
-
 struct AudioFeatures: Codable {
     let danceability: Double
     let energy: Double

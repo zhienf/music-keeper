@@ -64,6 +64,7 @@ class ReportViewController: UIViewController, UITableViewDelegate, UITableViewDa
         fetchTracks()
         fetchEnergy()
         fetchValence()
+        fetchGenreDecade()
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -98,7 +99,7 @@ class ReportViewController: UIViewController, UITableViewDelegate, UITableViewDa
         
         NetworkManager.shared.getTopTracks(with: token, timeRange: timeRange, limit: limit) { tracksResult in
             guard let tracksResult = tracksResult else { return }
-            let tracks = tracksResult.items
+            let tracks = tracksResult
             
             DispatchQueue.main.async {
                 // append track IDs into a list
@@ -137,7 +138,7 @@ class ReportViewController: UIViewController, UITableViewDelegate, UITableViewDa
         
         NetworkManager.shared.getTopTracks(with: token, timeRange: timeRange, limit: limit) { tracksResult in
             guard let tracksResult = tracksResult else { return }
-            let tracks = tracksResult.items
+            let tracks = tracksResult
             
             DispatchQueue.main.async {
                 // append track IDs into a list
@@ -168,29 +169,29 @@ class ReportViewController: UIViewController, UITableViewDelegate, UITableViewDa
         }
     }
     
-//    private func fetchGenreDecade() {
-//        guard let token = token else { return }
-//        
-//        let timeRange = getTimeRange()
-//        let limit = "50"
-//        
-//        NetworkManager.shared.getTopTracks(with: token, timeRange: timeRange, limit: limit) { tracksResult in
-//            guard let tracksResult = tracksResult else { return }
-//            let tracks = tracksResult.items
-//            
-//            DispatchQueue.main.async {
-//                var genreCounts: [String: Int] = [:]
-//                for track in tracks {
-//                    for genre in track.album.genres {
-//                        genreCounts[genre] = (genreCounts[genre] ?? 0) + 1
-//                    }
-//                }
-//                let sortedGenres = genreCounts.sorted { $0.value > $1.value }
-//                let topGenres = sortedGenres.prefix(5).map { $0.key }
-//                print("Top genres: \(topGenres)")
-//            }
-//        }
-//    }
+    private func fetchGenreDecade() {
+        guard let token = token else { return }
+        
+        let timeRange = getTimeRange()
+        let limit = "50"
+        
+        NetworkManager.shared.getTopTracks(with: token, timeRange: timeRange, limit: limit) { tracksResult in
+            guard let tracksResult = tracksResult else { return }
+            let tracks = tracksResult
+            
+            DispatchQueue.main.async {
+                var genreCounts: [String: Int] = [:]
+                for track in tracks {
+                    for genre in track.album.genres {
+                        genreCounts[genre] = (genreCounts[genre] ?? 0) + 1
+                    }
+                }
+                let sortedGenres = genreCounts.sorted { $0.value > $1.value }
+                let topGenres = sortedGenres.prefix(5).map { $0.key }
+                print("Top genres: \(topGenres)")
+            }
+        }
+    }
     
     private func fetchArtist() {
         guard let token = token else { return }
@@ -200,15 +201,15 @@ class ReportViewController: UIViewController, UITableViewDelegate, UITableViewDa
         
         NetworkManager.shared.getTopArtists(with: token, timeRange: timeRange, limit: limit) { artistResult in
             guard let artistResult = artistResult else { return }
-            let topArtist = artistResult.items
+            let topArtist = artistResult
 
             let artist = topArtist[0]
-            let artistImageURL = artist.images?[1].url
+            let artistImageURL = artist.images[1].url
 
             // set UILabel and UIImageView with the result obtained
             DispatchQueue.main.async {
                 // Download image url
-                guard let imageURL = artistImageURL, let url = URL(string: imageURL) else { return }
+                guard let url = URL(string: artistImageURL) else { return }
                 URLSession.shared.dataTask(with: url) { (data, response, error) in
                     guard let data = data, error == nil else {
                         print("Failed to download album image: \(error?.localizedDescription ?? "Unknown error")")
@@ -231,14 +232,14 @@ class ReportViewController: UIViewController, UITableViewDelegate, UITableViewDa
         
         NetworkManager.shared.getTopTracks(with: token, timeRange: timeRange, limit: limit) { tracksResult in
             guard let tracksResult = tracksResult else { return }
-            self.topTracks = tracksResult.items
+            self.topTracks = tracksResult
             
             let top1stTrack = self.topTracks[0]
-            let trackImageURL = top1stTrack.album.images?[1].url
+            let trackImageURL = top1stTrack.album.images[1].url
             
             DispatchQueue.main.async {
                 self.tableView.reloadData()
-                guard let imageURL = trackImageURL, let url = URL(string: imageURL) else { return }
+                guard let url = URL(string: trackImageURL) else { return }
                 URLSession.shared.dataTask(with: url) { (data, response, error) in
                     guard let data = data, error == nil else {
                         print("Failed to download album image: \(error?.localizedDescription ?? "Unknown error")")
