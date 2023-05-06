@@ -409,6 +409,25 @@ class NetworkManager {
             }
             
             do {
+                let json = try JSONSerialization.jsonObject(with: data, options: [])
+                let jsonData = try JSONSerialization.data(withJSONObject: json, options: .prettyPrinted)
+                if let jsonString = String(data: jsonData, encoding: .utf8) {
+                    print(jsonString)
+                    let jsonData = jsonString.data(using: .utf8)!
+
+                    do {
+                        let jsonDictionary = try JSONSerialization.jsonObject(with: jsonData, options: []) as! [String:Any]
+                        let keys = jsonDictionary.keys
+                        print(keys) // ["name", "age", "city"]
+                    } catch {
+                        print("Error decoding JSON: \(error)")
+                    }
+                }
+            } catch {
+                print("JSON serialization failed: \(error)")
+            }
+            
+            do {
                 let decoder = JSONDecoder()
                 decoder.keyDecodingStrategy = .convertFromSnakeCase
                 let recentlyPlayedItems = try decoder.decode(RecentlyPlayedItems.self, from: data)

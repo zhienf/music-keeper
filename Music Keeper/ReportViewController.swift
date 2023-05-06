@@ -168,6 +168,30 @@ class ReportViewController: UIViewController, UITableViewDelegate, UITableViewDa
         }
     }
     
+//    private func fetchGenreDecade() {
+//        guard let token = token else { return }
+//        
+//        let timeRange = getTimeRange()
+//        let limit = "50"
+//        
+//        NetworkManager.shared.getTopTracks(with: token, timeRange: timeRange, limit: limit) { tracksResult in
+//            guard let tracksResult = tracksResult else { return }
+//            let tracks = tracksResult.items
+//            
+//            DispatchQueue.main.async {
+//                var genreCounts: [String: Int] = [:]
+//                for track in tracks {
+//                    for genre in track.album.genres {
+//                        genreCounts[genre] = (genreCounts[genre] ?? 0) + 1
+//                    }
+//                }
+//                let sortedGenres = genreCounts.sorted { $0.value > $1.value }
+//                let topGenres = sortedGenres.prefix(5).map { $0.key }
+//                print("Top genres: \(topGenres)")
+//            }
+//        }
+//    }
+    
     private func fetchArtist() {
         guard let token = token else { return }
         
