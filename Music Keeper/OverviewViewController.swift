@@ -85,17 +85,12 @@ class OverviewViewController: UIViewController, UITableViewDelegate, UITableView
                 self.currentlyPlayingTrackArtist.text = currentArtist
                 self.currentlyPlayingTrackAlbum.text = currentAlbum
                 
-                // Download image url
-                guard let url = URL(string: currentImageURL) else { return }
-                URLSession.shared.dataTask(with: url) { (data, response, error) in
-                    guard let data = data, error == nil else {
-                        print("Failed to download album image: \(error?.localizedDescription ?? "Unknown error")")
-                        return
-                    }
+                NetworkManager.shared.downloadImage(from: currentImageURL) { image in
+                    guard let image = image else { return }
                     DispatchQueue.main.async {
-                        self.currentlyPlayingTrackImage.image = UIImage(data: data)
+                        self.currentlyPlayingTrackImage.image = image
                     }
-                }.resume()
+                }
             }
         }
     }
@@ -113,22 +108,15 @@ class OverviewViewController: UIViewController, UITableViewDelegate, UITableView
                 let artist = topArtists[index]
                 let artistImageURL = artist.images[1].url
 
-                // Download image url
-                guard let url = URL(string: artistImageURL) else { return }
-
                 dispatchGroup.enter()
-                URLSession.shared.dataTask(with: url) { (data, response, error) in
-                    guard let data = data, error == nil else {
-                        print("Failed to download album image: \(error?.localizedDescription ?? "Unknown error")")
-                        dispatchGroup.leave()
-                        return
-                    }
+                NetworkManager.shared.downloadImage(from: artistImageURL) { image in
+                    guard let image = image else { return }
                     DispatchQueue.main.async {
-                        let top5Artist = ArtistTop5(artistName: artist.name, rank: index+1, artistImage: UIImage(data: data)!)
+                        let top5Artist = ArtistTop5(artistName: artist.name, rank: index+1, artistImage: image)
                         self.artistTop5Data.append(top5Artist)
                         dispatchGroup.leave()
                     }
-                }.resume()
+                }
             }
 
             dispatchGroup.notify(queue: .main) {
@@ -139,7 +127,6 @@ class OverviewViewController: UIViewController, UITableViewDelegate, UITableView
         }
     }
 
-    
     private func fetchRecentlyPlayedTracks() {
         guard let token = token else { return }
         NetworkManager.shared.getRecentlyPlayedTracks(with: token) { playHistoryResult in

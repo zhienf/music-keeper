@@ -182,17 +182,13 @@ class ReportViewController: UIViewController, UITableViewDelegate, UITableViewDa
             // set UILabel and UIImageView with the result obtained
             DispatchQueue.main.async {
                 // Download image url
-                guard let url = URL(string: artistImageURL) else { return }
-                URLSession.shared.dataTask(with: url) { (data, response, error) in
-                    guard let data = data, error == nil else {
-                        print("Failed to download album image: \(error?.localizedDescription ?? "Unknown error")")
-                        return
-                    }
+                NetworkManager.shared.downloadImage(from: artistImageURL) { image in
+                    guard let image = image else { return }
                     DispatchQueue.main.async {
                         self.topArtistLabel.text = artist.name
-                        self.topArtistImageView.image = UIImage(data: data)
+                        self.topArtistImageView.image = image
                     }
-                }.resume()
+                }
             }
         }
     }
@@ -212,17 +208,13 @@ class ReportViewController: UIViewController, UITableViewDelegate, UITableViewDa
             
             DispatchQueue.main.async {
                 self.tableView.reloadData()
-                guard let url = URL(string: trackImageURL) else { return }
-                URLSession.shared.dataTask(with: url) { (data, response, error) in
-                    guard let data = data, error == nil else {
-                        print("Failed to download album image: \(error?.localizedDescription ?? "Unknown error")")
-                        return
-                    }
+                NetworkManager.shared.downloadImage(from: trackImageURL) { image in
+                    guard let image = image else { return }
                     DispatchQueue.main.async {
                         self.topTrackLabel.text = top1stTrack.name
-                        self.topTrackImageView.image = UIImage(data: data)
+                        self.topTrackImageView.image = image
                     }
-                }.resume()
+                }
             }
         }
     }
