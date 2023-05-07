@@ -16,6 +16,7 @@ struct Track: Codable {
     let popularity: Int
     let preview_url: String
     let uri: String
+    let genres: [String]
     
     init(dictionary: [String: Any]) {
         if let albumDictionary = dictionary["album"] as? [String: Any] {
@@ -31,5 +32,6 @@ struct Track: Codable {
         popularity = dictionary["popularity"] as? Int ?? 0
         preview_url = dictionary["preview_url"] as? String ?? ""
         uri = dictionary["uri"] as? String ?? ""
+        genres = dictionary["genres"] as? [String] ?? []
     }
 }

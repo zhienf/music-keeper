@@ -14,8 +14,6 @@ struct Album: Codable {
     let name: String
     let release_date: String
     let uri: String
-    let genres: [String]
-    let popularity: Int
     let artists: [Artist]
     
     init(dictionary: [String: Any]) {
@@ -25,8 +23,6 @@ struct Album: Codable {
         name = dictionary["name"] as? String ?? ""
         release_date = dictionary["release_date"] as? String ?? ""
         uri = dictionary["uri"] as? String ?? ""
-        genres = dictionary["genres"] as? [String] ?? []
-        popularity = dictionary["popularity"] as? Int ?? 0
         artists = (dictionary["artists"] as? [[String: Any]])?.map { Artist(dictionary: $0) } ?? []
     }
 }
