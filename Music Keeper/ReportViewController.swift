@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import AVFoundation
 
 class ReportViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
 
@@ -62,8 +63,8 @@ class ReportViewController: UIViewController, UITableViewDelegate, UITableViewDa
         // fetch data from API
         fetchArtist()
         fetchTracks()
-        fetchEnergy()
-        fetchValence()
+        fetchEnergyAndValence()
+        fetchGenreAndDecade()
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -90,7 +91,33 @@ class ReportViewController: UIViewController, UITableViewDelegate, UITableViewDa
         return timeRange
     }
     
-    private func fetchEnergy() {
+    private func fetchAudioFeatures(for tracks: [Track], completion: @escaping (Double, Double) -> Void) {
+        guard let token = token else { return }
+        
+        let trackIDs = tracks.map { $0.id }.joined(separator: ",")
+        
+        NetworkManager.shared.getAudioFeatures(with: token, ids: trackIDs) { audioFeaturesResult in
+            guard let audioFeaturesResult = audioFeaturesResult else { return }
+            let audioFeaturesItems = audioFeaturesResult
+            
+            DispatchQueue.main.async {
+                var totalEnergy: Double = 0
+                var totalValence: Double = 0
+                
+                for audioFeatures in audioFeaturesItems {
+                    totalEnergy += audioFeatures.energy
+                    totalValence += audioFeatures.valence
+                }
+                
+                let averageEnergy = totalEnergy / Double(audioFeaturesItems.count)
+                let averageValence = totalValence / Double(audioFeaturesItems.count)
+                
+                completion(averageEnergy, averageValence)
+            }
+        }
+    }
+
+    private func fetchEnergyAndValence() {
         guard let token = token else { return }
         
         let timeRange = getTimeRange()
@@ -98,99 +125,47 @@ class ReportViewController: UIViewController, UITableViewDelegate, UITableViewDa
         
         NetworkManager.shared.getTopTracks(with: token, timeRange: timeRange, limit: limit) { tracksResult in
             guard let tracksResult = tracksResult else { return }
-            let tracks = tracksResult.items
+            let tracks = tracksResult
             
             DispatchQueue.main.async {
-                // append track IDs into a list
-                var trackIDs = tracks[0].id
-                for track in tracks.dropFirst() {
-                    trackIDs += ",\(track.id)"
-                }
-                
-                NetworkManager.shared.getAudioFeatures(with: token, ids: trackIDs) { audioFeaturesResult in
-                    guard let audioFeaturesResult = audioFeaturesResult else { return }
-                    let audioFeaturesItems = audioFeaturesResult
-                    DispatchQueue.main.async {
-                        var totalEnergy: Double = 0
-                        for audioFeatures in audioFeaturesItems {
-                            totalEnergy += audioFeatures.energy
-                        }
-                        let averageEnergy = totalEnergy / Double(audioFeaturesItems.count)
-                        print("Average energy: \(averageEnergy)")
-                        
-                        if averageEnergy >= 0.5 {
-                            self.energyLabel.text = "You listen to a lot of energetic music,"
-                        } else {
-                            self.energyLabel.text = "You listen to a lot of mellow music,"
-                        }
-                    }
+                self.fetchAudioFeatures(for: tracks) { averageEnergy, averageValence in
+                    print("Average energy: \(averageEnergy)")
+                    print("Average valence: \(averageValence)")
+                    
+                    self.energyLabel.text = "\(Int(averageEnergy * 100))% energy"
+                    self.happinessLabel.text = "\(Int(averageValence * 100))% happiness"
                 }
             }
         }
     }
     
-    private func fetchValence() {
+    private func fetchGenreAndDecade() {
         guard let token = token else { return }
-        
+
         let timeRange = getTimeRange()
         let limit = "50"
-        
-        NetworkManager.shared.getTopTracks(with: token, timeRange: timeRange, limit: limit) { tracksResult in
-            guard let tracksResult = tracksResult else { return }
-            let tracks = tracksResult.items
-            
+
+        NetworkManager.shared.getTopArtists(with: token, timeRange: timeRange, limit: limit) { artistResult in
+            guard let artistResult = artistResult else { return }
+            let artists = artistResult
+
             DispatchQueue.main.async {
-                // append track IDs into a list
-                var trackIDs = tracks[0].id
-                for track in tracks.dropFirst() {
-                    trackIDs += ",\(track.id)"
-                }
-                
-                NetworkManager.shared.getAudioFeatures(with: token, ids: trackIDs) { audioFeaturesResult in
-                    guard let audioFeaturesResult = audioFeaturesResult else { return }
-                    let audioFeaturesItems = audioFeaturesResult
+                let (topGenre, obscurity) = self.calculateTopGenreAndObscurity(from: artists)
+
+                NetworkManager.shared.getTopTracks(with: token, timeRange: timeRange, limit: limit) { tracksResult in
+                    guard let tracksResult = tracksResult else { return }
+                    let tracks = tracksResult
+
                     DispatchQueue.main.async {
-                        var totalValence: Double = 0
-                        for audioFeatures in audioFeaturesItems {
-                            totalValence += audioFeatures.valence
-                        }
-                        let averageValence = totalValence / Double(audioFeaturesItems.count)
-                        print("Average valence: \(averageValence)")
-                        
-                        if averageValence >= 0.5 {
-                            self.happinessLabel.text = "Your music mood is happy,"
-                        } else {
-                            self.happinessLabel.text = "Your music mood is sentimental,"
-                        }
+                        let topDecade = self.calculateTopDecade(from: tracks)
+
+                        self.obscurityLabel.text = "\(obscurity)% obscurity score"
+                        self.genreDecadeLabel.text = "Your top genre is \(topGenre), top decade is \(topDecade)s."
                     }
                 }
             }
         }
     }
-    
-//    private func fetchGenreDecade() {
-//        guard let token = token else { return }
-//        
-//        let timeRange = getTimeRange()
-//        let limit = "50"
-//        
-//        NetworkManager.shared.getTopTracks(with: token, timeRange: timeRange, limit: limit) { tracksResult in
-//            guard let tracksResult = tracksResult else { return }
-//            let tracks = tracksResult.items
-//            
-//            DispatchQueue.main.async {
-//                var genreCounts: [String: Int] = [:]
-//                for track in tracks {
-//                    for genre in track.album.genres {
-//                        genreCounts[genre] = (genreCounts[genre] ?? 0) + 1
-//                    }
-//                }
-//                let sortedGenres = genreCounts.sorted { $0.value > $1.value }
-//                let topGenres = sortedGenres.prefix(5).map { $0.key }
-//                print("Top genres: \(topGenres)")
-//            }
-//        }
-//    }
     
     private func fetchArtist() {
         guard let token = token else { return }
@@ -200,25 +175,21 @@ class ReportViewController: UIViewController, UITableViewDelegate, UITableViewDa
         
         NetworkManager.shared.getTopArtists(with: token, timeRange: timeRange, limit: limit) { artistResult in
             guard let artistResult = artistResult else { return }
-            let topArtist = artistResult.items
+            let topArtist = artistResult
 
             let artist = topArtist[0]
-            let artistImageURL = artist.images?[1].url
+            let artistImageURL = artist.images[1].url
 
             // set UILabel and UIImageView with the result obtained
             DispatchQueue.main.async {
                 // Download image url
-                guard let imageURL = artistImageURL, let url = URL(string: imageURL) else { return }
-                URLSession.shared.dataTask(with: url) { (data, response, error) in
-                    guard let data = data, error == nil else {
-                        print("Failed to download album image: \(error?.localizedDescription ?? "Unknown error")")
-                        return
-                    }
+                NetworkManager.shared.downloadImage(from: artistImageURL) { image in
+                    guard let image = image else { return }
                     DispatchQueue.main.async {
                         self.topArtistLabel.text = artist.name
-                        self.topArtistImageView.image = UIImage(data: data)
+                        self.topArtistImageView.image = image
                     }
-                }.resume()
+                }
             }
         }
     }
@@ -231,26 +202,58 @@ class ReportViewController: UIViewController, UITableViewDelegate, UITableViewDa
         
         NetworkManager.shared.getTopTracks(with: token, timeRange: timeRange, limit: limit) { tracksResult in
             guard let tracksResult = tracksResult else { return }
-            self.topTracks = tracksResult.items
+            self.topTracks = tracksResult
             
             let top1stTrack = self.topTracks[0]
-            let trackImageURL = top1stTrack.album.images?[1].url
+            let trackImageURL = top1stTrack.album.images[1].url
             
             DispatchQueue.main.async {
                 self.tableView.reloadData()
-                guard let imageURL = trackImageURL, let url = URL(string: imageURL) else { return }
-                URLSession.shared.dataTask(with: url) { (data, response, error) in
-                    guard let data = data, error == nil else {
-                        print("Failed to download album image: \(error?.localizedDescription ?? "Unknown error")")
-                        return
-                    }
+                NetworkManager.shared.downloadImage(from: trackImageURL) { image in
+                    guard let image = image else { return }
                     DispatchQueue.main.async {
                         self.topTrackLabel.text = top1stTrack.name
-                        self.topTrackImageView.image = UIImage(data: data)
+                        self.topTrackImageView.image = image
                     }
-                }.resume()
+                }
             }
         }
+    }
+    
+    private func calculateTopGenreAndObscurity(from artists: [Artist]) -> (String, Int) {
+        var genreCounts: [String: Int] = [:]
+        var artistPopularity = 0
+
+        for artist in artists {
+            for genre in artist.genres {
+                genreCounts[genre] = (genreCounts[genre] ?? 0) + 1
+            }
+            artistPopularity += artist.popularity
+        }
+
+        let sortedGenres = genreCounts.sorted { $0.value > $1.value }
+        let topGenre = sortedGenres[0].key
+        let obscurity = 100 - (artistPopularity / artists.count)
+
+        return (topGenre, obscurity)
+    }
+
+    private func calculateTopDecade(from tracks: [Track]) -> Int {
+        var decadeFrequency: [Int: Int] = [:]
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        
+        for track in tracks {
+            let date = dateFormatter.date(from: track.album.release_date)
+            guard let date = date, let year = Calendar.current.dateComponents([.year], from: date).year else { continue }
+            let decade = year - (year % 10)
+            decadeFrequency[decade, default: 0] += 1
+        }
+        
+        // Find the decade with the highest frequency
+        let topDecade = decadeFrequency.max { $0.value < $1.value }!.key
+        
+        return topDecade
     }
     
     // MARK: - UITableViewDataSource
@@ -265,6 +268,7 @@ class ReportViewController: UIViewController, UITableViewDelegate, UITableViewDa
         cell.trackLabel.text = topTrack.name
         cell.artistLabel.text = topTrack.artists[0].name
         cell.numberLabel.text = "#" + "\(indexPath.row + 1)"
+        cell.urlString = topTrack.preview_url
         return cell
     }
 }
@@ -274,4 +278,19 @@ class TopTrackCell: UITableViewCell {
     @IBOutlet weak var artistLabel: UILabel!
     @IBOutlet weak var trackLabel: UILabel!
     @IBOutlet weak var numberLabel: UILabel!
+    
+    var urlString: String?
+    
+    @IBAction func playTrackPreview(_ sender: Any) {
+        print("enter play track")
+        guard let urlString = urlString, let previewURL = URL(string: urlString) else { return }
+        print(previewURL)
+        let playerItem = AVPlayerItem(url: previewURL)
+        print("player item:", playerItem)
+        let player = AVPlayer(playerItem: playerItem)
+        print("player:",player)
+        player.volume = 1.0
+        player.play()
+        print("played")
+    }
 }

@@ -60,11 +60,6 @@ class SpotifyAPIClient: NSObject {
         task.resume()
     }
     
-    func search(query: String, completion: @escaping ([SearchResults], Error?) -> Void) {
-        // code to make an authenticated request to the Spotify Web API using the accessToken property
-        // parse the response and return the search results or any errors using the completion handler
-    }
-    
     // other methods for making API requests
     
 }

@@ -56,7 +56,7 @@ class OverviewViewController: UIViewController, UITableViewDelegate, UITableView
         token = databaseController?.fetchAccessToken()
         let refreshToken = databaseController?.fetchRefreshToken()
         print("overview token:", token!)
-        print("overview refresh token:", refreshToken)
+        print("overview refresh token:", refreshToken ?? "error")
         
         currentlyPlayingView.layer.cornerRadius = 10
     }
@@ -77,7 +77,7 @@ class OverviewViewController: UIViewController, UITableViewDelegate, UITableView
             let currentSongTitle = trackResult.name
             let currentAlbum = trackResult.album.name
             let currentArtist = trackResult.artists[0].name
-            let currentImageURL = trackResult.album.images?[1].url
+            let currentImageURL = trackResult.album.images[1].url
 
             // set UILabels and UIImageView with the result obtained
             DispatchQueue.main.async {
@@ -85,17 +85,12 @@ class OverviewViewController: UIViewController, UITableViewDelegate, UITableView
                 self.currentlyPlayingTrackArtist.text = currentArtist
                 self.currentlyPlayingTrackAlbum.text = currentAlbum
                 
-                // Download image url
-                guard let imageURL = currentImageURL, let url = URL(string: imageURL) else { return }
-                URLSession.shared.dataTask(with: url) { (data, response, error) in
-                    guard let data = data, error == nil else {
-                        print("Failed to download album image: \(error?.localizedDescription ?? "Unknown error")")
-                        return
-                    }
+                NetworkManager.shared.downloadImage(from: currentImageURL) { image in
+                    guard let image = image else { return }
                     DispatchQueue.main.async {
-                        self.currentlyPlayingTrackImage.image = UIImage(data: data)
+                        self.currentlyPlayingTrackImage.image = image
                     }
-                }.resume()
+                }
             }
         }
     }
@@ -105,30 +100,23 @@ class OverviewViewController: UIViewController, UITableViewDelegate, UITableView
         artistTop5Data = []
         NetworkManager.shared.getTopArtists(with: token, timeRange: "short_term", limit: "5") { artistResult in
             guard let artistResult = artistResult else { return }
-            let topArtists = artistResult.items
+            let topArtists = artistResult
 
             let dispatchGroup = DispatchGroup()
 
             for index in 0..<topArtists.count {
                 let artist = topArtists[index]
-                let artistImageURL = artist.images?[1].url
-
-                // Download image url
-                guard let imageURL = artistImageURL, let url = URL(string: imageURL) else { return }
+                let artistImageURL = artist.images[1].url
 
                 dispatchGroup.enter()
-                URLSession.shared.dataTask(with: url) { (data, response, error) in
-                    guard let data = data, error == nil else {
-                        print("Failed to download album image: \(error?.localizedDescription ?? "Unknown error")")
-                        dispatchGroup.leave()
-                        return
-                    }
+                NetworkManager.shared.downloadImage(from: artistImageURL) { image in
+                    guard let image = image else { return }
                     DispatchQueue.main.async {
-                        let top5Artist = ArtistTop5(artistName: artist.name, rank: index+1, artistImage: UIImage(data: data)!)
+                        let top5Artist = ArtistTop5(artistName: artist.name, rank: index+1, artistImage: image)
                         self.artistTop5Data.append(top5Artist)
                         dispatchGroup.leave()
                     }
-                }.resume()
+                }
             }
 
             dispatchGroup.notify(queue: .main) {
@@ -139,12 +127,11 @@ class OverviewViewController: UIViewController, UITableViewDelegate, UITableView
         }
     }
 
-    
     private func fetchRecentlyPlayedTracks() {
         guard let token = token else { return }
-        NetworkManager.shared.getRecentlyPlayedTracks(with: token) { playHistoryResults in
-            guard let playHistoryResults = playHistoryResults else { return }
-            self.recentlyPlayedTracks = playHistoryResults.items
+        NetworkManager.shared.getRecentlyPlayedTracks(with: token) { playHistoryResult in
+            guard let playHistoryResult = playHistoryResult else { return }
+            self.recentlyPlayedTracks = playHistoryResult
             DispatchQueue.main.async {
                 self.tableView.reloadData()
             }
@@ -187,7 +174,7 @@ class OverviewViewController: UIViewController, UITableViewDelegate, UITableView
 class TopArtistCell: UICollectionViewCell {
     @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var artistTitle: UILabel!
-
+    
     override func awakeFromNib() {
         super.awakeFromNib()
         // set attributes and constraints to image view

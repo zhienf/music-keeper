@@ -7,21 +7,14 @@
 
 import Foundation
 
-class Image: Codable {
+struct Image: Codable {
     let url: String
-    let width: Int?
-    let height: Int?
-
-    enum CodingKeys: String, CodingKey {
-        case url
-        case width
-        case height
-    }
-
-    required init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        url = try container.decode(String.self, forKey: .url)
-        width = try container.decodeIfPresent(Int.self, forKey: .width)
-        height = try container.decodeIfPresent(Int.self, forKey: .height)
+    let width: Int
+    let height: Int
+    
+    init(dictionary: [String: Any]) {
+        url = dictionary["url"] as? String ?? ""
+        width = dictionary["width"] as? Int ?? 0
+        height = dictionary["height"] as? Int ?? 0
     }
 }
