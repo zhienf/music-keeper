@@ -174,7 +174,7 @@ class OverviewViewController: UIViewController, UITableViewDelegate, UITableView
 class TopArtistCell: UICollectionViewCell {
     @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var artistTitle: UILabel!
-
+    
     override func awakeFromNib() {
         super.awakeFromNib()
         // set attributes and constraints to image view

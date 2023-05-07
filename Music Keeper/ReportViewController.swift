@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import AVFoundation
 
 class ReportViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
 
@@ -267,6 +268,7 @@ class ReportViewController: UIViewController, UITableViewDelegate, UITableViewDa
         cell.trackLabel.text = topTrack.name
         cell.artistLabel.text = topTrack.artists[0].name
         cell.numberLabel.text = "#" + "\(indexPath.row + 1)"
+        cell.urlString = topTrack.preview_url
         return cell
     }
 }
@@ -276,4 +278,19 @@ class TopTrackCell: UITableViewCell {
     @IBOutlet weak var artistLabel: UILabel!
     @IBOutlet weak var trackLabel: UILabel!
     @IBOutlet weak var numberLabel: UILabel!
+    
+    var urlString: String?
+    
+    @IBAction func playTrackPreview(_ sender: Any) {
+        print("enter play track")
+        guard let urlString = urlString, let previewURL = URL(string: urlString) else { return }
+        print(previewURL)
+        let playerItem = AVPlayerItem(url: previewURL)
+        print("player item:", playerItem)
+        let player = AVPlayer(playerItem: playerItem)
+        print("player:",player)
+        player.volume = 1.0
+        player.play()
+        print("played")
+    }
 }

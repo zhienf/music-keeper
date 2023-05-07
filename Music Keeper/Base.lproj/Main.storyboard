@@ -1033,6 +1033,9 @@
                                                     <buttonConfiguration key="configuration" style="plain" image="play.circle" catalog="system">
                                                         <color key="baseForegroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                     </buttonConfiguration>
+                                                    <connections>
+                                                        <action selector="playTrackPreview:" destination="Fh5-p1-Z7q" eventType="touchUpInside" id="iWo-Fc-r4E"/>
+                                                    </connections>
                                                 </button>
                                             </subviews>
                                             <constraints>
