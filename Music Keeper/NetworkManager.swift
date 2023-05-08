@@ -272,13 +272,14 @@ class NetworkManager {
             
             do {
                 guard let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
-                        let audioFeaturesArray = json["audio_features"] as? [[String: Any]]
+                      let audioFeaturesArray = json["audio_features"] as? [Any]
                 else {
-                    print("Failed to decode JSON")
+                    print("getAudioFeatures: Failed to decode JSON")
                     return
                 }
 
-                let audioFeatures = audioFeaturesArray.compactMap { AudioFeatures(dictionary: $0) }
+                let audioFeatures = audioFeaturesArray.compactMap { $0 as? [String: Any] }
+                                                      .compactMap { AudioFeatures(dictionary: $0) }
 
                 completion(audioFeatures)
             } catch let error {
