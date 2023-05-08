@@ -36,11 +36,12 @@ class ReportViewController: UIViewController, UITableViewDelegate, UITableViewDa
         }
     }
     
-    var token: String?
-    
     weak var databaseController: DatabaseProtocol?
-    
+    var token: String?
     var timeRangeSelected: Int = 0  // default is 'last month'
+    var audioPlayer: AVAudioPlayer?
+    var selectedAudioURL: URL?
+    var previousSelectedIndexPath: IndexPath?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -256,6 +257,22 @@ class ReportViewController: UIViewController, UITableViewDelegate, UITableViewDa
         return topDecade
     }
     
+    private func downloadAndPlayAudio(from url: URL) {
+        // handle the asynchronous downloading of the audio file. It creates a URLSession data task to download the audio data, and upon completion, it attempts to create an AVAudioPlayer instance using the downloaded data.
+        URLSession.shared.dataTask(with: url) { [weak self] (data, response, error) in
+            guard let data = data, let audioPlayer = try? AVAudioPlayer(data: data) else {
+                if let error = error {
+                    print("Failed to load audio: \(error)")
+                }
+                return
+            }
+
+            self?.audioPlayer = audioPlayer
+            self?.selectedAudioURL = url
+            audioPlayer.play()
+        }.resume()
+    }
+    
     // MARK: - UITableViewDataSource
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -268,8 +285,47 @@ class ReportViewController: UIViewController, UITableViewDelegate, UITableViewDa
         cell.trackLabel.text = topTrack.name
         cell.artistLabel.text = topTrack.artists[0].name
         cell.numberLabel.text = "#" + "\(indexPath.row + 1)"
-        cell.urlString = topTrack.preview_url
+        cell.audioURL = URL(string: topTrack.preview_url)
         return cell
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        // Get the selected cell and its associated MP3 URL
+        let selectedCell = tableView.cellForRow(at: indexPath) as! TopTrackCell
+        guard let mp3URL = selectedCell.audioURL else { return }
+
+        // Check if the selected cell is the same as the previously selected cell
+        if mp3URL == selectedAudioURL {
+            if let audioPlayer = audioPlayer {
+                if audioPlayer.isPlaying {
+                    // If it is currently playing, pause the audio player
+                    audioPlayer.pause()
+                    selectedCell.playButton.setImage(UIImage(systemName: "play.circle"), for: .normal) // Set the play button image
+                } else {
+                    // If it is currently paused, resume playing the audio
+                    audioPlayer.play()
+                    selectedCell.playButton.setImage(UIImage(systemName: "pause.circle"), for: .normal) // Set the pause button image
+                }
+            }
+        } else {
+            // Stop the previous audio if it's playing
+            if let audioPlayer = audioPlayer, audioPlayer.isPlaying {
+                audioPlayer.stop()
+                // Reset the play button image of the previously selected cell to default (play button)
+                if let previousIndexPath = previousSelectedIndexPath, let previousCell = tableView.cellForRow(at: previousIndexPath) as? TopTrackCell {
+                    previousCell.playButton.setImage(UIImage(systemName: "play.circle"), for: .normal)
+                }
+            }
+            // Play the selected audio
+            downloadAndPlayAudio(from: mp3URL)
+            selectedCell.playButton.setImage(UIImage(systemName: "pause.circle"), for: .normal) // Set the pause button image
+        }
+
+        // Store the currently selected index path as the previous selected index path
+        previousSelectedIndexPath = indexPath
+
+        // Deselect the table view cell to remove the selection highlight
+        tableView.deselectRow(at: indexPath, animated: true)
     }
 }
 
@@ -279,18 +335,5 @@ class TopTrackCell: UITableViewCell {
     @IBOutlet weak var trackLabel: UILabel!
     @IBOutlet weak var numberLabel: UILabel!
     
-    var urlString: String?
-    
-    @IBAction func playTrackPreview(_ sender: Any) {
-        print("enter play track")
-        guard let urlString = urlString, let previewURL = URL(string: urlString) else { return }
-        print(previewURL)
-        let playerItem = AVPlayerItem(url: previewURL)
-        print("player item:", playerItem)
-        let player = AVPlayer(playerItem: playerItem)
-        print("player:",player)
-        player.volume = 1.0
-        player.play()
-        print("played")
-    }
+    var audioURL: URL?
 }
