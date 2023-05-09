@@ -8,7 +8,7 @@
 import UIKit
 import AVFoundation
 
-class ReportViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+class ReportViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, AVAudioPlayerDelegate {
 
     @IBOutlet weak var timeRangeSegmentedControl: UISegmentedControl!
     
@@ -42,6 +42,7 @@ class ReportViewController: UIViewController, UITableViewDelegate, UITableViewDa
     var audioPlayer: AVAudioPlayer?
     var selectedAudioURL: URL?
     var previousSelectedIndexPath: IndexPath?
+    var selectedRow = Set<Int>()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -204,12 +205,16 @@ class ReportViewController: UIViewController, UITableViewDelegate, UITableViewDa
         NetworkManager.shared.getTopTracks(with: token, timeRange: timeRange, limit: limit) { tracksResult in
             guard let tracksResult = tracksResult else { return }
             self.topTracks = tracksResult
-            
-            let top1stTrack = self.topTracks[0]
+
+            let top1stTrack = tracksResult[0]
             let trackImageURL = top1stTrack.album.images[1].url
             
             DispatchQueue.main.async {
+                print("fetch tracks selected row before:", self.selectedRow)
+                self.selectedRow.removeAll()
+                print("fetch tracks selected row after:", self.selectedRow)
                 self.tableView.reloadData()
+
                 NetworkManager.shared.downloadImage(from: trackImageURL) { image in
                     guard let image = image else { return }
                     DispatchQueue.main.async {
@@ -269,6 +274,7 @@ class ReportViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
             self?.audioPlayer = audioPlayer
             self?.selectedAudioURL = url
+            self?.audioPlayer?.delegate = self
             audioPlayer.play()
         }.resume()
     }
@@ -286,12 +292,20 @@ class ReportViewController: UIViewController, UITableViewDelegate, UITableViewDa
         cell.artistLabel.text = topTrack.artists[0].name
         cell.numberLabel.text = "#" + "\(indexPath.row + 1)"
         cell.audioURL = URL(string: topTrack.preview_url)
+        
+        if selectedRow.contains(indexPath.row) {
+            cell.playButton.setImage(UIImage(systemName: "pause.circle"), for: .normal)
+        } else {
+            cell.playButton.setImage(UIImage(systemName: "play.circle"), for: .normal)
+        }
         return cell
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         // Get the selected cell and its associated MP3 URL
         let selectedCell = tableView.cellForRow(at: indexPath) as! TopTrackCell
+//        selectedRow.insert(indexPath.row)
+        print("didselect start selected row:", selectedRow)
         guard let mp3URL = selectedCell.audioURL else { return }
 
         // Check if the selected cell is the same as the previously selected cell
@@ -300,10 +314,14 @@ class ReportViewController: UIViewController, UITableViewDelegate, UITableViewDa
                 if audioPlayer.isPlaying {
                     // If it is currently playing, pause the audio player
                     audioPlayer.pause()
+                    print("indexpath to remove:",indexPath.row)
+//                    selectedRow.remove(indexPath.row)
                     selectedCell.playButton.setImage(UIImage(systemName: "play.circle"), for: .normal) // Set the play button image
                 } else {
                     // If it is currently paused, resume playing the audio
                     audioPlayer.play()
+                    print("indexpath to insert:",indexPath.row)
+//                    selectedRow.insert(indexPath.row)
                     selectedCell.playButton.setImage(UIImage(systemName: "pause.circle"), for: .normal) // Set the pause button image
                 }
             }
@@ -312,20 +330,54 @@ class ReportViewController: UIViewController, UITableViewDelegate, UITableViewDa
             if let audioPlayer = audioPlayer, audioPlayer.isPlaying {
                 audioPlayer.stop()
                 // Reset the play button image of the previously selected cell to default (play button)
+                print("prev index path playing:",previousSelectedIndexPath?.row)
+                let previousIndexPath = previousSelectedIndexPath
+                let previousCell = tableView.cellForRow(at: previousIndexPath!) as? TopTrackCell
+                print("previousCell:", previousCell)
                 if let previousIndexPath = previousSelectedIndexPath, let previousCell = tableView.cellForRow(at: previousIndexPath) as? TopTrackCell {
+                    print("indexpath to remove:",previousIndexPath.row)
+//                    selectedRow.remove(previousIndexPath.row)
                     previousCell.playButton.setImage(UIImage(systemName: "play.circle"), for: .normal)
                 }
             }
             // Play the selected audio
             downloadAndPlayAudio(from: mp3URL)
+            print("indexpath to insert:",indexPath.row)
+//            selectedRow.insert(indexPath.row)
             selectedCell.playButton.setImage(UIImage(systemName: "pause.circle"), for: .normal) // Set the pause button image
         }
 
         // Store the currently selected index path as the previous selected index path
         previousSelectedIndexPath = indexPath
-
-        // Deselect the table view cell to remove the selection highlight
+        
         tableView.deselectRow(at: indexPath, animated: true)
+        print("didselect end selected row:", selectedRow)
+    }
+    
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        if let topTrackCell = cell as? TopTrackCell {
+            // Check if the cell's index path matches the previously selected index path
+            if indexPath == previousSelectedIndexPath {
+                topTrackCell.playButton.setImage(UIImage(systemName: "pause.circle"), for: .normal)
+            } else {
+                topTrackCell.playButton.setImage(UIImage(systemName: "play.circle"), for: .normal)
+            }
+        }
+    }
+    
+//    func tableView(_ tableView: UITableView, didDeselectRowAt indexPath: IndexPath) {
+//        if let cell = tableView.cellForRow(at: indexPath) {
+//            selectedRow.remove(indexPath.row)
+//        }
+//    }
+    
+    // MARK: - AVAudioPlayerDelegate
+    
+    func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+        if let selectedIndexPath = previousSelectedIndexPath {
+            let selectedCell = tableView.cellForRow(at: selectedIndexPath) as? TopTrackCell
+            selectedCell?.playButton.setImage(UIImage(systemName: "play.circle"), for: .normal)
+        }
     }
 }
 
