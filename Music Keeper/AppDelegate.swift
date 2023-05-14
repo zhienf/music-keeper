@@ -32,6 +32,22 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
     }
 
+    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
+        if url.scheme == "musickeeper" {
+            // Extract the content type and ID from the deep link URL
+            if let components = URLComponents(url: url, resolvingAgainstBaseURL: false) {
+                let contentPath = Array(components.path.components(separatedBy: "/").dropFirst())
+                if let contentType = contentPath.first, let contentID = contentPath.last {
+                     // Perform the desired action in your app based on the content type and ID
+                     // For demonstration purposes, we'll print the content type and ID to the console
+                     print("Content Type: \(contentType)")
+                     print("Content ID: \(contentID)")
+                }
+            }
+            return true
+        }
+        return false
+    }
 
 }
 

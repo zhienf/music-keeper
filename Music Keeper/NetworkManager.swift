@@ -254,6 +254,73 @@ class NetworkManager {
         }.resume()
     }
     
+    func getPlaylists(with token: String, limit: Int, offset: Int, completion: @escaping (([Playlist]?, Int?)) -> Void) {
+        // Set up the request URL
+        guard let url = URL(string: "https://api.spotify.com/v1/me/playlists?limit=\(limit)&offset=\(offset)") else { print("getPlaylists: url"); return }
+
+        // Create the request object
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        // Send the request
+        URLSession.shared.dataTask(with: request) { (data, response, error) in
+            guard error == nil else { print("getPlaylists: error", error!); return }
+            guard let response = response as? HTTPURLResponse else { print("getPlaylists: NO RESPONSE"); return }
+            guard response.statusCode == 200 else { print("getPlaylists: BAD RESPONSE: ", response.statusCode); return }
+            guard let data = data else { print("NO DATA"); return }
+            
+            do {
+                guard let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+                      let playlistsArray = json["items"] as? [Any]
+                else {
+                    print("getPlaylists: Failed to decode JSON")
+                    return
+                }
+                let playlistsCount =  json["total"] as? Int
+                let playlists = playlistsArray.compactMap { $0 as? [String: Any] }
+                                                .compactMap { Playlist(dictionary: $0) }
+
+                completion((playlists, playlistsCount))
+            } catch let error {
+                print("getPlaylists: JSON decoding error", error)
+                completion((nil, nil))
+            }
+        }.resume()
+    }
+    
+    func getPlaylistsCount(with token: String, limit: Int, offset: Int, completion: @escaping (Int?) -> Void) {
+        // Set up the request URL
+        guard let url = URL(string: "https://api.spotify.com/v1/me/playlists?limit=\(limit)&offset=\(offset)") else { print("getPlaylistsCount: url"); return }
+
+        // Create the request object
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        // Send the request
+        URLSession.shared.dataTask(with: request) { (data, response, error) in
+            guard error == nil else { print("getPlaylistsCount: error", error!); return }
+            guard let response = response as? HTTPURLResponse else { print("getPlaylistsCount: NO RESPONSE"); return }
+            guard response.statusCode == 200 else { print("getPlaylistsCount: BAD RESPONSE: ", response.statusCode); return }
+            guard let data = data else { print("NO DATA"); return }
+            
+            do {
+                guard let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+                      let playlistsCount = json["total"] as? Int
+                else {
+                    print("getPlaylistsCount: Failed to decode JSON")
+                    return
+                }
+
+                completion(playlistsCount)
+            } catch let error {
+                print("getPlaylistsCount: JSON decoding error", error)
+                completion(nil)
+            }
+        }.resume()
+    }
+    
     // MARK: - FETCH MUSICAL ANALYSIS
     func getAudioFeatures(with token: String, ids: String, completion: @escaping ([AudioFeatures]?) -> Void) {
         guard let url = URL(string: "https://api.spotify.com/v1/audio-features?ids=\(ids)") else { print("getAudioFeatures: url"); return }

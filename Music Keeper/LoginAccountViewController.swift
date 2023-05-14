@@ -14,7 +14,7 @@ class LoginAccountViewController: UIViewController {
     private let clientID    = "***REMOVED***"
     private let scope       = "user-top-read,"
                                 + "user-read-private,user-read-email,user-read-currently-playing,user-read-recently-played,"
-                                + "playlist-modify-public,playlist-modify-private"
+                                + "playlist-modify-public,playlist-modify-private,playlist-read-private,playlist-read-collaborative"
                                 
     weak var databaseController: DatabaseProtocol?
     
