@@ -9,12 +9,26 @@ import UIKit
 
 private let reuseIdentifier = "playlistToAnalyse"
 
+struct PlaylistInfo {
+    var playlistTitle: String
+    var playlistImage: UIImage
+    var playlistID: String
+}
+
 class PlaylistAnalysisCollectionViewController: UICollectionViewController {
     
     weak var databaseController: DatabaseProtocol?
     var token: String?
     var allPlaylists: [Playlist] = []
+    var allPlaylistInfo: [PlaylistInfo] = []
     var totalNumberOfPlaylists: Int = 0
+    private let itemsPerRow: CGFloat = 2
+    private let sectionInsets = UIEdgeInsets(
+      top: 50.0,
+      left: 20.0,
+      bottom: 50.0,
+      right: 20.0)
+
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -45,6 +59,12 @@ class PlaylistAnalysisCollectionViewController: UICollectionViewController {
         let limit = 50 // Number of playlists to fetch per request
         var offset = 0 // Initial offset
         
+        // Create a dispatch group to track the completion of image downloads
+        let downloadGroup = DispatchGroup()
+        
+        // Create a concurrent queue for appending playlist info objects
+        let queue = DispatchQueue(label: "playlistInfoQueue", attributes: .concurrent)
+        
         // Define a recursive function to fetch playlists
         func fetchPlaylistsRecursive(offset: Int) {
             // Make the API request to fetch playlists with the specified limit and offset
@@ -62,9 +82,30 @@ class PlaylistAnalysisCollectionViewController: UICollectionViewController {
                         // Update UI or perform other tasks related to fetched playlists
                         print("All playlists fetched")
                         for playlist in self.allPlaylists {
-                            print(playlist.name)
+                            let playlistTitle = playlist.name
+                            let playlistID = playlist.id
+                            if let playlistImageURL = playlist.images.first?.url {
+                                downloadGroup.enter() // Enter the dispatch group
+
+                                NetworkManager.shared.downloadImage(from: playlistImageURL) { [weak self] image in
+                                    guard let self = self, let image = image else {
+                                        downloadGroup.leave() // Leave the dispatch group if the image download fails
+                                        return
+                                    }
+
+                                    let playlistInfo = PlaylistInfo(playlistTitle: playlistTitle, playlistImage: image, playlistID: playlistID)
+                                    queue.async(flags: .barrier) {
+                                        self.allPlaylistInfo.append(playlistInfo)
+                                    }
+                                    downloadGroup.leave() // Leave the dispatch group after successful image download
+                                }
+                            }
                         }
-                        self.collectionView.reloadData()
+                        
+                        // Notify when all image downloads have completed
+                        downloadGroup.notify(queue: .main) {
+                            self.collectionView.reloadData()
+                        }
                     }
                 } else {
                     // Fetch the next batch of playlists recursively
@@ -78,15 +119,21 @@ class PlaylistAnalysisCollectionViewController: UICollectionViewController {
         fetchPlaylistsRecursive(offset: offset)
     }
 
-    /*
-    // MARK: - Navigation
+     // MARK: - Navigation
 
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
+     // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using [segue destinationViewController].
-        // Pass the selected object to the new view controller.
+         // Get the new view controller using [segue destinationViewController].
+         // Pass the selected object to the new view controller.
+        if segue.identifier == "showPlaylistSummary" {
+            
+            if let cell = sender as? UICollectionViewCell, let indexPath = collectionView.indexPath(for: cell) {
+                
+                let controller = segue.destination as! PlaylistSummaryViewController
+                controller.currentPlaylist = allPlaylistInfo[indexPath.row]
+            }
+        }
     }
-    */
 
     // MARK: UICollectionViewDataSource
 
@@ -104,9 +151,10 @@ class PlaylistAnalysisCollectionViewController: UICollectionViewController {
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath) as! PlaylistToAnalyseCell
     
-        let playlist = allPlaylists[indexPath.item]
+        let playlist = allPlaylistInfo[indexPath.row]
         // Configure the cell using the playlist data
-        cell.playlistTitle.text = playlist.name
+        cell.playlistTitle.text = playlist.playlistTitle
+        cell.playlistImage.image = playlist.playlistImage
         // Configure other cell properties
     
         return cell
@@ -145,7 +193,29 @@ class PlaylistAnalysisCollectionViewController: UICollectionViewController {
 
 }
 
+// MARK: - Collection View Flow Layout Delegate
+extension PlaylistAnalysisCollectionViewController: UICollectionViewDelegateFlowLayout {
+  func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+    let paddingSpace = sectionInsets.left * (itemsPerRow + 1)
+    let availableWidth = view.frame.width - paddingSpace
+    let widthPerItem = availableWidth / itemsPerRow
+    
+    return CGSize(width: widthPerItem, height: widthPerItem * 1.2)
+  }
+  
+
+  func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
+    return sectionInsets
+  }
+  
+  func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+    return sectionInsets.left
+  }
+}
+
+
 class PlaylistToAnalyseCell: UICollectionViewCell {
     
+    @IBOutlet weak var playlistImage: UIImageView!
     @IBOutlet weak var playlistTitle: UILabel!
 }

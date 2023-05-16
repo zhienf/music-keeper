@@ -12,12 +12,14 @@ struct Playlist: Codable {
     let name: String
     let tracks: PlaylistTracks
     let uri: String
+    let id: String
     
     init(dictionary: [String: Any]) {
         images = (dictionary["images"] as? [[String: Any]])?.map { Image(dictionary: $0) } ?? []
         name = dictionary["name"] as? String ?? ""
         tracks = PlaylistTracks(dictionary: dictionary["tracks"] as? [String: Any] ?? [:])
         uri = dictionary["uri"] as? String ?? ""
+        id = dictionary["id"] as? String ?? ""
     }
 }
 
