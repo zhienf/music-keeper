@@ -31,6 +31,8 @@
 		F29762FE29FCC43F0013FC8D /* DatabaseProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = F29762FD29FCC43F0013FC8D /* DatabaseProtocol.swift */; };
 		F297630029FCC4470013FC8D /* CoreDataController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F29762FF29FCC4470013FC8D /* CoreDataController.swift */; };
 		F2AC83A12A130E9D00D23AC9 /* PlaylistSummaryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2AC83A02A130E9D00D23AC9 /* PlaylistSummaryViewController.swift */; };
+		F2AC83A32A13CEE400D23AC9 /* GeneratePlaylistViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2AC83A22A13CEE400D23AC9 /* GeneratePlaylistViewController.swift */; };
+		F2AC83A52A13CF0500D23AC9 /* NewPlaylistViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2AC83A42A13CF0500D23AC9 /* NewPlaylistViewController.swift */; };
 		F2BC696C29FB868300F13AA9 /* LibraryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2BC696B29FB868300F13AA9 /* LibraryViewController.swift */; };
 		F2BC697029FB8AE900F13AA9 /* OverLayerPopUp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2BC696E29FB8AE900F13AA9 /* OverLayerPopUp.swift */; };
 		F2BC697129FB8AE900F13AA9 /* OverLayerPopUp.xib in Resources */ = {isa = PBXBuildFile; fileRef = F2BC696F29FB8AE900F13AA9 /* OverLayerPopUp.xib */; };
@@ -67,6 +69,8 @@
 		F29762FD29FCC43F0013FC8D /* DatabaseProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DatabaseProtocol.swift; sourceTree = "<group>"; };
 		F29762FF29FCC4470013FC8D /* CoreDataController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreDataController.swift; sourceTree = "<group>"; };
 		F2AC83A02A130E9D00D23AC9 /* PlaylistSummaryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaylistSummaryViewController.swift; sourceTree = "<group>"; };
+		F2AC83A22A13CEE400D23AC9 /* GeneratePlaylistViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneratePlaylistViewController.swift; sourceTree = "<group>"; };
+		F2AC83A42A13CF0500D23AC9 /* NewPlaylistViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewPlaylistViewController.swift; sourceTree = "<group>"; };
 		F2BC696B29FB868300F13AA9 /* LibraryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryViewController.swift; sourceTree = "<group>"; };
 		F2BC696E29FB8AE900F13AA9 /* OverLayerPopUp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverLayerPopUp.swift; sourceTree = "<group>"; };
 		F2BC696F29FB8AE900F13AA9 /* OverLayerPopUp.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = OverLayerPopUp.xib; sourceTree = "<group>"; };
@@ -97,6 +101,8 @@
 				F21EC0062A0A25CE001BB42C /* DiscoverViewController.swift */,
 				F2E03D372A11234600B03980 /* PlaylistAnalysisCollectionViewController.swift */,
 				F2AC83A02A130E9D00D23AC9 /* PlaylistSummaryViewController.swift */,
+				F2AC83A22A13CEE400D23AC9 /* GeneratePlaylistViewController.swift */,
+				F2AC83A42A13CF0500D23AC9 /* NewPlaylistViewController.swift */,
 			);
 			name = ViewControllers;
 			sourceTree = "<group>";
@@ -267,6 +273,7 @@
 				F2E3944C29FFA779001CD918 /* Image.swift in Sources */,
 				F2AC83A12A130E9D00D23AC9 /* PlaylistSummaryViewController.swift in Sources */,
 				F29762FC29FCC4390013FC8D /* MulticastDelegate.swift in Sources */,
+				F2AC83A52A13CF0500D23AC9 /* NewPlaylistViewController.swift in Sources */,
 				F28EFAD829FC092700B942C8 /* Token.swift in Sources */,
 				F20377162A03C06900553183 /* ReportViewController.swift in Sources */,
 				F2E3944E29FFA87E001CD918 /* PlayHistory.swift in Sources */,
@@ -277,6 +284,7 @@
 				F28EFAD629FC02E400B942C8 /* OverviewViewController.swift in Sources */,
 				F2BC696C29FB868300F13AA9 /* LibraryViewController.swift in Sources */,
 				F26A897D29EE1EB200FF3A59 /* SceneDelegate.swift in Sources */,
+				F2AC83A32A13CEE400D23AC9 /* GeneratePlaylistViewController.swift in Sources */,
 				F26A899729EE4A0600FF3A59 /* Artist.swift in Sources */,
 				F21EC0072A0A25CE001BB42C /* DiscoverViewController.swift in Sources */,
 				F26A899129EE3EDE00FF3A59 /* SpotifyAPIClient.swift in Sources */,

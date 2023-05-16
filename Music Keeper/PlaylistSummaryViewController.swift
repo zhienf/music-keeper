@@ -74,7 +74,7 @@ class PlaylistSummaryViewController: UIViewController {
             let playlistTracks = trackResult
         
             DispatchQueue.main.async {
-                print("summary:", playlistTracks)
+//                print("summary:", playlistTracks)
                 self.fetchAudioFeatures(for: playlistTracks) { averageEnergy, averageValence, averageDanceability, topKey in
 //                    print("Average energy: \(averageEnergy)")
 //                    print("Average valence: \(averageValence)")
@@ -86,48 +86,67 @@ class PlaylistSummaryViewController: UIViewController {
                     }
                     self.playlistRepeatedDecade.text = topKey
                 }
-                self.calculateTopGenreAndArtist(from: playlistTracks) { topGenres, topArtist in
+                self.calculateTopGenreAndArtist(from: playlistTracks) { topGenres, topArtist, artistNum in
                     // Handle the top genre here
                     print("Top Genre: \(topGenres)")
                     self.playlistGenre.text = topGenres.first
                     self.playlistMainGenres.text = topGenres.joined(separator: "\n")
                     self.playlistRepeatedArtist.text = topArtist
+                    self.playlistDetails.text = "\(playlistTracks.count) tracks by \(artistNum) artists"
                 }
             }
         }
     }
     
-    private func calculateTopGenreAndArtist(from tracks: [Track], completion: @escaping (([String], String)) -> Void) {
+    private func calculateTopGenreAndArtist(from tracks: [Track], completion: @escaping (([String], String, Int)) -> Void) {
         guard let token = token else {
-            completion(([], ""))
+            completion(([], "", 0))
             return
         }
         
         var artistIDs = ""
         var artists: [Artist] = []
-        var artistIDCounts: [String: Int] = [:]
-        
+
         for track in tracks {
             for artist in track.artists {
-                artistIDCounts[artist.id] = (artistIDCounts[artist.id] ?? 0) + 1
+                artists.append(artist)
             }
         }
-        let sortedArtists = artistIDCounts.sorted { $0.value > $1.value }
-        let topArtistID = sortedArtists.first?.key ?? ""
-//        let artistsIDs = artists.map { $0.id }.joined(separator: ",")
-        print("artists:", artists)
-        print("top artist id:", topArtistID)
 
-        NetworkManager.shared.getArtists(with: token, ids: topArtistID) { artistsResult in
-            guard let artistsResult = artistsResult else {
-                completion(([], ""))
-                return
-            }
+        let artistIDsArray = artists.map { $0.id }
+        let batchSize = 50 // Maximum number of artist IDs per request
+        var currentIndex = 0
+
+        // dispatchGroup to keep track of the asynchronous API requests
+        let dispatchGroup = DispatchGroup()
+        var combinedResults: [Artist] = []
+
+        while currentIndex < artistIDsArray.count {
+            let endIndex = min(currentIndex + batchSize, artistIDsArray.count)
+            let batchArtistIDs = Array(artistIDsArray[currentIndex..<endIndex])
+            let batchArtistIDsString = batchArtistIDs.joined(separator: ",")
             
+            // Each time we enter the loop, we enter the dispatchGroup
+            dispatchGroup.enter()
+            
+            NetworkManager.shared.getArtists(with: token, ids: batchArtistIDsString) { artistsResult in
+                defer {
+                    // inside the completion handler of each API request, we leave the dispatchGroup
+                    dispatchGroup.leave()
+                }
+                
+                guard let artistsResult = artistsResult else { return }
+                
+                combinedResults.append(contentsOf: artistsResult)
+            }
+            currentIndex += batchSize
+        }
+
+        dispatchGroup.notify(queue: .main) {
             var genreCounts: [String: Int] = [:]
             var artistCounts: [String: Int] = [:]
 
-            for artist in artistsResult {
+            for artist in combinedResults {
                 for genre in artist.genres {
                     genreCounts[genre] = (genreCounts[genre] ?? 0) + 1
                 }
@@ -141,13 +160,9 @@ class PlaylistSummaryViewController: UIViewController {
             let topArtist = sortedArtists.first?.key ?? ""
             
             print("genre counts:", genreCounts)
-            print("artist counts:", artistCounts)
-            
-            let topArtist = artistsResult.first?.name ?? ""
+            print("artistCounts:", artistCounts)
 
-            DispatchQueue.main.async {
-                completion((topGenres, topArtist))
-            }
+            completion((topGenres, topArtist, artistCounts.count))
         }
     }
     
@@ -178,7 +193,7 @@ class PlaylistSummaryViewController: UIViewController {
                 let averageDanceability = totalDanceability / Double(audioFeaturesItems.count)
                 let sortedKeys = keyCounts.sorted { $0.value > $1.value }
                 let topKey = self.pitchClassNotation[sortedKeys[0].key] ?? ""
-                print("key counts:", keyCounts)
+
                 completion(averageEnergy, averageValence, averageDanceability, topKey)
             }
         }
