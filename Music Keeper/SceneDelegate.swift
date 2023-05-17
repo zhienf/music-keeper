@@ -17,7 +17,56 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
         guard let _ = (scene as? UIWindowScene) else { return }
+        
+        if let urlContext = connectionOptions.urlContexts.first {
+//            handleURL(url: urlContext.url)
+            print("I was opened")
+        }
     }
+    
+    func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+        print("Link clicked")
+        if let urlContext = URLContexts.first {
+            handleURL(url: urlContext.url)
+        }
+    }
+    
+    func handleURL(url: URL) {
+        if url.scheme == "spotify" {
+            // Extract the content type and ID from the deep link URL
+            if let components = URLComponents(url: url, resolvingAgainstBaseURL: false) {
+                let contentPath = Array(components.path.components(separatedBy: "/").dropFirst())
+                if let contentType = contentPath.first, let contentID = contentPath.last {
+                     // Perform the desired action in your app based on the content type and ID
+                     // For demonstration purposes, we'll print the content type and ID to the console
+                     print("Content Type: \(contentType)")
+                     print("Content ID: \(contentID)")
+                }
+            }
+        }
+    }
+    
+//    func handleURL(url: URL) {
+//        if let scheme = url.scheme, scheme == "spotify", let viewname = url.host {
+//            var parameters: [String: String] = [:]
+//            URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems?.forEach {
+//                parameters[$0.name] = $0.value
+//            }
+//
+//            switch viewname {
+//                case "forgotpassword":
+//                    if let email = parameters["email"] {
+//                        print("Forgotten password for email \(email)")
+//                        let navigationController = window?.rootViewController as? UINavigationController
+//                        let forgottenPassWordViewController = storyboard.instantiateViewController(withIdentifier: "forgottenPasswordVC") as! ForgottenPasswordViewController
+//                        navigationController?.pushViewController(forgottenPassWordViewController, animated: false)
+//                    }
+//                    break;
+//                default:
+//                    print("Unrecognised host passed via URL.")
+//            }
+//        }
+//    }
 
     func sceneDidDisconnect(_ scene: UIScene) {
         // Called as the scene is being released by the system.

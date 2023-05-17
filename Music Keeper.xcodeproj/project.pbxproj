@@ -10,6 +10,7 @@
 		F20377162A03C06900553183 /* ReportViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F20377152A03C06900553183 /* ReportViewController.swift */; };
 		F203771B2A03F61300553183 /* AudioFeatures.swift in Sources */ = {isa = PBXBuildFile; fileRef = F203771A2A03F61300553183 /* AudioFeatures.swift */; };
 		F203771D2A0638A700553183 /* ExternalURLs.swift in Sources */ = {isa = PBXBuildFile; fileRef = F203771C2A0638A700553183 /* ExternalURLs.swift */; };
+		F21EC0072A0A25CE001BB42C /* DiscoverViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F21EC0062A0A25CE001BB42C /* DiscoverViewController.swift */; };
 		F26A897B29EE1EB200FF3A59 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F26A897A29EE1EB200FF3A59 /* AppDelegate.swift */; };
 		F26A897D29EE1EB200FF3A59 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F26A897C29EE1EB200FF3A59 /* SceneDelegate.swift */; };
 		F26A898229EE1EB200FF3A59 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F26A898029EE1EB200FF3A59 /* Main.storyboard */; };
@@ -29,9 +30,14 @@
 		F29762FC29FCC4390013FC8D /* MulticastDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F29762FB29FCC4390013FC8D /* MulticastDelegate.swift */; };
 		F29762FE29FCC43F0013FC8D /* DatabaseProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = F29762FD29FCC43F0013FC8D /* DatabaseProtocol.swift */; };
 		F297630029FCC4470013FC8D /* CoreDataController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F29762FF29FCC4470013FC8D /* CoreDataController.swift */; };
+		F2AC83A12A130E9D00D23AC9 /* PlaylistSummaryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2AC83A02A130E9D00D23AC9 /* PlaylistSummaryViewController.swift */; };
+		F2AC83A32A13CEE400D23AC9 /* GeneratePlaylistViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2AC83A22A13CEE400D23AC9 /* GeneratePlaylistViewController.swift */; };
+		F2AC83A52A13CF0500D23AC9 /* NewPlaylistViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2AC83A42A13CF0500D23AC9 /* NewPlaylistViewController.swift */; };
 		F2BC696C29FB868300F13AA9 /* LibraryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2BC696B29FB868300F13AA9 /* LibraryViewController.swift */; };
 		F2BC697029FB8AE900F13AA9 /* OverLayerPopUp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2BC696E29FB8AE900F13AA9 /* OverLayerPopUp.swift */; };
 		F2BC697129FB8AE900F13AA9 /* OverLayerPopUp.xib in Resources */ = {isa = PBXBuildFile; fileRef = F2BC696F29FB8AE900F13AA9 /* OverLayerPopUp.xib */; };
+		F2E03D382A11234600B03980 /* PlaylistAnalysisCollectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E03D372A11234600B03980 /* PlaylistAnalysisCollectionViewController.swift */; };
+		F2E03D3A2A11277C00B03980 /* Playlist.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E03D392A11277C00B03980 /* Playlist.swift */; };
 		F2E3944C29FFA779001CD918 /* Image.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E3944B29FFA779001CD918 /* Image.swift */; };
 		F2E3944E29FFA87E001CD918 /* PlayHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E3944D29FFA87E001CD918 /* PlayHistory.swift */; };
 /* End PBXBuildFile section */
@@ -40,6 +46,7 @@
 		F20377152A03C06900553183 /* ReportViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportViewController.swift; sourceTree = "<group>"; };
 		F203771A2A03F61300553183 /* AudioFeatures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioFeatures.swift; sourceTree = "<group>"; };
 		F203771C2A0638A700553183 /* ExternalURLs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalURLs.swift; sourceTree = "<group>"; };
+		F21EC0062A0A25CE001BB42C /* DiscoverViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoverViewController.swift; sourceTree = "<group>"; };
 		F26A897729EE1EB200FF3A59 /* Music Keeper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Music Keeper.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		F26A897A29EE1EB200FF3A59 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		F26A897C29EE1EB200FF3A59 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -61,9 +68,14 @@
 		F29762FB29FCC4390013FC8D /* MulticastDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MulticastDelegate.swift; sourceTree = "<group>"; };
 		F29762FD29FCC43F0013FC8D /* DatabaseProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DatabaseProtocol.swift; sourceTree = "<group>"; };
 		F29762FF29FCC4470013FC8D /* CoreDataController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreDataController.swift; sourceTree = "<group>"; };
+		F2AC83A02A130E9D00D23AC9 /* PlaylistSummaryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaylistSummaryViewController.swift; sourceTree = "<group>"; };
+		F2AC83A22A13CEE400D23AC9 /* GeneratePlaylistViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneratePlaylistViewController.swift; sourceTree = "<group>"; };
+		F2AC83A42A13CF0500D23AC9 /* NewPlaylistViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewPlaylistViewController.swift; sourceTree = "<group>"; };
 		F2BC696B29FB868300F13AA9 /* LibraryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryViewController.swift; sourceTree = "<group>"; };
 		F2BC696E29FB8AE900F13AA9 /* OverLayerPopUp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverLayerPopUp.swift; sourceTree = "<group>"; };
 		F2BC696F29FB8AE900F13AA9 /* OverLayerPopUp.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = OverLayerPopUp.xib; sourceTree = "<group>"; };
+		F2E03D372A11234600B03980 /* PlaylistAnalysisCollectionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaylistAnalysisCollectionViewController.swift; sourceTree = "<group>"; };
+		F2E03D392A11277C00B03980 /* Playlist.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Playlist.swift; sourceTree = "<group>"; };
 		F2E3944B29FFA779001CD918 /* Image.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Image.swift; sourceTree = "<group>"; };
 		F2E3944D29FFA87E001CD918 /* PlayHistory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayHistory.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -86,6 +98,11 @@
 				F28EFACF29FBFC8A00B942C8 /* LoginAccountViewController.swift */,
 				F28EFAD529FC02E400B942C8 /* OverviewViewController.swift */,
 				F20377152A03C06900553183 /* ReportViewController.swift */,
+				F21EC0062A0A25CE001BB42C /* DiscoverViewController.swift */,
+				F2E03D372A11234600B03980 /* PlaylistAnalysisCollectionViewController.swift */,
+				F2AC83A02A130E9D00D23AC9 /* PlaylistSummaryViewController.swift */,
+				F2AC83A22A13CEE400D23AC9 /* GeneratePlaylistViewController.swift */,
+				F2AC83A42A13CF0500D23AC9 /* NewPlaylistViewController.swift */,
 			);
 			name = ViewControllers;
 			sourceTree = "<group>";
@@ -100,6 +117,7 @@
 				F2E3944D29FFA87E001CD918 /* PlayHistory.swift */,
 				F203771A2A03F61300553183 /* AudioFeatures.swift */,
 				F203771C2A0638A700553183 /* ExternalURLs.swift */,
+				F2E03D392A11277C00B03980 /* Playlist.swift */,
 			);
 			name = Spotify;
 			sourceTree = "<group>";
@@ -243,6 +261,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F28EFAD229FBFE3900B942C8 /* NetworkManager.swift in Sources */,
+				F2E03D3A2A11277C00B03980 /* Playlist.swift in Sources */,
 				F29762F829FCC26B0013FC8D /* AccessToken+CoreDataClass.swift in Sources */,
 				F26A899529EE49C100FF3A59 /* Track.swift in Sources */,
 				F2BC697029FB8AE900F13AA9 /* OverLayerPopUp.swift in Sources */,
@@ -250,8 +269,11 @@
 				F203771D2A0638A700553183 /* ExternalURLs.swift in Sources */,
 				F297630029FCC4470013FC8D /* CoreDataController.swift in Sources */,
 				F26A897B29EE1EB200FF3A59 /* AppDelegate.swift in Sources */,
+				F2E03D382A11234600B03980 /* PlaylistAnalysisCollectionViewController.swift in Sources */,
 				F2E3944C29FFA779001CD918 /* Image.swift in Sources */,
+				F2AC83A12A130E9D00D23AC9 /* PlaylistSummaryViewController.swift in Sources */,
 				F29762FC29FCC4390013FC8D /* MulticastDelegate.swift in Sources */,
+				F2AC83A52A13CF0500D23AC9 /* NewPlaylistViewController.swift in Sources */,
 				F28EFAD829FC092700B942C8 /* Token.swift in Sources */,
 				F20377162A03C06900553183 /* ReportViewController.swift in Sources */,
 				F2E3944E29FFA87E001CD918 /* PlayHistory.swift in Sources */,
@@ -262,7 +284,9 @@
 				F28EFAD629FC02E400B942C8 /* OverviewViewController.swift in Sources */,
 				F2BC696C29FB868300F13AA9 /* LibraryViewController.swift in Sources */,
 				F26A897D29EE1EB200FF3A59 /* SceneDelegate.swift in Sources */,
+				F2AC83A32A13CEE400D23AC9 /* GeneratePlaylistViewController.swift in Sources */,
 				F26A899729EE4A0600FF3A59 /* Artist.swift in Sources */,
+				F21EC0072A0A25CE001BB42C /* DiscoverViewController.swift in Sources */,
 				F26A899129EE3EDE00FF3A59 /* SpotifyAPIClient.swift in Sources */,
 				F29762FE29FCC43F0013FC8D /* DatabaseProtocol.swift in Sources */,
 			);
@@ -411,6 +435,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 545VG594GZ;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Music Keeper/Info.plist";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -420,6 +445,7 @@
 				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleLightContent;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -440,6 +466,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 545VG594GZ;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Music Keeper/Info.plist";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -449,6 +476,7 @@
 				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleLightContent;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

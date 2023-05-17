@@ -28,9 +28,7 @@ class LibraryViewController: UIViewController, UITableViewDelegate, UITableViewD
     @IBOutlet weak var songsCount: UILabel!
     
     private var songList: [Track] = []
-    
     var token: String?
-    
     weak var databaseController: DatabaseProtocol?
     
     override func viewDidLoad() {
