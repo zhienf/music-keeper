@@ -15,10 +15,14 @@ class NewPlaylistViewController: UIViewController {
     
     @IBOutlet weak var tableView: UITableView!
     
+    var playlistName: String?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
         // Do any additional setup after loading the view.
+        guard let playlistName = playlistName else { return }
+        playlistTitle.text = playlistName
     }
     
 

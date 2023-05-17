@@ -434,6 +434,48 @@ class NetworkManager {
         }.resume()
     }
     
+    // MARK: - SEARCH ITEM
+    func searchArtistItems(with token: String, query: String, completion: @escaping ([Artist]?) -> Void) {
+        guard let url = URL(string: "https://api.spotify.com/v1/search?q=\(query)&type=artist&limit=1") else { print("searchArtistItems: url"); return }
+        
+        // Create the request object
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        // Send the request
+        URLSession.shared.dataTask(with: request) { (data, response, error) in
+            guard error == nil else { print("searchArtistItems: error", error!); return }
+            guard let response = response as? HTTPURLResponse else { print("searchArtistItems: NO RESPONSE"); return }
+            guard response.statusCode == 200 else { print("searchArtistItems: BAD RESPONSE: ", response.statusCode); return }
+            guard let data = data else { print("NO DATA"); return }
+            
+            do {
+                guard let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any], let searchArtistResult = json["artists"] as? [String: Any]
+                else {
+                    print("searchArtistItems: Failed to decode JSON")
+                    return
+                }
+                print("json:", json)
+                print("searchArtistResult:", searchArtistResult)
+                
+//                guard let artistItemsArray = searchArtistResult["items"] as? [Any],
+//                    let artistsArray = artistItemsArray.compactMap({ $0 as? [String: Any] }),
+//                    let artists = artistsArray.compactMap({ Artist(dictionary: $0) })
+//                else {
+//                    print("Failed to parse artists")
+//                    return
+//                }
+
+//                print("artists:", artists)
+                completion([])
+            } catch let error {
+                print("searchArtistItems: JSON decoding error", error)
+                completion(nil)
+            }
+        }.resume()
+    }
+    
     // MARK: - DOWNLOAD IMAGES
 
     func downloadImage(from urlString: String, completed: @escaping (UIImage?) -> Void) {
