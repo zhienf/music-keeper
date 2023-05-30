@@ -216,13 +216,12 @@ class ReportViewController: UIViewController, UITableViewDelegate, UITableViewDa
             let trackImageURL = top1stTrack.album.images[1].url
             
             DispatchQueue.main.async {
-                self.tableView.reloadData()
-
                 NetworkManager.shared.downloadImage(from: trackImageURL) { image in
                     guard let image = image else { return }
                     DispatchQueue.main.async {
                         self.topTrackLabel.text = top1stTrack.name
                         self.topTrackImageView.image = image
+                        self.tableView.reloadData()
                     }
                 }
             }

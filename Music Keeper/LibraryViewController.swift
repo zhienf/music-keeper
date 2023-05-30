@@ -9,8 +9,18 @@ import UIKit
 
 class LibraryViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, MoodChangeDelegate {
     
-    func changedToValue(_ value: Double) {
-        moodValue = value
+    func changedToValues(_ values: (Double, Double, Double)) {
+        danceabilityValue = values.0
+        energyValue = values.1
+        valenceValue = values.2
+        print(danceabilityValue)
+        print(energyValue)
+        print(valenceValue)
+    }
+    func resetValues() {
+        danceabilityValue = nil
+        energyValue = nil
+        valenceValue = nil
     }
     
     @IBAction func savePlaylistButton(_ sender: Any) {
@@ -33,7 +43,10 @@ class LibraryViewController: UIViewController, UITableViewDelegate, UITableViewD
     private var songList: [Track] = []
     var token: String?
     weak var databaseController: DatabaseProtocol?
-    var moodValue: Double?
+    var danceabilityValue: Double?
+    var energyValue: Double?
+    var valenceValue: Double?
+    var indicator = UIActivityIndicatorView()   // displays a spinning animation to indicate loading
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -48,11 +61,22 @@ class LibraryViewController: UIViewController, UITableViewDelegate, UITableViewD
         print("library token:", token!)
         print("library refresh token:", refreshToken)
         
+        // Add a loading indicator view
+        indicator.style = UIActivityIndicatorView.Style.large
+        indicator.translatesAutoresizingMaskIntoConstraints = false
+        indicator.color = UIColor.lightGray
+        self.view.addSubview(indicator)
+        NSLayoutConstraint.activate([indicator.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor), indicator.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor)
+        ])
+        indicator.startAnimating()
+        
         fetchLibrary()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        songList = []
+        self.tableView.reloadData()
         viewDidLoad()
     }
     
@@ -74,6 +98,7 @@ class LibraryViewController: UIViewController, UITableViewDelegate, UITableViewD
                         DispatchQueue.main.async {
                             self.songList = filteredSongs
                             self.songsCount.text = "\(filteredSongs.count) songs"
+                            self.indicator.stopAnimating()
                             self.tableView.reloadData()
                         }
                     }
@@ -88,6 +113,58 @@ class LibraryViewController: UIViewController, UITableViewDelegate, UITableViewD
         fetchTracks(offset: offset)
     }
     
+//    private func filterSongsByAudioFeatures(_ tracks: [Track], completion: @escaping ([Track]) -> Void) {
+//        guard let token = token else { return }
+//
+//        let trackIDs = tracks.map { $0.id }.joined(separator: ",")
+//
+//        NetworkManager.shared.getAudioFeatures(with: token, ids: trackIDs) { audioFeaturesResult in
+//            guard let audioFeaturesResult = audioFeaturesResult else { return }
+//            let audioFeaturesItems = audioFeaturesResult
+//
+//            DispatchQueue.main.async {
+//                // Example: Filtering songs based on danceability, energy, and valence
+//                if let danceabilityValue = self.danceabilityValue,
+//                   let energyValue = self.energyValue,
+//                   let valenceValue = self.valenceValue {
+//
+//                    let filteredSongs = tracks.filter { savedTrack in
+//                        guard let audioFeature = audioFeaturesItems.first(where: { $0.id == savedTrack.id }) else {
+//                            return false
+//                        }
+//
+//                        var danceabilityLowerBound = 0.0
+//                        var danceabilityUpperBound = 1.0
+//                        var energyLowerBound = 0.0
+//                        var energyUpperBound = 1.0
+//                        var valenceLowerBound = 0.0
+//                        var valenceUpperBound = 1.0
+//
+//                        if danceabilityValue != 0.0 {
+//                            danceabilityLowerBound = danceabilityValue - 0.2
+//                            danceabilityUpperBound = danceabilityValue + 0.2
+//                        }
+//                        if energyValue != 0.0 {
+//                            energyLowerBound = energyValue - 0.2
+//                            energyUpperBound = energyValue + 0.2
+//                        }
+//                        if valenceValue != 0.0 {
+//                            valenceLowerBound = valenceValue - 0.2
+//                            valenceUpperBound = valenceValue + 0.2
+//                        }
+//
+//                        return audioFeature.danceability >= danceabilityLowerBound && audioFeature.danceability <= danceabilityUpperBound &&
+//                            audioFeature.energy >= energyLowerBound && audioFeature.energy <= energyUpperBound &&
+//                            audioFeature.valence >= valenceLowerBound && audioFeature.valence <= valenceUpperBound
+//                    }
+//                    completion(filteredSongs) // Return the filtered songs through the completion closure
+//                } else {
+//                    completion(tracks) // Return the original list of tracks
+//                }
+//            }
+//        }
+//    }
+    
     private func filterSongsByAudioFeatures(_ tracks: [Track], completion: @escaping ([Track]) -> Void) {
         guard let token = token else { return }
         
@@ -98,15 +175,23 @@ class LibraryViewController: UIViewController, UITableViewDelegate, UITableViewD
             let audioFeaturesItems = audioFeaturesResult
             
             DispatchQueue.main.async {
-                // Example: Filtering songs within the range of moodValue ± 0.1
-                if let moodValue = self.moodValue {
+                // Example: Filtering songs based on danceability, energy, and valence
+                if let danceabilityValue = self.danceabilityValue,
+                   let energyValue = self.energyValue,
+                   let valenceValue = self.valenceValue {
+                    print(danceabilityValue, energyValue, valenceValue)
                     let filteredSongs = tracks.filter { savedTrack in
                         guard let audioFeature = audioFeaturesItems.first(where: { $0.id == savedTrack.id }) else {
                             return false
                         }
-                        let lowerBound = moodValue - 0.1
-                        let upperBound = moodValue + 0.1
-                        return audioFeature.danceability >= lowerBound && audioFeature.danceability <= upperBound
+                        
+                        let (danceabilityLowerBound, danceabilityUpperBound) = self.calculateBounds(value: danceabilityValue)
+                        let (energyLowerBound, energyUpperBound) = self.calculateBounds(value: energyValue)
+                        let (valenceLowerBound, valenceUpperBound) = self.calculateBounds(value: valenceValue)
+                        
+                        return (danceabilityLowerBound...danceabilityUpperBound).contains(audioFeature.danceability) &&
+                            (energyLowerBound...energyUpperBound).contains(audioFeature.energy) &&
+                            (valenceLowerBound...valenceUpperBound).contains(audioFeature.valence)
                     }
                     completion(filteredSongs) // Return the filtered songs through the completion closure
                 } else {
@@ -114,6 +199,17 @@ class LibraryViewController: UIViewController, UITableViewDelegate, UITableViewD
                 }
             }
         }
+    }
+    
+    func calculateBounds(value: Double) -> (lowerBound: Double, upperBound: Double) {
+        var lowerBound = 0.0
+        var upperBound = 1.0
+        if value != 0.0 {
+            print("not 0.0")
+            lowerBound = value - 0.2
+            upperBound = value + 0.2
+        }
+        return (lowerBound, upperBound)
     }
 
     // MARK: - UITableViewDataSource
@@ -140,6 +236,7 @@ class LibraryViewController: UIViewController, UITableViewDelegate, UITableViewD
             let destination = segue.destination as! FilterSongViewController
             destination.songsCount = songList.count
             destination.librarySongs = songList
+            destination.initialValues = (danceabilityValue ?? 0, energyValue ?? 0, valenceValue ?? 0)
             destination.delegate = self
         }
     }

@@ -22,6 +22,7 @@ class OverLayerPopUp: UIViewController {
     @IBAction func cancelButton(_ sender: Any) {
         hide()
     }
+    @IBOutlet weak var saveButton: UIButton!
     
     @IBAction func saveButton(_ sender: Any) {
         guard let playlistName = playlistNameTextField.text, !playlistName.isEmpty else {
@@ -32,13 +33,16 @@ class OverLayerPopUp: UIViewController {
         guard let token = token, let songListToSave = songListToSave else { return }
         let trackURIsArray = songListToSave.map { $0.uri }
         
-        // TODO: improve this part, playlist name
         NetworkManager.shared.createPlaylist(with: token, songs: trackURIsArray, playlistName: playlistName) { playlist in
             guard let playlist = playlist else { return }
             print("playlist created:", playlist.name)
             
             DispatchQueue.main.async {
-                self.hide()
+//                self.hide()
+//                self.displayMessage(title: "New Playlist", message: "Playlist saved!")
+                self.displayMessage(title: "New Playlist", message: "Playlist saved!") {
+                    self.hide()
+                }
             }
         }
     }
@@ -97,9 +101,37 @@ class OverLayerPopUp: UIViewController {
         self.removeFromParent()
     }
     
-    func displayMessage(title: String, message: String) {
+//    func displayMessage(title: String, message: String) {
+//        let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
+//        alertController.addAction(UIAlertAction(title: "Dismiss", style: .default, handler: nil))
+//        self.present(alertController, animated: true, completion: nil)
+//    }
+    
+    func displayMessage(title: String, message: String, completion: (() -> Void)? = nil) {
         let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
-        alertController.addAction(UIAlertAction(title: "Dismiss", style: .default, handler: nil))
+        alertController.addAction(UIAlertAction(title: "Dismiss", style: .default) { _ in
+            completion?() // Call the completion handler if provided
+        })
         self.present(alertController, animated: true, completion: nil)
+    }
+}
+
+class CustomTextField: UITextField {
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        
+        // Customize the text field appearance
+        self.tintColor = .systemGreen  // Set the cursor color
+        self.textColor = .black
+        
+        // Set the placeholder text color
+        if let placeholder = self.placeholder {
+            self.attributedPlaceholder = NSAttributedString(string: placeholder, attributes: [NSAttributedString.Key.foregroundColor: UIColor.lightGray])
+        }
+        
+        // Customize the border color and width
+        self.layer.borderColor = UIColor.lightGray.cgColor
+        self.layer.borderWidth = 0.5
+        self.borderStyle = .roundedRect
     }
 }

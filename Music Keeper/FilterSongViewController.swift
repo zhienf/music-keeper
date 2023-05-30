@@ -8,26 +8,38 @@
 import UIKit
 
 protocol MoodChangeDelegate: AnyObject {
-    func changedToValue(_ value: Double)
+    func changedToValues(_ values: (Double, Double, Double))
+    func resetValues()
 }
 
 class FilterSongViewController: UIViewController {
 
     @IBOutlet weak var songsCountLabel: UILabel!
     
-    @IBOutlet weak var moodSlider: UISlider!
+    @IBOutlet weak var danceabilitySlider: UISlider!
+    
+    @IBOutlet weak var energySlider: UISlider!
+    
+    @IBOutlet weak var valenceSlider: UISlider!
     
     @IBOutlet weak var minTempoTextField: UITextField!
     
     @IBOutlet weak var maxTempoTextField: UITextField!
     
     @IBAction func sliderValueChanged(_ sender: Any) {
-        let moodValue = Double(moodSlider.value)
-        print("slider:",moodValue)
-        delegate?.changedToValue(moodValue)
+        let danceabilityValue = Double(danceabilitySlider.value)
+        let energyValue = Double(energySlider.value)
+        let valenceValue = Double(valenceSlider.value)
+        
+        delegate?.changedToValues((danceabilityValue, energyValue, valenceValue))
     }
     
     @IBAction func clearFilters(_ sender: Any) {
+        danceabilitySlider.setValue(0.0, animated: false)
+        energySlider.setValue(0.0, animated: false)
+        valenceSlider.setValue(0.0, animated: false)
+        
+        delegate?.resetValues()
     }
     
     @IBAction func showResults(_ sender: Any) {
@@ -38,6 +50,7 @@ class FilterSongViewController: UIViewController {
     weak var databaseController: DatabaseProtocol?
     var songsCount: Int?
     var librarySongs: [Track]?
+    var initialValues: (Double, Double, Double) = (0, 0, 0)
     weak var delegate: MoodChangeDelegate?
     
     override func viewDidLoad() {
@@ -58,6 +71,10 @@ class FilterSongViewController: UIViewController {
         if let songsCount = songsCount {
             songsCountLabel.text = "\(songsCount) songs"
         }
+        
+        danceabilitySlider.setValue(Float(initialValues.0), animated: false)
+        energySlider.setValue(Float(initialValues.1), animated: false)
+        valenceSlider.setValue(Float(initialValues.2), animated: false)
     }
     
 
