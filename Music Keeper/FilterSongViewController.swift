@@ -8,7 +8,7 @@
 import UIKit
 
 protocol MoodChangeDelegate: AnyObject {
-    func changedToValue(_ value: Float)
+    func changedToValue(_ value: Double)
 }
 
 class FilterSongViewController: UIViewController {
@@ -22,7 +22,7 @@ class FilterSongViewController: UIViewController {
     @IBOutlet weak var maxTempoTextField: UITextField!
     
     @IBAction func sliderValueChanged(_ sender: Any) {
-        let moodValue = Float(moodSlider.value)
+        let moodValue = Double(moodSlider.value)
         print("slider:",moodValue)
         delegate?.changedToValue(moodValue)
     }

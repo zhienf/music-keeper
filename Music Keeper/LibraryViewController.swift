@@ -9,12 +9,14 @@ import UIKit
 
 class LibraryViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, MoodChangeDelegate {
     
-    func changedToValue(_ value: Float) {
+    func changedToValue(_ value: Double) {
         moodValue = value
     }
     
     @IBAction func savePlaylistButton(_ sender: Any) {
         let overLayer = OverLayerPopUp()
+        overLayer.songsCount = songList.count
+        overLayer.songListToSave = songList
         overLayer.appear(sender: self)
     }
     
@@ -31,7 +33,7 @@ class LibraryViewController: UIViewController, UITableViewDelegate, UITableViewD
     private var songList: [Track] = []
     var token: String?
     weak var databaseController: DatabaseProtocol?
-    var moodValue: Float?
+    var moodValue: Double?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -51,7 +53,7 @@ class LibraryViewController: UIViewController, UITableViewDelegate, UITableViewD
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        print("mood value:", moodValue)
+        viewDidLoad()
     }
     
     private func fetchLibrary() {
@@ -68,16 +70,11 @@ class LibraryViewController: UIViewController, UITableViewDelegate, UITableViewD
 
                 // Check if there are more tracks to fetch
                 if tracksResult.count < limit {
-                    DispatchQueue.main.async {
-                        self.songList = allTracks
-                        self.songsCount.text = "\(allTracks.count) songs"
-                        self.tableView.reloadData()
-                        print(self.songList)
-                        
-                        self.fetchAudioFeatures(for: self.songList) { averageEnergy, averageValence, averageDanceability in
-//                            print("Average energy: \(averageEnergy)")
-//                            print("Average valence: \(averageValence)")
-//                            print("danceability: \(averageDanceability)")
+                    self.filterSongsByAudioFeatures(allTracks) { filteredSongs in
+                        DispatchQueue.main.async {
+                            self.songList = filteredSongs
+                            self.songsCount.text = "\(filteredSongs.count) songs"
+                            self.tableView.reloadData()
                         }
                     }
                 } else {
@@ -91,7 +88,7 @@ class LibraryViewController: UIViewController, UITableViewDelegate, UITableViewD
         fetchTracks(offset: offset)
     }
     
-    private func fetchAudioFeatures(for tracks: [Track], completion: @escaping (Double, Double, Double) -> Void) {
+    private func filterSongsByAudioFeatures(_ tracks: [Track], completion: @escaping ([Track]) -> Void) {
         guard let token = token else { return }
         
         let trackIDs = tracks.map { $0.id }.joined(separator: ",")
@@ -99,24 +96,22 @@ class LibraryViewController: UIViewController, UITableViewDelegate, UITableViewD
         NetworkManager.shared.getAudioFeatures(with: token, ids: trackIDs) { audioFeaturesResult in
             guard let audioFeaturesResult = audioFeaturesResult else { return }
             let audioFeaturesItems = audioFeaturesResult
-            print(audioFeaturesItems)
             
             DispatchQueue.main.async {
-                var totalEnergy: Double = 0
-                var totalValence: Double = 0
-                var totalDanceability: Double = 0
-                
-                for audioFeatures in audioFeaturesItems {
-                    totalEnergy += audioFeatures.energy
-                    totalValence += audioFeatures.valence
-                    totalDanceability += audioFeatures.danceability
+                // Example: Filtering songs within the range of moodValue ± 0.1
+                if let moodValue = self.moodValue {
+                    let filteredSongs = tracks.filter { savedTrack in
+                        guard let audioFeature = audioFeaturesItems.first(where: { $0.id == savedTrack.id }) else {
+                            return false
+                        }
+                        let lowerBound = moodValue - 0.1
+                        let upperBound = moodValue + 0.1
+                        return audioFeature.danceability >= lowerBound && audioFeature.danceability <= upperBound
+                    }
+                    completion(filteredSongs) // Return the filtered songs through the completion closure
+                } else {
+                    completion(tracks) // Return the original list of tracks
                 }
-                
-                let averageEnergy = totalEnergy / Double(audioFeaturesItems.count)
-                let averageValence = totalValence / Double(audioFeaturesItems.count)
-                let averageDanceability = totalDanceability / Double(audioFeaturesItems.count)
-
-                completion(averageEnergy, averageValence, averageDanceability)
             }
         }
     }

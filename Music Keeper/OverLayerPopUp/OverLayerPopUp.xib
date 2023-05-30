@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="21507" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="21701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21505"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21678"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -11,7 +11,9 @@
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="OverLayerPopUp" customModule="Music_Keeper" customModuleProvider="target">
             <connections>
                 <outlet property="backView" destination="wEV-ut-ECt" id="g2A-gj-Dx6"/>
+                <outlet property="playlistNameTextField" destination="aUl-XQ-qFm" id="7tA-Th-hSC"/>
                 <outlet property="popUpView" destination="JVe-B7-gVg" id="BVL-5y-1KF"/>
+                <outlet property="songsCountLabel" destination="44w-Uz-ewo" id="RL2-mi-xq0"/>
                 <outlet property="view" destination="8t8-Na-awx" id="QCK-Qt-xwm"/>
             </connections>
         </placeholder>

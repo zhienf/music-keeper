@@ -931,7 +931,13 @@
                             <constraint firstItem="lgN-sg-0EU" firstAttribute="leading" secondItem="y6n-11-E86" secondAttribute="leading" id="kns-Zv-Ihf"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" title="Summary" id="lKJ-i6-W1o"/>
+                    <navigationItem key="navigationItem" title="Summary" id="lKJ-i6-W1o">
+                        <barButtonItem key="rightBarButtonItem" title="Open in Spotify" id="hMp-ib-YH0">
+                            <connections>
+                                <action selector="openSpotifyPlaylist:" destination="jKJ-oH-gt9" id="fkz-T3-DJ6"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                     <connections>
                         <outlet property="playlistDetails" destination="8tr-0h-wGF" id="WOW-mw-1ZW"/>
                         <outlet property="playlistGenre" destination="naM-oG-uBn" id="ma2-bz-2gE"/>
@@ -1711,6 +1717,7 @@
             <point key="canvasLocation" x="-1117" y="2730"/>
         </scene>
     </scenes>
+    <color key="tintColor" red="0.1137254902" green="0.72549019609999998" blue="0.3294117647" alpha="1" colorSpace="calibratedRGB"/>
     <resources>
         <image name="chart.pie.fill" catalog="system" width="128" height="123"/>
         <image name="house.fill" catalog="system" width="128" height="104"/>

@@ -43,7 +43,6 @@ class PlaylistSummaryViewController: UIViewController {
         11: "B"
     ]
 
-    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -66,6 +65,27 @@ class PlaylistSummaryViewController: UIViewController {
         fetchPlaylistTracks()
     }
 
+    @IBAction func openSpotifyPlaylist(_ sender: Any) {
+        guard let playlistID = currentPlaylist?.playlistID else { print("invalid playlist ID"); return }
+        
+        guard let spotifyDeepLinkURL = URL(string: "spotify:playlist:\(playlistID)") else { print("invalid playlist URI"); return }
+    
+        guard let spotifyExternalURL = URL(string: "https://open.spotify.com/playlist/\(playlistID)") else { print("invalid playlist external URL"); return }
+        
+        if UIApplication.shared.canOpenURL(spotifyDeepLinkURL) {
+            UIApplication.shared.open(spotifyDeepLinkURL)
+            print("spotify opened")
+        } else {
+            // Spotify app is not installed, handle accordingly
+            print("spotify is not installed")
+            if UIApplication.shared.canOpenURL(spotifyExternalURL) {
+                UIApplication.shared.open(spotifyExternalURL, options: [:], completionHandler: nil)
+            } else {
+                print("cannot open external url")
+            }
+        }
+    }
+    
     private func fetchPlaylistTracks() {
         guard let token = token, let playlistID = currentPlaylist?.playlistID else { return }
         
