@@ -23,6 +23,8 @@ class NewPlaylistViewController: UIViewController, UITableViewDelegate, UITableV
     var playlistName: String?
     var searchQuery: String?
     var playlistTracks: [Track] = []
+    var playlistURI: String?
+    var playlistID: String?
     var indicator = UIActivityIndicatorView()   // displays a spinning animation to indicate loading
     
     weak var databaseController: DatabaseProtocol?
@@ -58,6 +60,33 @@ class NewPlaylistViewController: UIViewController, UITableViewDelegate, UITableV
         playlistTitle.text = playlistName
     }
     
+    @IBAction func openSpotifyPlaylist(_ sender: Any) {        
+        guard let playlistURI = playlistURI, let spotifyDeepLinkURL = URL(string: playlistURI) else {
+            // Handle invalid URL
+            print("invalid playlist URI")
+            return
+        }
+    
+        guard let playlistID = playlistID, let spotifyExternalURL = URL(string: "https://open.spotify.com/playlist/\(playlistID)") else {
+            // Handle invalid URL
+            print("invalid playlist external URL")
+            return
+        }
+        
+        if UIApplication.shared.canOpenURL(spotifyDeepLinkURL) {
+            UIApplication.shared.open(spotifyDeepLinkURL)
+            print("spotify opened")
+        } else {
+            // Spotify app is not installed, handle accordingly
+            print("spotify is not installed")
+            if UIApplication.shared.canOpenURL(spotifyExternalURL) {
+                UIApplication.shared.open(spotifyExternalURL, options: [:], completionHandler: nil)
+            } else {
+                print("cannot open external url")
+            }
+        }
+    }
+    
     private func fetchSearchItem() {
         guard let token = token, let playlistName = playlistName, let searchQuery = searchQuery else { return }
         NetworkManager.shared.searchArtistItems(with: token, query: searchQuery) { artistResult in
@@ -75,6 +104,8 @@ class NewPlaylistViewController: UIViewController, UITableViewDelegate, UITableV
                     DispatchQueue.main.async {
                         NetworkManager.shared.createPlaylist(with: token, songs: trackURIsArray, playlistName: playlistName) { playlist in
                             guard let playlist = playlist else { return }
+                            self.playlistURI = playlist.uri
+                            self.playlistID = playlist.id
                             print("playlist created:", playlist.name)
 
                             DispatchQueue.main.async {
@@ -83,6 +114,7 @@ class NewPlaylistViewController: UIViewController, UITableViewDelegate, UITableV
                                     guard let image = image else { return }
                                     DispatchQueue.main.async {
                                         self.playlistImage.image = image
+                                        self.indicator.stopAnimating()
                                     }
                                 }
 

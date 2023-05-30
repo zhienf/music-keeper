@@ -430,7 +430,8 @@ class NetworkManager {
     
     // MARK: - SEARCH ITEM
     func searchArtistItems(with token: String, query: String, completion: @escaping ([Artist]?) -> Void) {
-        guard let url = URL(string: "https://api.spotify.com/v1/search?q=\(query)&type=artist&limit=1") else { print("searchArtistItems: url"); return }
+        let modifiedQuery = query.replacingOccurrences(of: " ", with: "+")
+        guard let url = URL(string: "https://api.spotify.com/v1/search?q=\(modifiedQuery)&type=artist&limit=1") else { print("searchArtistItems: url"); return }
         
         // Create the request object
         var request = URLRequest(url: url)

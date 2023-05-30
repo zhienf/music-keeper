@@ -689,7 +689,6 @@
                                     <color key="baseBackgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 </buttonConfiguration>
                                 <connections>
-                                    <action selector="randomButton:" destination="T6e-Sk-BMk" eventType="touchUpInside" id="uaa-6Q-Q5p"/>
                                     <segue destination="M9J-Mt-9as" kind="show" identifier="generatePlaylistSegue" id="M4M-3R-MzM"/>
                                 </connections>
                             </button>
@@ -1056,7 +1055,13 @@
                             <constraint firstItem="Ytm-1q-DtC" firstAttribute="bottom" secondItem="igt-Pt-P1i" secondAttribute="bottom" id="VzH-Qa-dVC"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" title="New Playlist" id="IQD-vy-dL4"/>
+                    <navigationItem key="navigationItem" title="New Playlist" id="IQD-vy-dL4">
+                        <barButtonItem key="rightBarButtonItem" title="Open in Spotify" id="zJ1-zv-JUQ">
+                            <connections>
+                                <action selector="openSpotifyPlaylist:" destination="46X-fD-55n" id="B1m-gP-shr"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                     <connections>
                         <outlet property="playlistImage" destination="eJd-rW-ihp" id="3GE-Oi-G3N"/>
                         <outlet property="playlistTitle" destination="OkY-Zy-IFj" id="bGD-Cb-kNs"/>
