@@ -52,17 +52,17 @@ class PlaylistSummaryViewController: UIViewController {
         // get a reference to the database from the appDelegate
         let appDelegate = (UIApplication.shared.delegate as? AppDelegate)
         databaseController = appDelegate?.databaseController
-        
+
         // Retrieve the token from Core Data
         token = databaseController?.fetchAccessToken()
         let refreshToken = databaseController?.fetchRefreshToken()
         print("summary token:", token!)
         print("summary refresh token:", refreshToken)
-        
+
         // Setup views
         playlistImage.image = currentPlaylist?.playlistImage
         playlistTitle.text = currentPlaylist?.playlistTitle
-        
+
         fetchPlaylistTracks()
     }
 
@@ -104,7 +104,6 @@ class PlaylistSummaryViewController: UIViewController {
             return
         }
         
-        var artistIDs = ""
         var artists: [Artist] = []
 
         for track in tracks {

@@ -40,8 +40,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 if let contentType = contentPath.first, let contentID = contentPath.last {
                      // Perform the desired action in your app based on the content type and ID
                      // For demonstration purposes, we'll print the content type and ID to the console
-                     print("Content Type: \(contentType)")
-                     print("Content ID: \(contentID)")
+//                     print("Content Type: \(contentType)")
+//                     print("Content ID: \(contentID)")
                 }
             }
             return true

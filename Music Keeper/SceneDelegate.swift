@@ -25,26 +25,26 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
     
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
-        print("Link clicked")
+//        print("Link clicked")
         if let urlContext = URLContexts.first {
-            handleURL(url: urlContext.url)
+//            handleURL(url: urlContext.url)
         }
     }
     
-    func handleURL(url: URL) {
-        if url.scheme == "spotify" {
-            // Extract the content type and ID from the deep link URL
-            if let components = URLComponents(url: url, resolvingAgainstBaseURL: false) {
-                let contentPath = Array(components.path.components(separatedBy: "/").dropFirst())
-                if let contentType = contentPath.first, let contentID = contentPath.last {
-                     // Perform the desired action in your app based on the content type and ID
-                     // For demonstration purposes, we'll print the content type and ID to the console
-                     print("Content Type: \(contentType)")
-                     print("Content ID: \(contentID)")
-                }
-            }
-        }
-    }
+//    func handleURL(url: URL) {
+//        if url.scheme == "spotify" {
+//            // Extract the content type and ID from the deep link URL
+//            if let components = URLComponents(url: url, resolvingAgainstBaseURL: false) {
+//                let contentPath = Array(components.path.components(separatedBy: "/").dropFirst())
+//                if let contentType = contentPath.first, let contentID = contentPath.last {
+//                     // Perform the desired action in your app based on the content type and ID
+//                     // For demonstration purposes, we'll print the content type and ID to the console
+//                     print("Content Type: \(contentType)")
+//                     print("Content ID: \(contentID)")
+//                }
+//            }
+//        }
+//    }
     
 //    func handleURL(url: URL) {
 //        if let scheme = url.scheme, scheme == "spotify", let viewname = url.host {

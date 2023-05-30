@@ -35,25 +35,6 @@ class GeneratePlaylistViewController: UIViewController {
         let refreshToken = databaseController?.fetchRefreshToken()
         print("gen playlist token:", token!)
         print("gen playlist refresh token:", refreshToken)
-        
-//        fetchSearchItem()
-    }
-    
-    private func fetchSearchItem() {
-        guard let token = token else { return }
-        let query = "flume"
-        NetworkManager.shared.searchArtistItems(with: token, query: query) { artistResult in
-            guard let artistResult = artistResult else { return }
-
-//            let artist = artistResult.first
-//            print("artist name:", artist?.name)
-
-            DispatchQueue.main.async {
-                print("artistResult:",artistResult)
-                let artist = artistResult.first
-                print("artist name:", artist?.name)
-            }
-        }
     }
     
     // MARK: - Navigation
@@ -64,7 +45,7 @@ class GeneratePlaylistViewController: UIViewController {
         // Pass the selected object to the new view controller.
         if segue.identifier == "showPlaylistGenerated" && shouldPerformSegue(withIdentifier: "showPlaylistGenerated", sender: self) {
             let destination = segue.destination as! NewPlaylistViewController
-            print(artistInput.text)
+            destination.searchQuery = artistInput.text
             destination.playlistName = playlistNameInput.text
         }
     }
