@@ -16,7 +16,6 @@
 		F26A898229EE1EB200FF3A59 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F26A898029EE1EB200FF3A59 /* Main.storyboard */; };
 		F26A898429EE1EB400FF3A59 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F26A898329EE1EB400FF3A59 /* Assets.xcassets */; };
 		F26A898729EE1EB400FF3A59 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F26A898529EE1EB400FF3A59 /* LaunchScreen.storyboard */; };
-		F26A899129EE3EDE00FF3A59 /* SpotifyAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = F26A899029EE3EDE00FF3A59 /* SpotifyAPIClient.swift */; };
 		F26A899529EE49C100FF3A59 /* Track.swift in Sources */ = {isa = PBXBuildFile; fileRef = F26A899429EE49C100FF3A59 /* Track.swift */; };
 		F26A899729EE4A0600FF3A59 /* Artist.swift in Sources */ = {isa = PBXBuildFile; fileRef = F26A899629EE4A0600FF3A59 /* Artist.swift */; };
 		F26A899929EE4A1500FF3A59 /* Album.swift in Sources */ = {isa = PBXBuildFile; fileRef = F26A899829EE4A1500FF3A59 /* Album.swift */; };
@@ -53,7 +52,6 @@
 		F26A898329EE1EB400FF3A59 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F26A898629EE1EB400FF3A59 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		F26A898829EE1EB400FF3A59 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		F26A899029EE3EDE00FF3A59 /* SpotifyAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpotifyAPIClient.swift; sourceTree = "<group>"; };
 		F26A899429EE49C100FF3A59 /* Track.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Track.swift; sourceTree = "<group>"; };
 		F26A899629EE4A0600FF3A59 /* Artist.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Artist.swift; sourceTree = "<group>"; };
 		F26A899829EE4A1500FF3A59 /* Album.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Album.swift; sourceTree = "<group>"; };
@@ -116,6 +114,7 @@
 				F203771A2A03F61300553183 /* AudioFeatures.swift */,
 				F203771C2A0638A700553183 /* ExternalURLs.swift */,
 				F2E03D392A11277C00B03980 /* Playlist.swift */,
+				F28EFAD729FC092700B942C8 /* Token.swift */,
 			);
 			name = Spotify;
 			sourceTree = "<group>";
@@ -152,9 +151,7 @@
 				F26A898329EE1EB400FF3A59 /* Assets.xcassets */,
 				F26A898529EE1EB400FF3A59 /* LaunchScreen.storyboard */,
 				F26A898829EE1EB400FF3A59 /* Info.plist */,
-				F26A899029EE3EDE00FF3A59 /* SpotifyAPIClient.swift */,
 				F28EFAD129FBFE3900B942C8 /* NetworkManager.swift */,
-				F28EFAD729FC092700B942C8 /* Token.swift */,
 			);
 			path = "Music Keeper";
 			sourceTree = "<group>";
@@ -282,7 +279,6 @@
 				F26A897D29EE1EB200FF3A59 /* SceneDelegate.swift in Sources */,
 				F2AC83A32A13CEE400D23AC9 /* GeneratePlaylistViewController.swift in Sources */,
 				F26A899729EE4A0600FF3A59 /* Artist.swift in Sources */,
-				F26A899129EE3EDE00FF3A59 /* SpotifyAPIClient.swift in Sources */,
 				F29762FE29FCC43F0013FC8D /* DatabaseProtocol.swift in Sources */,
 				F21AAE8D2A24D64E006C7756 /* FilterSongViewController.swift in Sources */,
 			);
