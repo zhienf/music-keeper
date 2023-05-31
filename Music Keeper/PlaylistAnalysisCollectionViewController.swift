@@ -17,6 +17,7 @@ struct PlaylistInfo {
 
 class PlaylistAnalysisCollectionViewController: UICollectionViewController {
     
+    var indicator = UIActivityIndicatorView()   // displays a spinning animation to indicate loading
     weak var databaseController: DatabaseProtocol?
     var token: String?
     var allPlaylists: [Playlist] = []
@@ -50,6 +51,15 @@ class PlaylistAnalysisCollectionViewController: UICollectionViewController {
         let refreshToken = databaseController?.fetchRefreshToken()
         print("analyser token:", token!)
         print("analyser refresh token:", refreshToken)
+        
+        // Add a loading indicator view
+        indicator.style = UIActivityIndicatorView.Style.large
+        indicator.translatesAutoresizingMaskIntoConstraints = false
+        indicator.color = UIColor.lightGray
+        self.view.addSubview(indicator)
+        NSLayoutConstraint.activate([indicator.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor), indicator.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor)
+        ])
+        indicator.startAnimating()
         
         fetchPlaylists()
     }
@@ -104,6 +114,7 @@ class PlaylistAnalysisCollectionViewController: UICollectionViewController {
                         
                         // Notify when all image downloads have completed
                         downloadGroup.notify(queue: .main) {
+                            self.indicator.stopAnimating()
                             self.collectionView.reloadData()
                         }
                     }

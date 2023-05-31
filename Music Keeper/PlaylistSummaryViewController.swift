@@ -43,7 +43,6 @@ class PlaylistSummaryViewController: UIViewController {
         11: "B"
     ]
 
-    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -52,20 +51,41 @@ class PlaylistSummaryViewController: UIViewController {
         // get a reference to the database from the appDelegate
         let appDelegate = (UIApplication.shared.delegate as? AppDelegate)
         databaseController = appDelegate?.databaseController
-        
+
         // Retrieve the token from Core Data
         token = databaseController?.fetchAccessToken()
         let refreshToken = databaseController?.fetchRefreshToken()
         print("summary token:", token!)
         print("summary refresh token:", refreshToken)
-        
+
         // Setup views
         playlistImage.image = currentPlaylist?.playlistImage
         playlistTitle.text = currentPlaylist?.playlistTitle
-        
+
         fetchPlaylistTracks()
     }
 
+    @IBAction func openSpotifyPlaylist(_ sender: Any) {
+        guard let playlistID = currentPlaylist?.playlistID else { print("invalid playlist ID"); return }
+        
+        guard let spotifyDeepLinkURL = URL(string: "spotify:playlist:\(playlistID)") else { print("invalid playlist URI"); return }
+    
+        guard let spotifyExternalURL = URL(string: "https://open.spotify.com/playlist/\(playlistID)") else { print("invalid playlist external URL"); return }
+        
+        if UIApplication.shared.canOpenURL(spotifyDeepLinkURL) {
+            UIApplication.shared.open(spotifyDeepLinkURL)
+            print("spotify opened")
+        } else {
+            // Spotify app is not installed, handle accordingly
+            print("spotify is not installed")
+            if UIApplication.shared.canOpenURL(spotifyExternalURL) {
+                UIApplication.shared.open(spotifyExternalURL, options: [:], completionHandler: nil)
+            } else {
+                print("cannot open external url")
+            }
+        }
+    }
+    
     private func fetchPlaylistTracks() {
         guard let token = token, let playlistID = currentPlaylist?.playlistID else { return }
         
@@ -104,7 +124,6 @@ class PlaylistSummaryViewController: UIViewController {
             return
         }
         
-        var artistIDs = ""
         var artists: [Artist] = []
 
         for track in tracks {
