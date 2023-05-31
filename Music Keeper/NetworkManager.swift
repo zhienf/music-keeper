@@ -4,6 +4,8 @@
 //
 //  Created by Zhi'en Foo on 28/04/2023.
 //
+// References:
+// 1) https://developer.spotify.com/documentation/web-api
 
 import UIKit
 import StoreKit
