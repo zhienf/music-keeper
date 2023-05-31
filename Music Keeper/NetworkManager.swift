@@ -9,6 +9,9 @@ import UIKit
 import StoreKit
 import CoreData
 
+/**
+ A class that handles all API requests to Spotify.
+ */
 class NetworkManager {
     
     // A singleton instance of NetworkManager
@@ -33,6 +36,9 @@ class NetworkManager {
     }
     
     func authoriseUser(with code: String, completion: @escaping (String?) -> Void) {
+        /**
+         Gets access token after user allows authorisation.
+         */
         var bodyComponents = URLComponents()
         let requestHeader: [String: String] = [
             "Authorization": "Basic \(encodedID)",
@@ -75,6 +81,9 @@ class NetworkManager {
     }
 
     func refreshAccessToken(completion: @escaping (String?) -> Void) {
+        /**
+         Requests for a new access token using the refresh token after its expiration.
+         */
         let refreshToken = databaseController?.fetchRefreshToken()
         if refreshToken == "" {
             print("could not refresh token")
@@ -124,6 +133,9 @@ class NetworkManager {
     // MARK: - FETCH MUSIC DATA
 
     func getTopArtists(with token: String, timeRange: String, limit: String, completion: @escaping ([Artist]?) -> Void) {
+        /**
+         Get top artists of a user within a time range.
+         */
         let type = "artists"
 
         guard let url = URL(string: "https://api.spotify.com/v1/me/top/\(type)?time_range=\(timeRange)&limit=\(limit)&offset=\(offset)") else { print("getTopArtists: url"); return }
@@ -157,6 +169,9 @@ class NetworkManager {
     }
     
     func getTopTracks(with token: String, timeRange: String, limit: String, completion: @escaping ([Track]?) -> Void) {
+        /**
+         Get top tracks of a user within a time range.
+         */
         let type = "tracks"
 
         guard let url = URL(string: "https://api.spotify.com/v1/me/top/\(type)?time_range=\(timeRange)&limit=\(limit)&offset=\(offset)") else { print("getTopTracks: url"); return }
@@ -190,6 +205,9 @@ class NetworkManager {
     }
     
     func getCurrentlyPlayingTrack(with token: String, completion: @escaping (Track?) -> Void) {
+        /**
+         Get currently playing track of a user on Spotify.
+         */
         // Set up the request URL
         guard let url = URL(string: "https://api.spotify.com/v1/me/player/currently-playing") else { print("getCurrentlyPlayingTrack: url"); return }
 
@@ -220,6 +238,9 @@ class NetworkManager {
     }
     
     func getRecentlyPlayedTracks(with token: String, completion: @escaping ([PlayHistory]?) -> Void) {
+        /**
+         Get recently played tracks of a user.
+         */
         // Set up the request URL
         guard let url = URL(string: "https://api.spotify.com/v1/me/player/recently-played") else { print("getRecentlyPlayedTracks: url"); return }
 
@@ -250,6 +271,9 @@ class NetworkManager {
     }
     
     func getPlaylists(with token: String, limit: Int, offset: Int, completion: @escaping (([Playlist]?, Int?)) -> Void) {
+        /**
+         Get playlists from the user's library, maximum is 50 per request.
+         */
         // Set up the request URL
         guard let url = URL(string: "https://api.spotify.com/v1/me/playlists?limit=\(limit)&offset=\(offset)") else { print("getPlaylists: url"); return }
 
@@ -283,6 +307,9 @@ class NetworkManager {
     }
     
     func getPlaylistTracks(with token: String, playlistID: String, completion: @escaping ([Track]?) -> Void) {
+        /**
+         Get all tracks from a playlist based on the playlist ID provided.
+         */
         // Set up the request URL
         guard let url = URL(string: "https://api.spotify.com/v1/playlists/\(playlistID)") else { print("getPlaylistTracks: url"); return }
 
@@ -319,6 +346,9 @@ class NetworkManager {
     }
     
     func getSavedTracks(with token: String, limit: Int, offset: Int, completion: @escaping ([Track]?) -> Void) {
+        /**
+         Get user's liked songs library, maximum is 50 per request.
+         */
         // Create the URL for the API endpoint
         guard let url = URL(string: "https://api.spotify.com/v1/me/tracks?limit=\(limit)&offset=\(offset)") else { print("getSavedTracks: url"); return }
         
@@ -354,6 +384,9 @@ class NetworkManager {
     }
     
     func getArtists(with token: String, ids: String, completion: @escaping ([Artist]?) -> Void) {
+        /**
+         Get an array of artist objects based on the artist IDs provided.
+         */
         // Set up the request URL
         guard let url = URL(string: "https://api.spotify.com/v1/artists?ids=\(ids)") else { print("getArtists: url"); return }
 
@@ -385,6 +418,9 @@ class NetworkManager {
     }
     
     func getRecommendations(with token: String, artistID: String, completion: @escaping ([Track]?) -> Void) {
+        /**
+         Get recommendations in the form of an array of track objects based on artist IDs provided.
+         */
         let limit = 10
         guard let url = URL(string: "https://api.spotify.com/v1/recommendations?limit=\(limit)&seed_artists=\(artistID)") else { print("getRecommendations: url"); return }
         
@@ -417,6 +453,9 @@ class NetworkManager {
     // MARK: - FETCH MUSICAL ANALYSIS
     
     func getAudioFeatures(with token: String, ids: String, completion: @escaping ([AudioFeatures]?) -> Void) {
+        /**
+         Get an array of audio features of tracks corresponding to the string of track IDs provided.
+         */
         guard let url = URL(string: "https://api.spotify.com/v1/audio-features?ids=\(ids)") else { print("getAudioFeatures: url"); return }
         
         // Create the request object
@@ -450,6 +489,9 @@ class NetworkManager {
     // MARK: - SEARCH ITEM
     
     func searchArtistItems(with token: String, query: String, completion: @escaping ([Artist]?) -> Void) {
+        /**
+         Get the result from a search in the form of an array of artist objects based on the search query provided to search for artists.
+         */
         let modifiedQuery = query.replacingOccurrences(of: " ", with: "+")
         guard let url = URL(string: "https://api.spotify.com/v1/search?q=\(modifiedQuery)&type=artist&limit=1") else { print("searchArtistItems: url"); return }
         
@@ -482,6 +524,9 @@ class NetworkManager {
     // MARK: - DOWNLOAD IMAGES
 
     func downloadImage(from urlString: String, completed: @escaping (UIImage?) -> Void) {
+        /**
+         Download and crop image to square.
+         */
         guard let url = URL(string: urlString) else { return }
         
         URLSession.shared.dataTask(with: url) { (data, response, error) in
@@ -495,6 +540,9 @@ class NetworkManager {
     }
     
     func cropToSquare(image: UIImage) -> UIImage? {
+        /**
+         Crop image to square.
+         */
         let sideLength = min(image.size.width, image.size.height)
         let originX = (image.size.width - sideLength) / 2
         let originY = (image.size.height - sideLength) / 2
@@ -510,6 +558,12 @@ class NetworkManager {
     // MARK: - PLAYLIST DATA
     
     func createPlaylist(with token: String, songs: [String], playlistName: String, completion: @escaping (Playlist?) -> Void) {
+        /**
+         Creates a new playlist with a given list of tracks and provided playlist name.
+        Starts by getting the current user's ID, which is used to create a new playlist in the user's Spotify library.
+        Then, adds all tracks given into the newly created playlist.
+        Returns the newly created playlist with all tracks added in.
+         */
         guard let urlUser = URL(string: "https://api.spotify.com/v1/me") else { print("getUserID: url"); return }
         
         // Create the request object
