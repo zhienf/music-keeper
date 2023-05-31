@@ -8,7 +8,7 @@
 import UIKit
 import CoreData
 
-class CoreDataController: NSObject, NSFetchedResultsControllerDelegate {
+class CoreDataController: NSObject, DatabaseProtocol, NSFetchedResultsControllerDelegate {
     
     var persistentContainer: NSPersistentContainer
     
