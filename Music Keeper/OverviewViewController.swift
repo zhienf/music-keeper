@@ -21,6 +21,7 @@ class OverviewViewController: UIViewController, UITableViewDelegate, UITableView
             collectionView.dataSource = self
         }
     }
+    
     @IBOutlet private weak var tableView: UITableView! {
         didSet {
             tableView.delegate = self
@@ -41,8 +42,8 @@ class OverviewViewController: UIViewController, UITableViewDelegate, UITableView
     private var recentlyPlayedTracks: [PlayHistory] = []
     private var artistTop5Data: [ArtistTop5] = []
 
+    // properties to retrieve access token for API calls
     var token: String?
-    
     weak var databaseController: DatabaseProtocol?
 
     override func viewDidLoad() {
@@ -55,8 +56,6 @@ class OverviewViewController: UIViewController, UITableViewDelegate, UITableView
         // Retrieve the token from Core Data
         token = databaseController?.fetchAccessToken()
         let refreshToken = databaseController?.fetchRefreshToken()
-        print("overview token:", token!)
-        print("overview refresh token:", refreshToken ?? "error")
         
         currentlyPlayingView.layer.cornerRadius = 10
     }
@@ -120,8 +119,6 @@ class OverviewViewController: UIViewController, UITableViewDelegate, UITableView
             }
 
             dispatchGroup.notify(queue: .main) {
-                print("image downloaded")
-                print(self.artistTop5Data)
                 self.collectionView.reloadData()
             }
         }

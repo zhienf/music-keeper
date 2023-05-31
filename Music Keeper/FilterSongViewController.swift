@@ -15,16 +15,9 @@ protocol MoodChangeDelegate: AnyObject {
 class FilterSongViewController: UIViewController {
 
     @IBOutlet weak var songsCountLabel: UILabel!
-    
     @IBOutlet weak var danceabilitySlider: UISlider!
-    
     @IBOutlet weak var energySlider: UISlider!
-    
     @IBOutlet weak var valenceSlider: UISlider!
-    
-    @IBOutlet weak var minTempoTextField: UITextField!
-    
-    @IBOutlet weak var maxTempoTextField: UITextField!
     
     @IBAction func sliderValueChanged(_ sender: Any) {
         let danceabilityValue = Double(danceabilitySlider.value)
@@ -46,12 +39,17 @@ class FilterSongViewController: UIViewController {
         navigationController?.popViewController(animated: true)
     }
     
+    // properties to retrieve access token for API calls
     var token: String?
     weak var databaseController: DatabaseProtocol?
-    var songsCount: Int?
-    var librarySongs: [Track]?
+    
+    // properties for keeping track of sliders' values
     var initialValues: (Double, Double, Double) = (0, 0, 0)
     weak var delegate: MoodChangeDelegate?
+    
+    // properties for filtering library
+    var songsCount: Int?
+    var librarySongs: [Track]?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -65,27 +63,14 @@ class FilterSongViewController: UIViewController {
         // Retrieve the token from Core Data
         token = databaseController?.fetchAccessToken()
         let refreshToken = databaseController?.fetchRefreshToken()
-        print("filter token:", token!)
-        print("filter refresh token:", refreshToken)
         
         if let songsCount = songsCount {
             songsCountLabel.text = "\(songsCount) songs"
         }
         
+        // initialise sliders' values
         danceabilitySlider.setValue(Float(initialValues.0), animated: false)
         energySlider.setValue(Float(initialValues.1), animated: false)
         valenceSlider.setValue(Float(initialValues.2), animated: false)
     }
-    
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
-    }
-    */
-
 }

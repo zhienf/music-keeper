@@ -10,16 +10,13 @@ import AVFoundation
 
 class LibraryViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, AVAudioPlayerDelegate, MoodChangeDelegate {
     
-    func changedToValues(_ values: (Double, Double, Double)) {
-        danceabilityValue = values.0
-        energyValue = values.1
-        valenceValue = values.2
-    }
-    
-    func resetValues() {
-        danceabilityValue = nil
-        energyValue = nil
-        valenceValue = nil
+    @IBOutlet weak var songsCount: UILabel!
+    @IBOutlet weak var tableView: UITableView! {
+        didSet {
+            tableView.delegate = self
+            tableView.dataSource = self
+            tableView.tableFooterView = UIView()
+        }
     }
     
     @IBAction func filterSongs(_ sender: Any) {
@@ -40,26 +37,25 @@ class LibraryViewController: UIViewController, UITableViewDelegate, UITableViewD
         overLayer.appear(sender: self)
     }
     
-    @IBOutlet weak var tableView: UITableView! {
-        didSet {
-            tableView.delegate = self
-            tableView.dataSource = self
-            tableView.tableFooterView = UIView()
-        }
-    }
-    
-    @IBOutlet weak var songsCount: UILabel!
-    
-    private var songList: [Track] = []
+    // properties to retrieve access token for API calls
     var token: String?
     weak var databaseController: DatabaseProtocol?
-    var danceabilityValue: Double?
-    var energyValue: Double?
-    var valenceValue: Double?
-    var indicator = UIActivityIndicatorView()   // displays a spinning animation to indicate loading
+    
+    // displays a spinning animation to indicate loading
+    var indicator = UIActivityIndicatorView()
+    
+    // properties for audio player
     var audioPlayer: AVAudioPlayer?
     var selectedAudioURL: URL?
     var previousSelectedIndexPath: IndexPath?
+    
+    // properties to store data fetched from API
+    private var songList: [Track] = []
+    
+    // properties for filtering library
+    var danceabilityValue: Double?
+    var energyValue: Double?
+    var valenceValue: Double?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -71,9 +67,23 @@ class LibraryViewController: UIViewController, UITableViewDelegate, UITableViewD
         // Retrieve the token from Core Data
         token = databaseController?.fetchAccessToken()
         let refreshToken = databaseController?.fetchRefreshToken()
-        print("library token:", token!)
-        print("library refresh token:", refreshToken)
         
+        // Add a loading indicator view
+        setupIndicator()
+        
+        fetchLibrary()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        // reset songList to show empty table view
+        songList = []
+        self.tableView.reloadData()
+        viewDidLoad()
+    }
+    
+    func setupIndicator() {
         // Add a loading indicator view
         indicator.style = UIActivityIndicatorView.Style.large
         indicator.translatesAutoresizingMaskIntoConstraints = false
@@ -82,22 +92,13 @@ class LibraryViewController: UIViewController, UITableViewDelegate, UITableViewD
         NSLayoutConstraint.activate([indicator.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor), indicator.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor)
         ])
         indicator.startAnimating()
-        
-        fetchLibrary()
-    }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        songList = []
-        self.tableView.reloadData()
-        viewDidLoad()
     }
     
     private func fetchLibrary() {
         guard let token = token else { return }
         var allTracks: [Track] = [] // Array to store all fetched tracks
         let limit = 50
-        var offset = 0
+        let offset = 0
         
         // Function to recursively fetch tracks using pagination
         func fetchTracks(offset: Int) {
@@ -121,7 +122,6 @@ class LibraryViewController: UIViewController, UITableViewDelegate, UITableViewD
                 }
             }
         }
-        
         // Start fetching tracks with an initial offset of 0
         fetchTracks(offset: offset)
     }
@@ -136,7 +136,7 @@ class LibraryViewController: UIViewController, UITableViewDelegate, UITableViewD
             let audioFeaturesItems = audioFeaturesResult
             
             DispatchQueue.main.async {
-                // Example: Filtering songs based on danceability, energy, and valence
+                // Filtering songs based on danceability, energy, and valence
                 if let danceabilityValue = self.danceabilityValue,
                    let energyValue = self.energyValue,
                    let valenceValue = self.valenceValue {
@@ -162,11 +162,10 @@ class LibraryViewController: UIViewController, UITableViewDelegate, UITableViewD
         }
     }
     
-    func calculateBounds(value: Double) -> (lowerBound: Double, upperBound: Double) {
+    private func calculateBounds(value: Double) -> (lowerBound: Double, upperBound: Double) {
         var lowerBound = 0.0
         var upperBound = 1.0
         if value != 0.0 {
-            print("not 0.0")
             lowerBound = value - 0.2
             upperBound = value + 0.2
         }
@@ -199,8 +198,6 @@ class LibraryViewController: UIViewController, UITableViewDelegate, UITableViewD
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "librarySongCell", for: indexPath) as! LibrarySongCell
         let song = songList[indexPath.row]
-//        cell.textLabel?.text = song.name
-//        cell.detailTextLabel?.text = song.artists[0].name
         cell.trackLabel.text = song.name
         cell.artistLabel.text = song.artists[0].name
         cell.audioURL = URL(string: song.preview_url)
@@ -265,6 +262,20 @@ class LibraryViewController: UIViewController, UITableViewDelegate, UITableViewD
             let selectedCell = tableView.cellForRow(at: selectedIndexPath) as? LibrarySongCell
             selectedCell?.playButton.setImage(UIImage(systemName: "play.circle"), for: .normal)
         }
+    }
+    
+    // MARK: - MoodChangeDelegate
+    
+    func changedToValues(_ values: (Double, Double, Double)) {
+        danceabilityValue = values.0
+        energyValue = values.1
+        valenceValue = values.2
+    }
+    
+    func resetValues() {
+        danceabilityValue = nil
+        energyValue = nil
+        valenceValue = nil
     }
     
     // MARK: - Navigation

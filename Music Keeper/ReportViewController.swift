@@ -33,43 +33,6 @@ class ReportViewController: UIViewController, UITableViewDelegate, UITableViewDa
         }
     }
     
-    private var topTracks: [Track] = [] // store data fetched from API
-    weak var databaseController: DatabaseProtocol?
-    var token: String?
-    var timeRangeSelected: Int = 0  // default is 'last month'
-    var audioPlayer: AVAudioPlayer?
-    var selectedAudioURL: URL?
-    var previousSelectedIndexPath: IndexPath?
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-
-        // get a reference to the database from the appDelegate
-        let appDelegate = (UIApplication.shared.delegate as? AppDelegate)
-        databaseController = appDelegate?.databaseController
-        
-        // Retrieve the token from Core Data
-        token = databaseController?.fetchAccessToken()
-        let refreshToken = databaseController?.fetchRefreshToken()
-        print("report token:", token!)
-        print("report refresh token:", refreshToken)
-        
-        // setup view
-        topItemsView.layer.cornerRadius = 10
-        timeRangeSegmentedControl.setTitleTextAttributes([NSAttributedString.Key.foregroundColor: UIColor.white], for: .normal)
-        timeRangeSegmentedControl.setTitleTextAttributes([NSAttributedString.Key.foregroundColor: UIColor.white], for: .selected)
-        
-        // fetch data from API
-        fetchArtist()
-        fetchTracks()
-        fetchEnergyAndValence()
-        fetchGenreAndDecade()
-    }
-    
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-    }
-    
     @IBAction func timeRangeValueChanged(_ sender: Any) {
         // update selected segment index
         timeRangeSelected = timeRangeSegmentedControl.selectedSegmentIndex
@@ -82,6 +45,44 @@ class ReportViewController: UIViewController, UITableViewDelegate, UITableViewDa
         // clear previously selected index path to reset play buttons of table view
         previousSelectedIndexPath = nil
         viewDidLoad()
+    }
+    
+    // core data to store access token
+    var token: String?
+    weak var databaseController: DatabaseProtocol?
+    
+    // determines segmented control selected
+    var timeRangeSelected: Int = 0  // default is 'last month'
+    
+    // properties for audio player
+    var audioPlayer: AVAudioPlayer?
+    var selectedAudioURL: URL?
+    var previousSelectedIndexPath: IndexPath?
+    
+    // properties to store data fetched from API
+    private var topTracks: [Track] = []
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+        // get a reference to the database from the appDelegate
+        let appDelegate = (UIApplication.shared.delegate as? AppDelegate)
+        databaseController = appDelegate?.databaseController
+        
+        // Retrieve the token from Core Data
+        token = databaseController?.fetchAccessToken()
+        let refreshToken = databaseController?.fetchRefreshToken()
+        
+        // setup view
+        topItemsView.layer.cornerRadius = 10
+        timeRangeSegmentedControl.setTitleTextAttributes([NSAttributedString.Key.foregroundColor: UIColor.white], for: .normal)
+        timeRangeSegmentedControl.setTitleTextAttributes([NSAttributedString.Key.foregroundColor: UIColor.white], for: .selected)
+        
+        // fetch data from API
+        fetchArtist()
+        fetchTracks()
+        fetchEnergyAndValence()
+        fetchGenreAndDecade()
     }
     
     private func getTimeRange() -> String {
@@ -137,9 +138,6 @@ class ReportViewController: UIViewController, UITableViewDelegate, UITableViewDa
             
             DispatchQueue.main.async {
                 self.fetchAudioFeatures(for: tracks) { averageEnergy, averageValence in
-                    print("Average energy: \(averageEnergy)")
-                    print("Average valence: \(averageValence)")
-                    
                     self.energyLabel.text = "\(Int(averageEnergy * 100))% energy"
                     self.happinessLabel.text = "\(Int(averageValence * 100))% happiness"
                 }

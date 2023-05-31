@@ -10,6 +10,12 @@ import WebKit
 
 class LoginAccountViewController: UIViewController {
 
+    /*
+    Notes:
+      - redirectURI encoded website using https://www.urlencoder.org/
+      - scope, "user-top-read": required scope for reading user's top artists/tracks data "user-top-read"
+      - encodedID = our Basic Auth which is "clientID:clientSecret", base64 encoded using https://www.base64encode.org/
+    */
     private let redirectURI = "https://www.google.com"
     private let clientID    = "***REMOVED***"
     private let scope       = "user-top-read,"
@@ -17,15 +23,9 @@ class LoginAccountViewController: UIViewController {
                                 +
                                     "user-library-read,"
                                 + "playlist-modify-public,playlist-modify-private,playlist-read-private,playlist-read-collaborative"
-                                
-    weak var databaseController: DatabaseProtocol?
     
-    /*
-    Notes:
-      - redirectURI encoded website using https://www.urlencoder.org/
-      - scope, "user-top-read": required scope for reading user's top artists/tracks data "user-top-read"
-      - encodedID = our Basic Auth which is "clientID:clientSecret", base64 encoded using https://www.base64encode.org/
-    */
+    // core data to store access token
+    weak var databaseController: DatabaseProtocol?
 
     override func viewDidLoad() {
         super.viewDidLoad()

@@ -10,31 +10,12 @@ import UIKit
 class GeneratePlaylistViewController: UIViewController {
 
     @IBOutlet weak var artistInput: UITextField!
-    
     @IBOutlet weak var playlistNameInput: UITextField!
-    
-    @IBAction func generatePlaylist(_ sender: Any) {
-//        artistInput.text =
-//        performSegue(withIdentifier: "showPlaylistGenerated", sender: sender)
-    }
-    
-    weak var databaseController: DatabaseProtocol?
-    var token: String?
     
     override func viewDidLoad() {
         super.viewDidLoad()
 
         // Do any additional setup after loading the view.
-        
-        // get a reference to the database from the appDelegate
-        let appDelegate = (UIApplication.shared.delegate as? AppDelegate)
-        databaseController = appDelegate?.databaseController
-        
-        // Retrieve the token from Core Data
-        token = databaseController?.fetchAccessToken()
-        let refreshToken = databaseController?.fetchRefreshToken()
-        print("gen playlist token:", token!)
-        print("gen playlist refresh token:", refreshToken)
     }
     
     // MARK: - Navigation

@@ -10,24 +10,22 @@ import UIKit
 class PlaylistSummaryViewController: UIViewController {
 
     @IBOutlet weak var playlistImage: UIImageView!
-    
     @IBOutlet weak var playlistTitle: UILabel!
-    
     @IBOutlet weak var playlistDetails: UILabel!
-    
     @IBOutlet weak var playlistMood: UILabel!
-    
     @IBOutlet weak var playlistGenre: UILabel!
-    
     @IBOutlet weak var playlistRepeatedArtist: UILabel!
-    
     @IBOutlet weak var playlistRepeatedDecade: UILabel!
-    
     @IBOutlet weak var playlistMainGenres: UILabel!
     
-    weak var databaseController: DatabaseProtocol?
+    // properties to retrieve access token for API calls
     var token: String?
+    weak var databaseController: DatabaseProtocol?
+    
+    // current playlist to analyse
     var currentPlaylist: PlaylistInfo?
+    
+    // pitch class notation to determine most repeated key
     let pitchClassNotation: [Int: String] = [
         0: "C",
         1: "C#/Db",
@@ -42,6 +40,25 @@ class PlaylistSummaryViewController: UIViewController {
         10: "A#/Bb",
         11: "B"
     ]
+    
+    @IBAction func openSpotifyPlaylist(_ sender: Any) {
+        guard let playlistID = currentPlaylist?.playlistID else { print("invalid playlist ID"); return }
+        
+        guard let spotifyDeepLinkURL = URL(string: "spotify:playlist:\(playlistID)") else { print("invalid playlist URI"); return }
+    
+        guard let spotifyExternalURL = URL(string: "https://open.spotify.com/playlist/\(playlistID)") else { print("invalid playlist external URL"); return }
+        
+        if UIApplication.shared.canOpenURL(spotifyDeepLinkURL) {
+            UIApplication.shared.open(spotifyDeepLinkURL)
+        } else {
+            // Spotify app is not installed, handle accordingly
+            if UIApplication.shared.canOpenURL(spotifyExternalURL) {
+                UIApplication.shared.open(spotifyExternalURL, options: [:], completionHandler: nil)
+            } else {
+                print("cannot open external url")
+            }
+        }
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -55,35 +72,12 @@ class PlaylistSummaryViewController: UIViewController {
         // Retrieve the token from Core Data
         token = databaseController?.fetchAccessToken()
         let refreshToken = databaseController?.fetchRefreshToken()
-        print("summary token:", token!)
-        print("summary refresh token:", refreshToken)
-
+        
         // Setup views
         playlistImage.image = currentPlaylist?.playlistImage
         playlistTitle.text = currentPlaylist?.playlistTitle
 
         fetchPlaylistTracks()
-    }
-
-    @IBAction func openSpotifyPlaylist(_ sender: Any) {
-        guard let playlistID = currentPlaylist?.playlistID else { print("invalid playlist ID"); return }
-        
-        guard let spotifyDeepLinkURL = URL(string: "spotify:playlist:\(playlistID)") else { print("invalid playlist URI"); return }
-    
-        guard let spotifyExternalURL = URL(string: "https://open.spotify.com/playlist/\(playlistID)") else { print("invalid playlist external URL"); return }
-        
-        if UIApplication.shared.canOpenURL(spotifyDeepLinkURL) {
-            UIApplication.shared.open(spotifyDeepLinkURL)
-            print("spotify opened")
-        } else {
-            // Spotify app is not installed, handle accordingly
-            print("spotify is not installed")
-            if UIApplication.shared.canOpenURL(spotifyExternalURL) {
-                UIApplication.shared.open(spotifyExternalURL, options: [:], completionHandler: nil)
-            } else {
-                print("cannot open external url")
-            }
-        }
     }
     
     private func fetchPlaylistTracks() {
@@ -94,11 +88,7 @@ class PlaylistSummaryViewController: UIViewController {
             let playlistTracks = trackResult
         
             DispatchQueue.main.async {
-//                print("summary:", playlistTracks)
                 self.fetchAudioFeatures(for: playlistTracks) { averageEnergy, averageValence, averageDanceability, topKey in
-//                    print("Average energy: \(averageEnergy)")
-//                    print("Average valence: \(averageValence)")
-//                    print("danceability: \(averageDanceability)")
                     if averageEnergy >= 0.5 {
                         self.playlistMood.text = "Energetic"
                     } else {
@@ -108,7 +98,6 @@ class PlaylistSummaryViewController: UIViewController {
                 }
                 self.calculateTopGenreAndArtist(from: playlistTracks) { topGenres, topArtist, artistNum in
                     // Handle the top genre here
-                    print("Top Genre: \(topGenres)")
                     self.playlistGenre.text = topGenres.first
                     self.playlistMainGenres.text = topGenres.joined(separator: "\n")
                     self.playlistRepeatedArtist.text = topArtist
@@ -177,9 +166,6 @@ class PlaylistSummaryViewController: UIViewController {
             
             let sortedArtists = artistCounts.sorted { $0.value > $1.value }
             let topArtist = sortedArtists.first?.key ?? ""
-            
-            print("genre counts:", genreCounts)
-            print("artistCounts:", artistCounts)
 
             completion((topGenres, topArtist, artistCounts.count))
         }
@@ -217,16 +203,4 @@ class PlaylistSummaryViewController: UIViewController {
             }
         }
     }
-
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
-    }
-    */
-
 }
