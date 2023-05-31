@@ -7,14 +7,11 @@
 
 import Foundation
 
-protocol DatabaseListener: AnyObject {  // defines the delegate used for receiving messages from the database
-}
-
-protocol DatabaseProtocol: AnyObject {  // defines all the behaviour that a database must have
+/**
+ Defines all the behaviour that a database must have
+ */
+protocol DatabaseProtocol: AnyObject {
     func cleanup()
-    
-    func addListener(listener: DatabaseListener)
-    func removeListener(listener: DatabaseListener)
     
     func saveTokens(token: String, refreshToken: String)
     func fetchAccessToken() -> String

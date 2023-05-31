@@ -27,7 +27,6 @@
 		F29762F529FCC1410013FC8D /* AccessTokenDataModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = F29762F329FCC1410013FC8D /* AccessTokenDataModel.xcdatamodeld */; };
 		F29762F829FCC26B0013FC8D /* AccessToken+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = F29762F629FCC26B0013FC8D /* AccessToken+CoreDataClass.swift */; };
 		F29762F929FCC26B0013FC8D /* AccessToken+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = F29762F729FCC26B0013FC8D /* AccessToken+CoreDataProperties.swift */; };
-		F29762FC29FCC4390013FC8D /* MulticastDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F29762FB29FCC4390013FC8D /* MulticastDelegate.swift */; };
 		F29762FE29FCC43F0013FC8D /* DatabaseProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = F29762FD29FCC43F0013FC8D /* DatabaseProtocol.swift */; };
 		F297630029FCC4470013FC8D /* CoreDataController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F29762FF29FCC4470013FC8D /* CoreDataController.swift */; };
 		F2AC83A12A130E9D00D23AC9 /* PlaylistSummaryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2AC83A02A130E9D00D23AC9 /* PlaylistSummaryViewController.swift */; };
@@ -65,7 +64,6 @@
 		F29762F429FCC1410013FC8D /* AccessTokenDataModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = AccessTokenDataModel.xcdatamodel; sourceTree = "<group>"; };
 		F29762F629FCC26B0013FC8D /* AccessToken+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AccessToken+CoreDataClass.swift"; sourceTree = "<group>"; };
 		F29762F729FCC26B0013FC8D /* AccessToken+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AccessToken+CoreDataProperties.swift"; sourceTree = "<group>"; };
-		F29762FB29FCC4390013FC8D /* MulticastDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MulticastDelegate.swift; sourceTree = "<group>"; };
 		F29762FD29FCC43F0013FC8D /* DatabaseProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DatabaseProtocol.swift; sourceTree = "<group>"; };
 		F29762FF29FCC4470013FC8D /* CoreDataController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreDataController.swift; sourceTree = "<group>"; };
 		F2AC83A02A130E9D00D23AC9 /* PlaylistSummaryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaylistSummaryViewController.swift; sourceTree = "<group>"; };
@@ -174,7 +172,6 @@
 			children = (
 				F29762FF29FCC4470013FC8D /* CoreDataController.swift */,
 				F29762FD29FCC43F0013FC8D /* DatabaseProtocol.swift */,
-				F29762FB29FCC4390013FC8D /* MulticastDelegate.swift */,
 			);
 			path = Database;
 			sourceTree = "<group>";
@@ -272,7 +269,6 @@
 				F2E03D382A11234600B03980 /* PlaylistAnalysisCollectionViewController.swift in Sources */,
 				F2E3944C29FFA779001CD918 /* Image.swift in Sources */,
 				F2AC83A12A130E9D00D23AC9 /* PlaylistSummaryViewController.swift in Sources */,
-				F29762FC29FCC4390013FC8D /* MulticastDelegate.swift in Sources */,
 				F2AC83A52A13CF0500D23AC9 /* NewPlaylistViewController.swift in Sources */,
 				F28EFAD829FC092700B942C8 /* Token.swift in Sources */,
 				F20377162A03C06900553183 /* ReportViewController.swift in Sources */,

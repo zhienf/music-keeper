@@ -8,12 +8,9 @@
 import UIKit
 import CoreData
 
-class CoreDataController: NSObject, DatabaseProtocol, NSFetchedResultsControllerDelegate {
+class CoreDataController: NSObject, NSFetchedResultsControllerDelegate {
     
-    var listeners = MulticastDelegate<DatabaseListener>()
     var persistentContainer: NSPersistentContainer
-    
-    var token: String?
     
     override init() {
         persistentContainer = NSPersistentContainer(name: "AccessTokenDataModel")
@@ -27,6 +24,9 @@ class CoreDataController: NSObject, DatabaseProtocol, NSFetchedResultsController
     }
     
     func saveTokens(token: String, refreshToken: String) {
+        /**
+         Save tokens retrieved from Spotify API to core data.
+         */
         guard let entity = NSEntityDescription.entity(forEntityName: "AccessToken", in: persistentContainer.viewContext) else {
             fatalError("Failed to create entity description")
         }
@@ -44,7 +44,9 @@ class CoreDataController: NSObject, DatabaseProtocol, NSFetchedResultsController
     }
     
     func fetchAccessToken() -> String {
-        // Fetch the AccessToken entity from the Core Data store
+        /**
+         Fetch the AccessToken entity from the Core Data store.
+         */
         let fetchRequest: NSFetchRequest<AccessToken> = AccessToken.fetchRequest()
         let sortDescriptor = NSSortDescriptor(key: "timestamp", ascending: false)
         fetchRequest.sortDescriptors = [sortDescriptor]
@@ -64,7 +66,9 @@ class CoreDataController: NSObject, DatabaseProtocol, NSFetchedResultsController
     }
     
     func fetchRefreshToken() -> String {
-        // Fetch the AccessToken entity from the Core Data store
+        /**
+         Fetch the AccessToken entity from the Core Data store.
+         */
         let fetchRequest: NSFetchRequest<AccessToken> = AccessToken.fetchRequest()
         let sortDescriptor = NSSortDescriptor(key: "timestamp", ascending: false)
         fetchRequest.sortDescriptors = [sortDescriptor]
@@ -93,13 +97,5 @@ class CoreDataController: NSObject, DatabaseProtocol, NSFetchedResultsController
                 fatalError("Failed to save data to Core Data with error \(error)")
             }
         }
-    }
-    
-    func addListener(listener: DatabaseListener) {
-        listeners.addDelegate(listener)
-    }
-    
-    func removeListener(listener: DatabaseListener) {
-        listeners.removeDelegate(listener)
     }
 }
