@@ -51,7 +51,7 @@ class NetworkManager {
         URLSession.shared.dataTask(with: request) { data, response, error in
             guard error == nil else { print("authoriseUser: error", error!); return }
             guard let response = response as? HTTPURLResponse else { print("authoriseUser: NO RESPONSE"); return }
-            guard response.statusCode == 200 else { print("authoriseUser: BAD RESPONSE: ", response.statusCode); return }
+            guard response.statusCode == 200 else { print("authoriseUser: BAD RESPONSE: ", response.statusCode, response.description); return }
             guard let data = data else { print("NO DATA"); return }
 
             do {

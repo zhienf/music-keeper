@@ -6,21 +6,31 @@
 //
 
 import UIKit
+import AVFoundation
 
-class LibraryViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, MoodChangeDelegate {
+class LibraryViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, AVAudioPlayerDelegate, MoodChangeDelegate {
     
     func changedToValues(_ values: (Double, Double, Double)) {
         danceabilityValue = values.0
         energyValue = values.1
         valenceValue = values.2
-        print(danceabilityValue)
-        print(energyValue)
-        print(valenceValue)
     }
+    
     func resetValues() {
         danceabilityValue = nil
         energyValue = nil
         valenceValue = nil
+    }
+    
+    @IBAction func filterSongs(_ sender: Any) {
+        // stop audio player if it's still playing
+        if let audioPlayer = audioPlayer, audioPlayer.isPlaying {
+            audioPlayer.stop()
+        }
+        
+        // clear previously selected index path to reset play buttons of table view
+        previousSelectedIndexPath = nil
+        viewDidLoad()
     }
     
     @IBAction func savePlaylistButton(_ sender: Any) {
@@ -47,6 +57,9 @@ class LibraryViewController: UIViewController, UITableViewDelegate, UITableViewD
     var energyValue: Double?
     var valenceValue: Double?
     var indicator = UIActivityIndicatorView()   // displays a spinning animation to indicate loading
+    var audioPlayer: AVAudioPlayer?
+    var selectedAudioURL: URL?
+    var previousSelectedIndexPath: IndexPath?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -113,58 +126,6 @@ class LibraryViewController: UIViewController, UITableViewDelegate, UITableViewD
         fetchTracks(offset: offset)
     }
     
-//    private func filterSongsByAudioFeatures(_ tracks: [Track], completion: @escaping ([Track]) -> Void) {
-//        guard let token = token else { return }
-//
-//        let trackIDs = tracks.map { $0.id }.joined(separator: ",")
-//
-//        NetworkManager.shared.getAudioFeatures(with: token, ids: trackIDs) { audioFeaturesResult in
-//            guard let audioFeaturesResult = audioFeaturesResult else { return }
-//            let audioFeaturesItems = audioFeaturesResult
-//
-//            DispatchQueue.main.async {
-//                // Example: Filtering songs based on danceability, energy, and valence
-//                if let danceabilityValue = self.danceabilityValue,
-//                   let energyValue = self.energyValue,
-//                   let valenceValue = self.valenceValue {
-//
-//                    let filteredSongs = tracks.filter { savedTrack in
-//                        guard let audioFeature = audioFeaturesItems.first(where: { $0.id == savedTrack.id }) else {
-//                            return false
-//                        }
-//
-//                        var danceabilityLowerBound = 0.0
-//                        var danceabilityUpperBound = 1.0
-//                        var energyLowerBound = 0.0
-//                        var energyUpperBound = 1.0
-//                        var valenceLowerBound = 0.0
-//                        var valenceUpperBound = 1.0
-//
-//                        if danceabilityValue != 0.0 {
-//                            danceabilityLowerBound = danceabilityValue - 0.2
-//                            danceabilityUpperBound = danceabilityValue + 0.2
-//                        }
-//                        if energyValue != 0.0 {
-//                            energyLowerBound = energyValue - 0.2
-//                            energyUpperBound = energyValue + 0.2
-//                        }
-//                        if valenceValue != 0.0 {
-//                            valenceLowerBound = valenceValue - 0.2
-//                            valenceUpperBound = valenceValue + 0.2
-//                        }
-//
-//                        return audioFeature.danceability >= danceabilityLowerBound && audioFeature.danceability <= danceabilityUpperBound &&
-//                            audioFeature.energy >= energyLowerBound && audioFeature.energy <= energyUpperBound &&
-//                            audioFeature.valence >= valenceLowerBound && audioFeature.valence <= valenceUpperBound
-//                    }
-//                    completion(filteredSongs) // Return the filtered songs through the completion closure
-//                } else {
-//                    completion(tracks) // Return the original list of tracks
-//                }
-//            }
-//        }
-//    }
-    
     private func filterSongsByAudioFeatures(_ tracks: [Track], completion: @escaping ([Track]) -> Void) {
         guard let token = token else { return }
         
@@ -211,6 +172,23 @@ class LibraryViewController: UIViewController, UITableViewDelegate, UITableViewD
         }
         return (lowerBound, upperBound)
     }
+    
+    private func downloadAndPlayAudio(from url: URL) {
+        // handle the asynchronous downloading of the audio file. It creates a URLSession data task to download the audio data, and upon completion, it attempts to create an AVAudioPlayer instance using the downloaded data.
+        URLSession.shared.dataTask(with: url) { [weak self] (data, response, error) in
+            guard let data = data, let audioPlayer = try? AVAudioPlayer(data: data) else {
+                if let error = error {
+                    print("Failed to load audio: \(error)")
+                }
+                return
+            }
+
+            self?.audioPlayer = audioPlayer
+            self?.selectedAudioURL = url    // current mp3 url to play
+            self?.audioPlayer?.delegate = self  // to keep track of the state of audio player
+            audioPlayer.play()
+        }.resume()
+    }
 
     // MARK: - UITableViewDataSource
     
@@ -219,11 +197,74 @@ class LibraryViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "librarySongCell", for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: "librarySongCell", for: indexPath) as! LibrarySongCell
         let song = songList[indexPath.row]
-        cell.textLabel?.text = song.name
-        cell.detailTextLabel?.text = song.artists[0].name
+//        cell.textLabel?.text = song.name
+//        cell.detailTextLabel?.text = song.artists[0].name
+        cell.trackLabel.text = song.name
+        cell.artistLabel.text = song.artists[0].name
+        cell.audioURL = URL(string: song.preview_url)
         return cell
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        // Get the selected cell and its associated MP3 URL
+        let selectedCell = tableView.cellForRow(at: indexPath) as! LibrarySongCell
+        guard let mp3URL = selectedCell.audioURL else { return }
+
+        // Check if the selected cell is the same as the previously selected cell
+        if mp3URL == selectedAudioURL {
+            if let audioPlayer = audioPlayer {
+                if audioPlayer.isPlaying {
+                    // If it is currently playing, pause the audio player
+                    audioPlayer.pause()
+                    selectedCell.playButton.setImage(UIImage(systemName: "play.circle"), for: .normal)
+                } else {
+                    // If it is currently paused, resume playing the audio
+                    audioPlayer.play()
+                    selectedCell.playButton.setImage(UIImage(systemName: "pause.circle"), for: .normal)
+                }
+            }
+        } else {
+            // Stop the previous audio if it's playing
+            if let audioPlayer = audioPlayer, audioPlayer.isPlaying {
+                audioPlayer.stop()
+                // Reset the play button image of the previously selected cell to default (play button)
+                // NOTE: won't enter block when table is scrolled, since previous cell has been reused.
+                if let previousIndexPath = previousSelectedIndexPath, let previousCell = tableView.cellForRow(at: previousIndexPath) as? LibrarySongCell {
+                    previousCell.playButton.setImage(UIImage(systemName: "play.circle"), for: .normal)
+                }
+            }
+            // Play the selected audio
+            downloadAndPlayAudio(from: mp3URL)
+            selectedCell.playButton.setImage(UIImage(systemName: "pause.circle"), for: .normal)
+        }
+
+        // Store the currently selected index path as the previous selected index path
+        previousSelectedIndexPath = indexPath
+        
+        tableView.deselectRow(at: indexPath, animated: true)
+    }
+    
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        if let topTrackCell = cell as? LibrarySongCell {
+            // Update the reused cell when the view scrolls back to it
+            // Check if the cell's index path matches the previously selected index path
+            if indexPath == previousSelectedIndexPath {
+                topTrackCell.playButton.setImage(UIImage(systemName: "pause.circle"), for: .normal)
+            } else {
+                topTrackCell.playButton.setImage(UIImage(systemName: "play.circle"), for: .normal)
+            }
+        }
+    }
+    
+    // MARK: - AVAudioPlayerDelegate
+    
+    func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+        if let selectedIndexPath = previousSelectedIndexPath {
+            let selectedCell = tableView.cellForRow(at: selectedIndexPath) as? LibrarySongCell
+            selectedCell?.playButton.setImage(UIImage(systemName: "play.circle"), for: .normal)
+        }
     }
     
     // MARK: - Navigation
@@ -240,4 +281,13 @@ class LibraryViewController: UIViewController, UITableViewDelegate, UITableViewD
             destination.delegate = self
         }
     }
+}
+
+class LibrarySongCell: UITableViewCell {
+    
+    @IBOutlet weak var trackLabel: UILabel!
+    @IBOutlet weak var artistLabel: UILabel!
+    @IBOutlet weak var playButton: UIButton!
+    
+    var audioURL: URL?
 }
