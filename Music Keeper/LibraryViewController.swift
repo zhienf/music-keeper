@@ -4,10 +4,26 @@
 //
 //  Created by Zhi'en Foo on 28/04/2023.
 //
+// References:
+// 1) FIT3178 Week 5 Lab Exercise - Adding a loading indicator view
+// 2) https://developer.apple.com/documentation/avfaudio/avaudioplayer
+// 3) https://medium.com/swift-productions/swiftui-play-an-audio-with-avaudioplayer-1c4085e2052c
+// 4) https://www.ralfebert.com/ios-examples/uikit/uitableviewcontroller/custom-cells/
 
 import UIKit
 import AVFoundation
 
+/**
+ A view controller that displays a user's liked songs library from Spotify.
+
+ This class is a subclass of UIViewController and conforms to UITableViewDelegate, UITableViewDataSource, AVAudioPlayerDelegate, and MoodChangeDelegate protocols.
+
+ Usage:
+ 1. Displays a list of user's liked songs from Spotify based on filters applied.
+ 2. Customize the filtering behavior using the `danceabilityValue`, `energyValue`, and `valenceValue` properties.
+ 3. Save the list of filtered tracks into a new playlist to the user's Spotify library.
+ 4. Allows playback of 30s preview for each track displayed.
+ */
 class LibraryViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, AVAudioPlayerDelegate, MoodChangeDelegate {
     
     @IBOutlet weak var songsCount: UILabel!
@@ -31,6 +47,7 @@ class LibraryViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
     
     @IBAction func savePlaylistButton(_ sender: Any) {
+        // displays an overlayer to save a new playlist
         let overLayer = OverLayerPopUp()
         overLayer.songsCount = songList.count
         overLayer.songListToSave = songList
@@ -57,6 +74,7 @@ class LibraryViewController: UIViewController, UITableViewDelegate, UITableViewD
     var energyValue: Double?
     var valenceValue: Double?
     
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -66,7 +84,6 @@ class LibraryViewController: UIViewController, UITableViewDelegate, UITableViewD
         
         // Retrieve the token from Core Data
         token = databaseController?.fetchAccessToken()
-        let refreshToken = databaseController?.fetchRefreshToken()
         
         // Add a loading indicator view
         setupIndicator()
@@ -95,6 +112,11 @@ class LibraryViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
     
     private func fetchLibrary() {
+        /**
+         Fetches the library of user's liked songs
+
+         This method uses pagination to fetch all the tracks from the API and applies filtering based on audio features. The fetched tracks are stored in the `songList` property and displayed in the table view.
+         */
         guard let token = token else { return }
         var allTracks: [Track] = [] // Array to store all fetched tracks
         let limit = 50
@@ -127,6 +149,11 @@ class LibraryViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
     
     private func filterSongsByAudioFeatures(_ tracks: [Track], completion: @escaping ([Track]) -> Void) {
+        /**
+         Filters the given tracks based on audio features.
+
+         This method retrieves the audio features for the provided tracks and applies filtering based on danceability, energy, and valence values. The filtered tracks are returned through the completion closure.
+         */
         guard let token = token else { return }
         
         let trackIDs = tracks.map { $0.id }.joined(separator: ",")
@@ -163,6 +190,9 @@ class LibraryViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
     
     private func calculateBounds(value: Double) -> (lowerBound: Double, upperBound: Double) {
+        /**
+         Calculates the lower and upper bounds for a given value.
+         */
         var lowerBound = 0.0
         var upperBound = 1.0
         if value != 0.0 {
@@ -173,7 +203,9 @@ class LibraryViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
     
     private func downloadAndPlayAudio(from url: URL) {
-        // handle the asynchronous downloading of the audio file. It creates a URLSession data task to download the audio data, and upon completion, it attempts to create an AVAudioPlayer instance using the downloaded data.
+        /**
+         Handle the asynchronous downloading of the audio file. It creates a URLSession data task to download the audio data, and upon completion, it attempts to create an AVAudioPlayer instance using the downloaded data.
+         */
         URLSession.shared.dataTask(with: url) { [weak self] (data, response, error) in
             guard let data = data, let audioPlayer = try? AVAudioPlayer(data: data) else {
                 if let error = error {
@@ -267,12 +299,18 @@ class LibraryViewController: UIViewController, UITableViewDelegate, UITableViewD
     // MARK: - MoodChangeDelegate
     
     func changedToValues(_ values: (Double, Double, Double)) {
+        /**
+         Sets the values of audio features required for filtering based on the slider values.
+         */
         danceabilityValue = values.0
         energyValue = values.1
         valenceValue = values.2
     }
     
     func resetValues() {
+        /**
+         Resets the values of audio features required for filtering as the slider values reset.
+         */
         danceabilityValue = nil
         energyValue = nil
         valenceValue = nil
@@ -295,10 +333,12 @@ class LibraryViewController: UIViewController, UITableViewDelegate, UITableViewD
 }
 
 class LibrarySongCell: UITableViewCell {
-    
+    /**
+     Custom table view cell used in LibraryViewController.
+     */
     @IBOutlet weak var trackLabel: UILabel!
     @IBOutlet weak var artistLabel: UILabel!
     @IBOutlet weak var playButton: UIButton!
     
-    var audioURL: URL?
+    var audioURL: URL? // audio URL to be downloaded and played for each cell
 }

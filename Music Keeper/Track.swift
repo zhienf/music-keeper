@@ -7,6 +7,15 @@
 
 import UIKit
 
+/**
+ A model representing a track.
+
+ This struct conforms to the Codable protocol to provide easy encoding and decoding of track objects from JSON.
+
+ Usage:
+ 1. Initialize an instance of `Track` by passing a dictionary representing the track's properties.
+ 2. Access the properties of the track as needed.
+ */
 struct Track: Codable {
     let album: Album
     let artists: [Artist]

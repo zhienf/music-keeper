@@ -7,6 +7,15 @@
 
 import UIKit
 
+/**
+ A model representing an artist.
+
+ This struct conforms to the Codable protocol to provide easy encoding and decoding of artist objects from JSON.
+
+ Usage:
+ 1. Initialize an instance of `Artist` by passing a dictionary representing the artist's properties.
+ 2. Access the properties of the artist as needed.
+ */
 struct Artist: Codable {
     let external_urls: ExternalURLs
     let genres: [String]    // ["j-rock", "japanese indie pop"]

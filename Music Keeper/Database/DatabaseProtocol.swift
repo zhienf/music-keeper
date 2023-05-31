@@ -8,7 +8,6 @@
 import Foundation
 
 protocol DatabaseListener: AnyObject {  // defines the delegate used for receiving messages from the database
-//    func onBookListChange(bookList: [Book])
 }
 
 protocol DatabaseProtocol: AnyObject {  // defines all the behaviour that a database must have
@@ -20,7 +19,4 @@ protocol DatabaseProtocol: AnyObject {  // defines all the behaviour that a data
     func saveTokens(token: String, refreshToken: String)
     func fetchAccessToken() -> String
     func fetchRefreshToken() -> String
-    
-//    func addBook(bookData: BookData) -> Book
-//    func removeBook(book: Book)
 }

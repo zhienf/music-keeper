@@ -4,10 +4,24 @@
 //
 //  Created by Zhi'en Foo on 04/05/2023.
 //
+// References:
+// 1) https://www.ralfebert.com/ios-examples/uikit/uitableviewcontroller/custom-cells/
+// 2) https://developer.apple.com/documentation/avfaudio/avaudioplayer
+// 3) https://medium.com/swift-productions/swiftui-play-an-audio-with-avaudioplayer-1c4085e2052c
 
 import UIKit
 import AVFoundation
 
+/**
+ A view controller that displays a user's listening report based on selected time range.
+
+ This class is a subclass of UIViewController and conforms to UITableViewDelegate, UITableViewDataSource, and AVAudioPlayerDelegate protocols.
+
+ Usage:
+ 1. Displays audio features analysis of user's listened tracks (energy, valence, obscurity, top genre, top decade).
+ 2. Displays user's top artist and top tracks.
+ 3. Allow selection of time range for analysis (last month, last 6 months, all time).
+ */
 class ReportViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, AVAudioPlayerDelegate {
 
     @IBOutlet weak var timeRangeSegmentedControl: UISegmentedControl!
@@ -71,7 +85,6 @@ class ReportViewController: UIViewController, UITableViewDelegate, UITableViewDa
         
         // Retrieve the token from Core Data
         token = databaseController?.fetchAccessToken()
-        let refreshToken = databaseController?.fetchRefreshToken()
         
         // setup view
         topItemsView.layer.cornerRadius = 10
@@ -86,6 +99,9 @@ class ReportViewController: UIViewController, UITableViewDelegate, UITableViewDa
     }
     
     private func getTimeRange() -> String {
+        /**
+         Get string of time range to be passed as a parameter for API calls, based on selected index of segmented control.
+         */
         var timeRange = ""
         switch timeRangeSelected {
         case 0:
@@ -101,6 +117,9 @@ class ReportViewController: UIViewController, UITableViewDelegate, UITableViewDa
     }
     
     private func fetchAudioFeatures(for tracks: [Track], completion: @escaping (Double, Double) -> Void) {
+        /**
+         Calculate average energy and valence from results obtained from API request for given tracks.
+         */
         guard let token = token else { return }
         
         let trackIDs = tracks.map { $0.id }.joined(separator: ",")
@@ -127,6 +146,9 @@ class ReportViewController: UIViewController, UITableViewDelegate, UITableViewDa
     }
 
     private func fetchEnergyAndValence() {
+        /**
+         Calculates energy and valence percentage of user's top tracks.
+         */
         guard let token = token else { return }
         
         let timeRange = getTimeRange()
@@ -146,6 +168,9 @@ class ReportViewController: UIViewController, UITableViewDelegate, UITableViewDa
     }
     
     private func fetchGenreAndDecade() {
+        /**
+         Calculates top genre and obscurity based on user's top artists, and top decade based on user's top tracks.
+         */
         guard let token = token else { return }
 
         let timeRange = getTimeRange()
@@ -227,6 +252,10 @@ class ReportViewController: UIViewController, UITableViewDelegate, UITableViewDa
     }
     
     private func calculateTopGenreAndObscurity(from artists: [Artist]) -> (String, Int) {
+        /**
+         Counts occurence of each genre of the top artists, sorts genre and gets the one with highest occurence.
+         Counts average popularity of the top artists to obtain obscurity score.
+         */
         var genreCounts: [String: Int] = [:]
         var artistPopularity = 0
 
@@ -245,6 +274,9 @@ class ReportViewController: UIViewController, UITableViewDelegate, UITableViewDa
     }
 
     private func calculateTopDecade(from tracks: [Track]) -> Int {
+        /**
+         Counts occurence of decade based on release date obtained from the top tracks, gets the one with the highest frequency.
+         */
         var decadeFrequency: [Int: Int] = [:]
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd"
@@ -263,7 +295,9 @@ class ReportViewController: UIViewController, UITableViewDelegate, UITableViewDa
     }
     
     private func downloadAndPlayAudio(from url: URL) {
-        // handle the asynchronous downloading of the audio file. It creates a URLSession data task to download the audio data, and upon completion, it attempts to create an AVAudioPlayer instance using the downloaded data.
+        /**
+         Handle the asynchronous downloading of the audio file. It creates a URLSession data task to download the audio data, and upon completion, it attempts to create an AVAudioPlayer instance using the downloaded data.
+         */
         URLSession.shared.dataTask(with: url) { [weak self] (data, response, error) in
             guard let data = data, let audioPlayer = try? AVAudioPlayer(data: data) else {
                 if let error = error {
@@ -357,6 +391,9 @@ class ReportViewController: UIViewController, UITableViewDelegate, UITableViewDa
 }
 
 class TopTrackCell: UITableViewCell {
+    /**
+     Custom table view cell used in ReportViewController.
+     */
     @IBOutlet weak var playButton: UIButton!
     @IBOutlet weak var artistLabel: UILabel!
     @IBOutlet weak var trackLabel: UILabel!

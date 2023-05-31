@@ -1181,7 +1181,6 @@
                                     <color key="baseBackgroundColor" red="0.1137254902" green="0.72549019609999998" blue="0.3294117647" alpha="1" colorSpace="calibratedRGB"/>
                                 </buttonConfiguration>
                                 <connections>
-                                    <action selector="generatePlaylist:" destination="M9J-Mt-9as" eventType="touchUpInside" id="tVJ-Dr-YYw"/>
                                     <segue destination="46X-fD-55n" kind="show" identifier="showPlaylistGenerated" id="31m-PI-fyS"/>
                                 </connections>
                             </button>
@@ -1217,6 +1216,7 @@
                     <navigationItem key="navigationItem" title="Generate a playlist" largeTitleDisplayMode="never" id="f7q-YB-SQp"/>
                     <connections>
                         <outlet property="artistInput" destination="Fez-pm-F8Y" id="zdK-Lb-Ojs"/>
+                        <outlet property="generatePlaylistButton" destination="1cp-kE-RSx" id="YIB-cn-pgi"/>
                         <outlet property="playlistNameInput" destination="tYe-d8-q9y" id="rre-6M-PLL"/>
                     </connections>
                 </viewController>

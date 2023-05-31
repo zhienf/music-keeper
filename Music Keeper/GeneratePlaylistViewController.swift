@@ -7,10 +7,21 @@
 
 import UIKit
 
+/**
+ A view controller that generates a random playlist based on a given artist name.
+
+ This class is a subclass of UIViewController.
+
+ Usage:
+ 1. Generates a random playlist based on a given artist name.
+ 2. Artist name input will be used to get track recommendations for the new playlist.
+ 3. Allows user to name the new playlist to be generated.
+ */
 class GeneratePlaylistViewController: UIViewController {
 
     @IBOutlet weak var artistInput: UITextField!
     @IBOutlet weak var playlistNameInput: UITextField!
+    @IBOutlet weak var generatePlaylistButton: UIButton!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -32,6 +43,9 @@ class GeneratePlaylistViewController: UIViewController {
     }
     
     override func shouldPerformSegue(withIdentifier: String, sender: Any?) -> Bool {
+        /**
+         Validates the text field input and makes sure they are not left empty.
+         */
         if withIdentifier == "showPlaylistGenerated" {
             guard let artistInput = artistInput.text, !artistInput.isEmpty else {
                 displayMessage(title: "Error", message: "Please enter an artist")

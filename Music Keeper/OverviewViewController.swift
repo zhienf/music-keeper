@@ -4,15 +4,34 @@
 //
 //  Created by Zhi'en Foo on 28/04/2023.
 //
+// References:
+// 1) https://youtu.be/k90V115zqRk (Custom CollectionView Cell In Swift 5 & Xcode 10)
+// 2) https://www.letsbuildthatapp.com/videos/83 (Horizontal Scroll Direction UICollectionView)
 
 import UIKit
 
+/**
+ A model representing the top 5 artists of a user.
+ 
+ Usage:
+ 1. Data is used for displaying the artist information in the collection view.
+ */
 struct ArtistTop5 {
     var artistName: String
     var rank: Int
     var artistImage: UIImage
 }
 
+/**
+ A view controller that displays a user's currently playing track, recently played tracks and recent top 5 artists.
+
+ This class is a subclass of UIViewController and conforms to UITableViewDelegate, UITableViewDataSource, UICollectionViewDelegate, UICollectionViewDataSource, and UICollectionViewDelegateFlowLayout protocols.
+
+ Usage:
+ 1. Displays user's currently played track on Spotify if there is any.
+ 2. Displays user's top 5 artists for the past 4 weeks in a collection view.
+ 3. Displays user's 50 recently played tracks in a table view.
+ */
 class OverviewViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     
     @IBOutlet weak var collectionView: UICollectionView! {
@@ -55,7 +74,6 @@ class OverviewViewController: UIViewController, UITableViewDelegate, UITableView
         
         // Retrieve the token from Core Data
         token = databaseController?.fetchAccessToken()
-        let refreshToken = databaseController?.fetchRefreshToken()
         
         currentlyPlayingView.layer.cornerRadius = 10
     }
@@ -169,6 +187,9 @@ class OverviewViewController: UIViewController, UITableViewDelegate, UITableView
 }
 
 class TopArtistCell: UICollectionViewCell {
+    /**
+     Custom collection view cell to display the top 5 artists of a user.
+     */
     @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var artistTitle: UILabel!
     

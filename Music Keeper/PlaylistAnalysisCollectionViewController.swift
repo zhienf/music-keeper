@@ -4,18 +4,36 @@
 //
 //  Created by Zhi'en Foo on 15/05/2023.
 //
+// References:
+// 1) FIT3178 Week 5 Lab Exercise - Adding a loading indicator view
+// 2) https://developer.apple.com/documentation/uikit/uicollectionviewdelegateflowlayout
+// 3) https://youtu.be/F6JNvzuldxg (How to UICollectionView Flow Layout)
 
 import UIKit
 
-private let reuseIdentifier = "playlistToAnalyse"
-
+/**
+ A model representing the playlist information required for collection view display.
+ 
+ Usage:
+ 1. Data is used for displaying the playlist information in the collection view.
+ */
 struct PlaylistInfo {
     var playlistTitle: String
     var playlistImage: UIImage
     var playlistID: String
 }
 
+/**
+ A view controller that displays a list of playlists from user's Spotify library.
+
+ This class is a subclass of UICollectionViewController and conforms to UICollectionViewDelegateFlowLayout protocols.
+
+ Usage:
+ 1. Displays a collection of playlists from user's Spotify library, allows selection for playlist analysis.
+ */
 class PlaylistAnalysisCollectionViewController: UICollectionViewController, UICollectionViewDelegateFlowLayout {
+    
+    private let reuseIdentifier = "playlistToAnalyse"
     
     // properties to retrieve access token for API calls
     var token: String?
@@ -48,7 +66,6 @@ class PlaylistAnalysisCollectionViewController: UICollectionViewController, UICo
         
         // Retrieve the token from Core Data
         token = databaseController?.fetchAccessToken()
-        let refreshToken = databaseController?.fetchRefreshToken()
         
         // Add a loading indicator view
         setupIndicator()
@@ -68,6 +85,9 @@ class PlaylistAnalysisCollectionViewController: UICollectionViewController, UICo
     }
     
     private func fetchPlaylists() {
+        /**
+         Retrieves all playlists from the API using pagination to fetch a specified number of playlists per request. It also downloads playlist images asynchronously and processes the fetched data.
+         */
         guard let token = token else { return }
         let limit = 50 // Number of playlists to fetch per request
         let offset = 0 // Initial offset
@@ -148,13 +168,12 @@ class PlaylistAnalysisCollectionViewController: UICollectionViewController, UICo
     // MARK: UICollectionViewDataSource
 
     override func numberOfSections(in collectionView: UICollectionView) -> Int {
-        // #warning Incomplete implementation, return the number of sections
+        // return the number of sections
         return 1
     }
 
-
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        // #warning Incomplete implementation, return the number of items
+        // return the number of items
         return allPlaylists.count
     }
 
@@ -165,7 +184,6 @@ class PlaylistAnalysisCollectionViewController: UICollectionViewController, UICo
         // Configure the cell using the playlist data
         cell.playlistTitle.text = playlist.playlistTitle
         cell.playlistImage.image = playlist.playlistImage
-        // Configure other cell properties
     
         return cell
     }
@@ -191,7 +209,9 @@ class PlaylistAnalysisCollectionViewController: UICollectionViewController, UICo
 }
 
 class PlaylistToAnalyseCell: UICollectionViewCell {
-    
+    /**
+     Custom collection view cell used in PlaylistAnalysisCollectionViewController.
+     */
     @IBOutlet weak var playlistImage: UIImageView!
     @IBOutlet weak var playlistTitle: UILabel!
 }

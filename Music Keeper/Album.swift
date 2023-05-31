@@ -7,6 +7,15 @@
 
 import UIKit
 
+/**
+ A model representing an album.
+
+ This struct conforms to the Codable protocol to provide easy encoding and decoding of album objects from JSON.
+
+ Usage:
+ 1. Initialize an instance of `Album` by passing a dictionary representing the album's properties.
+ 2. Access the properties of the album as needed.
+ */
 struct Album: Codable {
     let external_urls: ExternalURLs
     let id: String

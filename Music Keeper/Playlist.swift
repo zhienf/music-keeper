@@ -7,6 +7,15 @@
 
 import Foundation
 
+/**
+ A model representing a playlist.
+
+ This struct conforms to the Codable protocol to provide easy encoding and decoding of playlist data from JSON.
+
+ Usage:
+ 1. Initialize an instance of `Playlist` by passing a dictionary representing the playlist data.
+ 2. Access the properties to retrieve playlist details such as images, name, tracks, URI, and ID.
+ */
 struct Playlist: Codable {
     let images: [Image]
     let name: String
@@ -23,12 +32,19 @@ struct Playlist: Codable {
     }
 }
 
+/*
+ A model representing playlist tracks.
+
+ This struct conforms to the Codable protocol to provide easy encoding and decoding of playlist tracks data from JSON.
+
+ Usage:
+ 1. Initialize an instance of `PlaylistTracks` by passing a dictionary representing the playlist tracks data.
+ 2. Access the property 'total' to retrieve playlist track count.
+ */
 struct PlaylistTracks: Codable {
-    let href: String
     let total: Int
     
     init(dictionary: [String: Any]) {
-        href = dictionary["href"] as? String ?? ""
         total = dictionary["total"] as? Int ?? 0
     }
 }

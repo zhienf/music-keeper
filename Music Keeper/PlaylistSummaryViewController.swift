@@ -4,9 +4,20 @@
 //
 //  Created by Zhi'en Foo on 16/05/2023.
 //
+// References:
+// 1) https://developer.spotify.com/documentation/ios/tutorials/content-linking
 
 import UIKit
 
+/**
+ A view controller that displays the summary of a playlist selected.
+
+ This class is a subclass of UIViewController.
+
+ Usage:
+ 1. Displays a summary of the playlist selected (playlist mood, top genre, most repeated artist, most repeated pitch)
+ 2. Allows user to view the playlist in Spotify app through deep linking.
+ */
 class PlaylistSummaryViewController: UIViewController {
 
     @IBOutlet weak var playlistImage: UIImageView!
@@ -71,7 +82,6 @@ class PlaylistSummaryViewController: UIViewController {
 
         // Retrieve the token from Core Data
         token = databaseController?.fetchAccessToken()
-        let refreshToken = databaseController?.fetchRefreshToken()
         
         // Setup views
         playlistImage.image = currentPlaylist?.playlistImage
@@ -81,6 +91,9 @@ class PlaylistSummaryViewController: UIViewController {
     }
     
     private func fetchPlaylistTracks() {
+        /**
+         Get tracks of the playlist for analysis.
+         */
         guard let token = token, let playlistID = currentPlaylist?.playlistID else { return }
         
         NetworkManager.shared.getPlaylistTracks(with: token, playlistID: playlistID) { trackResult in
@@ -108,6 +121,9 @@ class PlaylistSummaryViewController: UIViewController {
     }
     
     private func calculateTopGenreAndArtist(from tracks: [Track], completion: @escaping (([String], String, Int)) -> Void) {
+        /**
+         Calculates top genre and top artist based on the tracks from the playlist selected.
+         */
         guard let token = token else {
             completion(([], "", 0))
             return
@@ -172,6 +188,9 @@ class PlaylistSummaryViewController: UIViewController {
     }
     
     private func fetchAudioFeatures(for tracks: [Track], completion: @escaping (Double, Double, Double, String) -> Void) {
+        /**
+         Get audio features of the tracks from the playlist for analysis, by calculating the averages of energy, valence, danceability and key counts of the tracks.
+         */
         guard let token = token else { return }
         
         let trackIDs = tracks.map { $0.id }.joined(separator: ",")
