@@ -4,6 +4,8 @@
 //
 //  Created by Zhi'en Foo on 29/05/2023.
 //
+// References:
+// 1) FIT3178 Week 2 Lab Exercise - Sliders
 
 import UIKit
 
@@ -12,6 +14,14 @@ protocol MoodChangeDelegate: AnyObject {
     func resetValues()
 }
 
+/**
+ A view controller that allows filters to be applied to user's liked songs library.
+
+ This class is a subclass of UIViewController.
+
+ Usage:
+ 1. Apply filters to liked songs library using sliders for danceability, energy and valence
+ */
 class FilterSongViewController: UIViewController {
 
     @IBOutlet weak var songsCountLabel: UILabel!
@@ -20,6 +30,9 @@ class FilterSongViewController: UIViewController {
     @IBOutlet weak var valenceSlider: UISlider!
     
     @IBAction func sliderValueChanged(_ sender: Any) {
+        /**
+         Detects if there is a change in any of the three sliders and informs its delegate.
+         */
         let danceabilityValue = Double(danceabilitySlider.value)
         let energyValue = Double(energySlider.value)
         let valenceValue = Double(valenceSlider.value)
@@ -28,6 +41,9 @@ class FilterSongViewController: UIViewController {
     }
     
     @IBAction func clearFilters(_ sender: Any) {
+        /**
+         Resets slider values to 0 when clear all button is selected and informs its delegate.
+         */
         danceabilitySlider.setValue(0.0, animated: false)
         energySlider.setValue(0.0, animated: false)
         valenceSlider.setValue(0.0, animated: false)
@@ -36,12 +52,11 @@ class FilterSongViewController: UIViewController {
     }
     
     @IBAction func showResults(_ sender: Any) {
+        /**
+         Return to previous view controller when show results button is selected
+         */
         navigationController?.popViewController(animated: true)
     }
-    
-    // properties to retrieve access token for API calls
-    var token: String?
-    weak var databaseController: DatabaseProtocol?
     
     // properties for keeping track of sliders' values
     var initialValues: (Double, Double, Double) = (0, 0, 0)
@@ -53,17 +68,7 @@ class FilterSongViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Do any additional setup after loading the view.
-        
-        // get a reference to the database from the appDelegate
-        let appDelegate = (UIApplication.shared.delegate as? AppDelegate)
-        databaseController = appDelegate?.databaseController
-        
-        // Retrieve the token from Core Data
-        token = databaseController?.fetchAccessToken()
-        let refreshToken = databaseController?.fetchRefreshToken()
-        
+    
         if let songsCount = songsCount {
             songsCountLabel.text = "\(songsCount) songs"
         }
