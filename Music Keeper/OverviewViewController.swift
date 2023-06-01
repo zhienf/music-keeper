@@ -137,6 +137,8 @@ class OverviewViewController: UIViewController, UITableViewDelegate, UITableView
             }
 
             dispatchGroup.notify(queue: .main) {
+                // sorts artistTop5Data array to make sure the artists are sorted in correct rank order for collection view
+                self.artistTop5Data.sort { $0.rank < $1.rank }
                 self.collectionView.reloadData()
             }
         }

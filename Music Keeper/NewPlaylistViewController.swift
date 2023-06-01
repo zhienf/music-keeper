@@ -56,7 +56,6 @@ class NewPlaylistViewController: UIViewController, UITableViewDelegate, UITableV
         
         // Retrieve the token from Core Data
         token = databaseController?.fetchAccessToken()
-        let refreshToken = databaseController?.fetchRefreshToken()
         
         // Add a loading indicator view
         setupIndicator()

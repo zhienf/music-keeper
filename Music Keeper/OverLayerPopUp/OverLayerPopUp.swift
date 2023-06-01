@@ -50,7 +50,7 @@ class OverLayerPopUp: UIViewController {
         let trackURIsArray = songListToSave.map { $0.uri }
         
         NetworkManager.shared.createPlaylist(with: token, songs: trackURIsArray, playlistName: playlistName) { playlist in
-            guard let playlist = playlist else { return }
+            guard playlist != nil else { return }
             
             DispatchQueue.main.async {
                 // displays a pop up message to inform playlist successfully saved before dismissing the overlayer
@@ -79,7 +79,6 @@ class OverLayerPopUp: UIViewController {
         
         // Retrieve the token from Core Data
         token = databaseController?.fetchAccessToken()
-        let refreshToken = databaseController?.fetchRefreshToken()
 
         configView()
     }
