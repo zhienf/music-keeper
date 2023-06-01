@@ -97,6 +97,15 @@ class LibraryViewController: UIViewController, UITableViewDelegate, UITableViewD
         // reset songList to show empty table view
         songList = []
         self.tableView.reloadData()
+        
+        // stop audio player if it's still playing
+        if let audioPlayer = audioPlayer, audioPlayer.isPlaying {
+            audioPlayer.stop()
+        }
+        
+        // clear previously selected index path to reset play buttons of table view
+        previousSelectedIndexPath = nil
+        
         viewDidLoad()
     }
     
