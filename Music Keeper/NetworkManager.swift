@@ -6,6 +6,7 @@
 //
 // References:
 // 1) https://developer.spotify.com/documentation/web-api
+// 2) https://youtu.be/uyqPBNJ33jw (How To Use Spotify's API In Swift)
 
 import UIKit
 import StoreKit
