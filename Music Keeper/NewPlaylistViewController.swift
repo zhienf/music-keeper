@@ -4,14 +4,25 @@
 //
 //  Created by Zhi'en Foo on 17/05/2023.
 //
+// References:
+// 1) https://developer.spotify.com/documentation/ios/tutorials/content-linking
 
 import UIKit
 
+/**
+ A view controller that displays the newly generated playlist information based on a given artist name from the previous view controller.
+
+ This class is a subclass of UIViewController and conforms to UITableViewDelegate, and UITableViewDataSource protocols.
+
+ Usage:
+ 1. Displays the playlist information of the newly generated playlist information based on a given artist name from the previous view controller.
+ 2. Allows user to view the playlist in Spotify app through deep linking.
+ */
 class NewPlaylistViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+    
     @IBOutlet weak var playlistImage: UIImageView!
-    
     @IBOutlet weak var playlistTitle: UILabel!
-    
+
     @IBOutlet weak var tableView: UITableView! {
         didSet {
             tableView.delegate = self
@@ -20,15 +31,19 @@ class NewPlaylistViewController: UIViewController, UITableViewDelegate, UITableV
         }
     }
     
+    // properties to retrieve access token for API calls
+    var token: String?
+    weak var databaseController: DatabaseProtocol?
+    
+    // displays a spinning animation to indicate loading
+    var indicator = UIActivityIndicatorView()
+    
+    // properties for playlist information to be displayed
     var playlistName: String?
     var searchQuery: String?
     var playlistTracks: [Track] = []
     var playlistURI: String?
     var playlistID: String?
-    var indicator = UIActivityIndicatorView()   // displays a spinning animation to indicate loading
-    
-    weak var databaseController: DatabaseProtocol?
-    var token: String?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -41,18 +56,9 @@ class NewPlaylistViewController: UIViewController, UITableViewDelegate, UITableV
         
         // Retrieve the token from Core Data
         token = databaseController?.fetchAccessToken()
-        let refreshToken = databaseController?.fetchRefreshToken()
-        print("new playlist token:", token!)
-        print("new playlist refresh token:", refreshToken)
         
         // Add a loading indicator view
-        indicator.style = UIActivityIndicatorView.Style.large
-        indicator.translatesAutoresizingMaskIntoConstraints = false
-        indicator.color = UIColor.lightGray
-        self.view.addSubview(indicator)
-        NSLayoutConstraint.activate([indicator.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor), indicator.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor)
-        ])
-        indicator.startAnimating()
+        setupIndicator()
         
         fetchSearchItem()
 
@@ -61,24 +67,14 @@ class NewPlaylistViewController: UIViewController, UITableViewDelegate, UITableV
     }
     
     @IBAction func openSpotifyPlaylist(_ sender: Any) {        
-        guard let playlistURI = playlistURI, let spotifyDeepLinkURL = URL(string: playlistURI) else {
-            // Handle invalid URL
-            print("invalid playlist URI")
-            return
-        }
+        guard let playlistURI = playlistURI, let spotifyDeepLinkURL = URL(string: playlistURI) else { print("invalid playlist URI"); return }
     
-        guard let playlistID = playlistID, let spotifyExternalURL = URL(string: "https://open.spotify.com/playlist/\(playlistID)") else {
-            // Handle invalid URL
-            print("invalid playlist external URL")
-            return
-        }
+        guard let playlistID = playlistID, let spotifyExternalURL = URL(string: "https://open.spotify.com/playlist/\(playlistID)") else { print("invalid playlist external URL"); return }
         
         if UIApplication.shared.canOpenURL(spotifyDeepLinkURL) {
             UIApplication.shared.open(spotifyDeepLinkURL)
-            print("spotify opened")
         } else {
             // Spotify app is not installed, handle accordingly
-            print("spotify is not installed")
             if UIApplication.shared.canOpenURL(spotifyExternalURL) {
                 UIApplication.shared.open(spotifyExternalURL, options: [:], completionHandler: nil)
             } else {
@@ -87,8 +83,23 @@ class NewPlaylistViewController: UIViewController, UITableViewDelegate, UITableV
         }
     }
     
+    func setupIndicator() {
+        // Add a loading indicator view
+        indicator.style = UIActivityIndicatorView.Style.large
+        indicator.translatesAutoresizingMaskIntoConstraints = false
+        indicator.color = UIColor.lightGray
+        self.view.addSubview(indicator)
+        NSLayoutConstraint.activate([indicator.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor), indicator.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor)
+        ])
+        indicator.startAnimating()
+    }
+    
     private func fetchSearchItem() {
+        /**
+         Retrieves search items based on the search query, selects an artist ID, and fetches recommendations based on the artist ID. It then creates a playlist with the specified playlist name using the recommendations. The method also downloads the playlist image and retrieves the tracks of the created playlist.
+         */
         guard let token = token, let playlistName = playlistName, let searchQuery = searchQuery else { return }
+        // Retrieves search items based on the search query (artist name)
         NetworkManager.shared.searchArtistItems(with: token, query: searchQuery) { artistResult in
             guard let artistResult = artistResult else { return }
 
@@ -96,12 +107,14 @@ class NewPlaylistViewController: UIViewController, UITableViewDelegate, UITableV
 
             DispatchQueue.main.async {
                 guard let artistID = artistID else { return }
+                // Fetches track recommendations based on the artist ID retrieved
                 NetworkManager.shared.getRecommendations(with: token, artistID: artistID) { tracksResult in
                     guard let tracksResult = tracksResult else { return }
                     let trackURIsArray = tracksResult.map { $0.uri }
                     print(trackURIsArray)
 
                     DispatchQueue.main.async {
+                        // Creates a playlist with the specific playlist name using the track recommendations.
                         NetworkManager.shared.createPlaylist(with: token, songs: trackURIsArray, playlistName: playlistName) { playlist in
                             guard let playlist = playlist else { return }
                             self.playlistURI = playlist.uri
@@ -118,6 +131,7 @@ class NewPlaylistViewController: UIViewController, UITableViewDelegate, UITableV
                                     }
                                 }
 
+                                // Displays the tracks from the playlist
                                 NetworkManager.shared.getPlaylistTracks(with: token, playlistID: playlist.id) { tracksResult in
                                     guard let tracksResult = tracksResult else { return }
                                     self.playlistTracks = tracksResult
@@ -149,15 +163,4 @@ class NewPlaylistViewController: UIViewController, UITableViewDelegate, UITableV
         cell.detailTextLabel?.text = playlistTrack.artists[0].name
         return cell
     }
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
-    }
-    */
-
 }

@@ -4,13 +4,32 @@
 //
 //  Created by Zhi'en Foo on 28/04/2023.
 //
+// References:
+// 1) https://developer.spotify.com/documentation/web-api
 
 import UIKit
 import StoreKit
 import CoreData
 
+/**
+ A class that handles all API requests to Spotify.
+ */
 class NetworkManager {
+    
+    // A singleton instance of NetworkManager
     static let shared   = NetworkManager()
+    
+    private let offset          = "0"
+    private let clientID        = "***REMOVED***"
+    private let clientSecret    = "***REMOVED***"
+    
+    // Base64 Encoded Client ID:Client secret
+    private let encodedID  = "***REMOVED***"
+    
+    private let redirectUrl = "https://www.google.com"
+    
+    weak var databaseController: DatabaseProtocol?
+    
     
     private init() {
         // get a reference to the database from the appDelegate
@@ -18,18 +37,10 @@ class NetworkManager {
         databaseController = appDelegate?.databaseController
     }
     
-    private let offset          = "0"
-    private let clientID        = "***REMOVED***"
-    private let clientSecret    = "***REMOVED***"
-    
-    private let encodedID  = "***REMOVED***"
-    // Base64 Encoded Client ID:Client secret
-    
-    private let redirectUrl = "https://www.google.com"
-    
-    weak var databaseController: DatabaseProtocol?
-    
     func authoriseUser(with code: String, completion: @escaping (String?) -> Void) {
+        /**
+         Gets access token after user allows authorisation.
+         */
         var bodyComponents = URLComponents()
         let requestHeader: [String: String] = [
             "Authorization": "Basic \(encodedID)",
@@ -60,13 +71,10 @@ class NetworkManager {
                 let token = try decoder.decode(Token.self, from: data)
 
                 if let accessToken = token.accessToken {
-                    print("decoded access token:", accessToken)
                     completion(accessToken)
                 }
-                print("network access token:", token.accessToken!)
-                print("network refresh token:", token.refreshToken!)
-                self.databaseController?.saveTokens(token: token.accessToken!, refreshToken: token.refreshToken!)
                 
+                self.databaseController?.saveTokens(token: token.accessToken!, refreshToken: token.refreshToken!)
                 return
             } catch {
                 print("authoriseUser catch: ", error)
@@ -75,8 +83,10 @@ class NetworkManager {
     }
 
     func refreshAccessToken(completion: @escaping (String?) -> Void) {
+        /**
+         Requests for a new access token using the refresh token after its expiration.
+         */
         let refreshToken = databaseController?.fetchRefreshToken()
-        print("current refresh token:",refreshToken ?? "error")
         if refreshToken == "" {
             print("could not refresh token")
             return
@@ -111,12 +121,10 @@ class NetworkManager {
                 let token = try decoder.decode(Token.self, from: data)
                 
                 if let refreshedAccessToken = token.accessToken {
-                    print("decoded refreshed token:", refreshedAccessToken)
                     completion(refreshedAccessToken)
                 }
                 
                 self.databaseController?.saveTokens(token: token.accessToken!, refreshToken: token.refreshToken!)
-                                
                 return
             } catch {
                 print("getRefreshToken: catch");
@@ -127,7 +135,10 @@ class NetworkManager {
     // MARK: - FETCH MUSIC DATA
 
     func getTopArtists(with token: String, timeRange: String, limit: String, completion: @escaping ([Artist]?) -> Void) {
-        let type        = "artists"
+        /**
+         Get top artists of a user within a time range.
+         */
+        let type = "artists"
 
         guard let url = URL(string: "https://api.spotify.com/v1/me/top/\(type)?time_range=\(timeRange)&limit=\(limit)&offset=\(offset)") else { print("getTopArtists: url"); return }
 
@@ -160,7 +171,10 @@ class NetworkManager {
     }
     
     func getTopTracks(with token: String, timeRange: String, limit: String, completion: @escaping ([Track]?) -> Void) {
-        let type        = "tracks"
+        /**
+         Get top tracks of a user within a time range.
+         */
+        let type = "tracks"
 
         guard let url = URL(string: "https://api.spotify.com/v1/me/top/\(type)?time_range=\(timeRange)&limit=\(limit)&offset=\(offset)") else { print("getTopTracks: url"); return }
 
@@ -193,6 +207,9 @@ class NetworkManager {
     }
     
     func getCurrentlyPlayingTrack(with token: String, completion: @escaping (Track?) -> Void) {
+        /**
+         Get currently playing track of a user on Spotify.
+         */
         // Set up the request URL
         guard let url = URL(string: "https://api.spotify.com/v1/me/player/currently-playing") else { print("getCurrentlyPlayingTrack: url"); return }
 
@@ -223,6 +240,9 @@ class NetworkManager {
     }
     
     func getRecentlyPlayedTracks(with token: String, completion: @escaping ([PlayHistory]?) -> Void) {
+        /**
+         Get recently played tracks of a user.
+         */
         // Set up the request URL
         guard let url = URL(string: "https://api.spotify.com/v1/me/player/recently-played") else { print("getRecentlyPlayedTracks: url"); return }
 
@@ -253,6 +273,9 @@ class NetworkManager {
     }
     
     func getPlaylists(with token: String, limit: Int, offset: Int, completion: @escaping (([Playlist]?, Int?)) -> Void) {
+        /**
+         Get playlists from the user's library, maximum is 50 per request.
+         */
         // Set up the request URL
         guard let url = URL(string: "https://api.spotify.com/v1/me/playlists?limit=\(limit)&offset=\(offset)") else { print("getPlaylists: url"); return }
 
@@ -271,10 +294,8 @@ class NetworkManager {
             do {
                 guard let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
                       let playlistsArray = json["items"] as? [Any]
-                else {
-                    print("getPlaylists: Failed to decode JSON")
-                    return
-                }
+                else { print("getPlaylists: Failed to decode JSON"); return }
+                
                 let playlistsCount =  json["total"] as? Int
                 let playlists = playlistsArray.compactMap { $0 as? [String: Any] }
                                                 .compactMap { Playlist(dictionary: $0) }
@@ -288,6 +309,9 @@ class NetworkManager {
     }
     
     func getPlaylistTracks(with token: String, playlistID: String, completion: @escaping ([Track]?) -> Void) {
+        /**
+         Get all tracks from a playlist based on the playlist ID provided.
+         */
         // Set up the request URL
         guard let url = URL(string: "https://api.spotify.com/v1/playlists/\(playlistID)") else { print("getPlaylistTracks: url"); return }
 
@@ -305,19 +329,16 @@ class NetworkManager {
             
             do {
                 guard let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
-                else {
-                    print("getPlaylistTracks: Failed to decode JSON")
-                    return
-                }
+                else { print("getPlaylistTracks: Failed to decode JSON"); return }
 
                 let tracksObject = json["tracks"] as? [String: Any]
                 guard let playlistTrackObjects = tracksObject?["items"] as? [[String: Any]] else { return }
                 
-                print("playlist track object:", playlistTrackObjects)
                 let tracks = playlistTrackObjects.compactMap { playlistTrack -> Track? in
                     guard let track = playlistTrack["track"] as? [String: Any] else { return nil }
                     return Track(dictionary: track)
                 }
+                
                 completion(tracks)
             } catch let error {
                 print("getPlaylistTracks: JSON decoding error", error)
@@ -326,7 +347,48 @@ class NetworkManager {
         }.resume()
     }
     
+    func getSavedTracks(with token: String, limit: Int, offset: Int, completion: @escaping ([Track]?) -> Void) {
+        /**
+         Get user's liked songs library, maximum is 50 per request.
+         */
+        // Create the URL for the API endpoint
+        guard let url = URL(string: "https://api.spotify.com/v1/me/tracks?limit=\(limit)&offset=\(offset)") else { print("getSavedTracks: url"); return }
+        
+        // Create the request object
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        // Send the request
+        URLSession.shared.dataTask(with: request) { (data, response, error) in
+            guard error == nil else { print("getSavedTracks: error", error!); return }
+            guard let response = response as? HTTPURLResponse else { print("getSavedTracks: NO RESPONSE"); return }
+            guard response.statusCode == 200 else { print("getSavedTracks: BAD RESPONSE: ", response.statusCode); return }
+            guard let data = data else { print("NO DATA"); return }
+            
+            do {
+                guard let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
+                else { print("getSavedTracks: Failed to decode JSON"); return }
+
+                guard let savedTrackObjects = json["items"] as? [[String: Any]] else { return }
+                
+                let tracks = savedTrackObjects.compactMap { savedTrack -> Track? in
+                    guard let track = savedTrack["track"] as? [String: Any] else { return nil }
+                    return Track(dictionary: track)
+                }
+                
+                completion(tracks)
+            } catch let error {
+                print("getSavedTracks: JSON decoding error", error)
+                completion(nil)
+            }
+        }.resume()
+    }
+    
     func getArtists(with token: String, ids: String, completion: @escaping ([Artist]?) -> Void) {
+        /**
+         Get an array of artist objects based on the artist IDs provided.
+         */
         // Set up the request URL
         guard let url = URL(string: "https://api.spotify.com/v1/artists?ids=\(ids)") else { print("getArtists: url"); return }
 
@@ -345,10 +407,8 @@ class NetworkManager {
             do {
                 guard let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
                       let artistsArray = json["artists"] as? [[String: Any]]
-                else {
-                    print("getArtists: Failed to decode JSON")
-                    return
-                }
+                else { print("getArtists: Failed to decode JSON"); return }
+                
                 let artists = artistsArray.compactMap { Artist(dictionary: $0) }
 
                 completion(artists)
@@ -359,81 +419,10 @@ class NetworkManager {
         }.resume()
     }
     
-    // MARK: - FETCH MUSICAL ANALYSIS
-    func getAudioFeatures(with token: String, ids: String, completion: @escaping ([AudioFeatures]?) -> Void) {
-        guard let url = URL(string: "https://api.spotify.com/v1/audio-features?ids=\(ids)") else { print("getAudioFeatures: url"); return }
-        
-        // Create the request object
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        
-        // Send the request
-        URLSession.shared.dataTask(with: request) { (data, response, error) in
-            guard error == nil else { print("getAudioFeatures: error", error!); return }
-            guard let response = response as? HTTPURLResponse else { print("getAudioFeatures: NO RESPONSE"); return }
-            guard response.statusCode == 200 else { print("getAudioFeatures: BAD RESPONSE: ", response.statusCode); return }
-            guard let data = data else { print("NO DATA"); return }
-            
-            do {
-                guard let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
-                      let audioFeaturesArray = json["audio_features"] as? [Any]
-                else {
-                    print("getAudioFeatures: Failed to decode JSON")
-                    return
-                }
-
-                let audioFeatures = audioFeaturesArray.compactMap { $0 as? [String: Any] }
-                                                      .compactMap { AudioFeatures(dictionary: $0) }
-
-                completion(audioFeatures)
-            } catch let error {
-                print("getAudioFeatures: JSON decoding error", error)
-                completion(nil)
-            }
-        }.resume()
-    }
-    
-    // MARK: - SEARCH ITEM
-    func searchArtistItems(with token: String, query: String, completion: @escaping ([Artist]?) -> Void) {
-        let modifiedQuery = query.replacingOccurrences(of: " ", with: "+")
-        guard let url = URL(string: "https://api.spotify.com/v1/search?q=\(modifiedQuery)&type=artist&limit=1") else { print("searchArtistItems: url"); return }
-        
-        // Create the request object
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        
-        // Send the request
-        URLSession.shared.dataTask(with: request) { (data, response, error) in
-            guard error == nil else { print("searchArtistItems: error", error!); return }
-            guard let response = response as? HTTPURLResponse else { print("searchArtistItems: NO RESPONSE"); return }
-            guard response.statusCode == 200 else { print("searchArtistItems: BAD RESPONSE: ", response.statusCode); return }
-            guard let data = data else { print("NO DATA"); return }
-            
-            do {
-                guard let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any], let searchArtistResult = json["artists"] as? [String: Any]
-                else {
-                    print("searchArtistItems: Failed to decode JSON")
-                    return
-                }
-                
-                guard let artistItemsArray = searchArtistResult["items"] as? [[String: Any]]
-                else {
-                    print("Failed to parse artists")
-                    return
-                }
-                let artists = artistItemsArray.compactMap({ Artist(dictionary: $0) })
-
-                completion(artists)
-            } catch let error {
-                print("searchArtistItems: JSON decoding error", error)
-                completion(nil)
-            }
-        }.resume()
-    }
-    
     func getRecommendations(with token: String, artistID: String, completion: @escaping ([Track]?) -> Void) {
+        /**
+         Get recommendations in the form of an array of track objects based on artist IDs provided.
+         */
         let limit = 10
         guard let url = URL(string: "https://api.spotify.com/v1/recommendations?limit=\(limit)&seed_artists=\(artistID)") else { print("getRecommendations: url"); return }
         
@@ -451,13 +440,10 @@ class NetworkManager {
             
             do {
                 guard let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any], let tracksArray = json["tracks"] as? [[String: Any]]
-                else {
-                    print("getRecommendations: Failed to decode JSON")
-                    return
-                }
+                else { print("getRecommendations: Failed to decode JSON"); return }
 
                 let tracks = tracksArray.compactMap({ Track(dictionary: $0) })
-//                print(tracks)
+                
                 completion(tracks)
             } catch let error {
                 print("getRecommendations: JSON decoding error", error)
@@ -466,7 +452,120 @@ class NetworkManager {
         }.resume()
     }
     
+    // MARK: - FETCH MUSICAL ANALYSIS
+    
+    func getAudioFeatures(with token: String, ids: String, completion: @escaping ([AudioFeatures]?) -> Void) {
+        /**
+         Get an array of audio features of tracks corresponding to the string of track IDs provided.
+         */
+        guard let url = URL(string: "https://api.spotify.com/v1/audio-features?ids=\(ids)") else { print("getAudioFeatures: url"); return }
+        
+        // Create the request object
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        // Send the request
+        URLSession.shared.dataTask(with: request) { (data, response, error) in
+            guard error == nil else { print("getAudioFeatures: error", error!); return }
+            guard let response = response as? HTTPURLResponse else { print("getAudioFeatures: NO RESPONSE"); return }
+            guard response.statusCode == 200 else { print("getAudioFeatures: BAD RESPONSE: ", response.statusCode); return }
+            guard let data = data else { print("NO DATA"); return }
+            
+            do {
+                guard let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+                      let audioFeaturesArray = json["audio_features"] as? [Any]
+                else { print("getAudioFeatures: Failed to decode JSON"); return }
+
+                let audioFeatures = audioFeaturesArray.compactMap { $0 as? [String: Any] }
+                                                      .compactMap { AudioFeatures(dictionary: $0) }
+
+                completion(audioFeatures)
+            } catch let error {
+                print("getAudioFeatures: JSON decoding error", error)
+                completion(nil)
+            }
+        }.resume()
+    }
+    
+    // MARK: - SEARCH ITEM
+    
+    func searchArtistItems(with token: String, query: String, completion: @escaping ([Artist]?) -> Void) {
+        /**
+         Get the result from a search in the form of an array of artist objects based on the search query provided to search for artists.
+         */
+        let modifiedQuery = query.replacingOccurrences(of: " ", with: "+")
+        guard let url = URL(string: "https://api.spotify.com/v1/search?q=\(modifiedQuery)&type=artist&limit=1") else { print("searchArtistItems: url"); return }
+        
+        // Create the request object
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        // Send the request
+        URLSession.shared.dataTask(with: request) { (data, response, error) in
+            guard error == nil else { print("searchArtistItems: error", error!); return }
+            guard let response = response as? HTTPURLResponse else { print("searchArtistItems: NO RESPONSE"); return }
+            guard response.statusCode == 200 else { print("searchArtistItems: BAD RESPONSE: ", response.statusCode); return }
+            guard let data = data else { print("NO DATA"); return }
+            
+            do {
+                guard let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any], let searchArtistResult = json["artists"] as? [String: Any], let artistItemsArray = searchArtistResult["items"] as? [[String: Any]]
+                else { print("searchArtistItems: Failed to decode JSON"); return }
+                
+                let artists = artistItemsArray.compactMap({ Artist(dictionary: $0) })
+
+                completion(artists)
+            } catch let error {
+                print("searchArtistItems: JSON decoding error", error)
+                completion(nil)
+            }
+        }.resume()
+    }
+    
+    // MARK: - DOWNLOAD IMAGES
+
+    func downloadImage(from urlString: String, completed: @escaping (UIImage?) -> Void) {
+        /**
+         Download and crop image to square.
+         */
+        guard let url = URL(string: urlString) else { return }
+        
+        URLSession.shared.dataTask(with: url) { (data, response, error) in
+            guard let data = data, error == nil, let image = UIImage(data: data) else {
+                print("Failed to download album image: \(error?.localizedDescription ?? "Unknown error")")
+                return
+            }
+            let croppedImage = self.cropToSquare(image: image)
+            completed(croppedImage)
+        }.resume()
+    }
+    
+    func cropToSquare(image: UIImage) -> UIImage? {
+        /**
+         Crop image to square.
+         */
+        let sideLength = min(image.size.width, image.size.height)
+        let originX = (image.size.width - sideLength) / 2
+        let originY = (image.size.height - sideLength) / 2
+        let cropRect = CGRect(x: originX, y: originY, width: sideLength, height: sideLength)
+        
+        guard let cgImage = image.cgImage?.cropping(to: cropRect) else {
+            return nil
+        }
+        
+        return UIImage(cgImage: cgImage)
+    }
+    
+    // MARK: - PLAYLIST DATA
+    
     func createPlaylist(with token: String, songs: [String], playlistName: String, completion: @escaping (Playlist?) -> Void) {
+        /**
+         Creates a new playlist with a given list of tracks and provided playlist name.
+        Starts by getting the current user's ID, which is used to create a new playlist in the user's Spotify library.
+        Then, adds all tracks given into the newly created playlist.
+        Returns the newly created playlist with all tracks added in.
+         */
         guard let urlUser = URL(string: "https://api.spotify.com/v1/me") else { print("getUserID: url"); return }
         
         // Create the request object
@@ -548,7 +647,7 @@ class NetworkManager {
                             
                             do {
                                 guard let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
-                                   let snapshotID = json["snapshot_id"] as? String
+                                   let _ = json["snapshot_id"] as? String
                                 else { print("addSongs: Failed to decode JSON"); return }
                                 
                                 // get playlist request
@@ -588,160 +687,4 @@ class NetworkManager {
         }
         taskUserID.resume()
     }
-    
-    func getSavedTracks(with token: String, limit: Int, offset: Int, completion: @escaping ([Track]?) -> Void) {
-        // Create the URL for the API endpoint
-        guard let url = URL(string: "https://api.spotify.com/v1/me/tracks?limit=\(limit)&offset=\(offset)") else { print("getSavedTracks: url"); return }
-        
-        // Create the request object
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        
-        // Send the request
-        URLSession.shared.dataTask(with: request) { (data, response, error) in
-            guard error == nil else { print("getSavedTracks: error", error!); return }
-            guard let response = response as? HTTPURLResponse else { print("getSavedTracks: NO RESPONSE"); return }
-            guard response.statusCode == 200 else { print("getSavedTracks: BAD RESPONSE: ", response.statusCode); return }
-            guard let data = data else { print("NO DATA"); return }
-            
-            do {
-                guard let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
-                else {
-                    print("getSavedTracks: Failed to decode JSON")
-                    return
-                }
-
-                guard let savedTrackObjects = json["items"] as? [[String: Any]] else { return }
-                
-//                print("savedTrackObjects:", savedTrackObjects)
-                let tracks = savedTrackObjects.compactMap { savedTrack -> Track? in
-                    guard let track = savedTrack["track"] as? [String: Any] else { return nil }
-                    return Track(dictionary: track)
-                }
-                completion(tracks)
-            } catch let error {
-                print("getSavedTracks: JSON decoding error", error)
-                completion(nil)
-            }
-        }.resume()
-    }
-    
-    // MARK: - DOWNLOAD IMAGES
-
-    func downloadImage(from urlString: String, completed: @escaping (UIImage?) -> Void) {
-        guard let url = URL(string: urlString) else { return }
-        
-        URLSession.shared.dataTask(with: url) { (data, response, error) in
-            guard let data = data, error == nil, let image = UIImage(data: data) else {
-                print("Failed to download album image: \(error?.localizedDescription ?? "Unknown error")")
-                return
-            }
-            let croppedImage = self.cropToSquare(image: image)
-            completed(croppedImage)
-        }.resume()
-    }
-    
-    func cropToSquare(image: UIImage) -> UIImage? {
-        let sideLength = min(image.size.width, image.size.height)
-        let originX = (image.size.width - sideLength) / 2
-        let originY = (image.size.height - sideLength) / 2
-        let cropRect = CGRect(x: originX, y: originY, width: sideLength, height: sideLength)
-        
-        guard let cgImage = image.cgImage?.cropping(to: cropRect) else {
-            return nil
-        }
-        
-        return UIImage(cgImage: cgImage)
-    }
-    
-    // MARK: - PLAYLIST DATA
-    
-//    func createPlaylist(OAuthtoken: String, playlistName: String, playlistDescription: String, songs: [String], isPublic: String, completed: @escaping (String?) -> Void)
-//    {
-//        guard let urlUser = URL(string: "\(baseURL.spotifyAPI)v1/me") else { print("urlUser"); return }
-//
-//        var requestUser         = URLRequest(url: urlUser)
-//        requestUser.httpMethod  = "GET"
-//        requestUser.addValue("application/json", forHTTPHeaderField: HeaderField.accept)
-//        requestUser.addValue("application/json", forHTTPHeaderField: HeaderField.contentType)
-//        requestUser.addValue("Bearer \(String(OAuthtoken))", forHTTPHeaderField: HeaderField.authorization)
-//
-//        let taskUserID = URLSession.shared.dataTask(with: requestUser) { data, response, error in
-//
-//            if let _            = error { print("taskUserID: error"); return }
-//            guard let response  = response as? HTTPURLResponse, response.statusCode == 200 else { print("taskUserID: response"); return }
-//            guard let data      = data else { print("taskUserIDL: data"); return }
-//
-//            do {
-//                let decoder                 = JSONDecoder()
-//                decoder.keyDecodingStrategy = .convertFromSnakeCase
-//                let user                    = try decoder.decode(UserProfile.self, from: data)
-//
-//                guard let uid = user.id else { return }
-//                guard let urlPlaylist = URL(string: "\(baseURL.spotifyAPI)v1/users/\(uid)/playlists") else { print("urlPlaylist"); return }
-//
-//                let requestPlaylistHeaders: [String:String] = [HeaderField.accept : "application/json",
-//                                                               HeaderField.contentType : "application/json",
-//                                                               HeaderField.authorization : "Bearer \(OAuthtoken)"]
-//
-//                let parametersPlaylist: [String: Any] = [
-//                    "name" : playlistName,
-//                    "description" : playlistDescription,
-//                    "public": false
-//                ]
-//
-//                let jsonPlaylistData = try? JSONSerialization.data(withJSONObject: parametersPlaylist)
-//
-//                var requestPlaylist                 = URLRequest(url: urlPlaylist)
-//                requestPlaylist.httpMethod          = "POST"
-//                requestPlaylist.allHTTPHeaderFields = requestPlaylistHeaders
-//                requestPlaylist.httpBody            = jsonPlaylistData
-//
-//                let taskPlaylist = URLSession.shared.dataTask(with: requestPlaylist) { data, response, error in
-//
-//                    if let _        = error { return }
-//                    guard let data  = data else { return } /// no error code, bc returns error object
-//
-//                    do {
-//                        let decoder                 = JSONDecoder()
-//                        decoder.keyDecodingStrategy = .convertFromSnakeCase
-//                        let playlist                = try decoder.decode(Playlist.self, from: data)
-//
-//                        guard let playlistID = playlist.id else { return }
-//                        guard let urlSongs = URL(string: "\(baseURL.spotifyAPI)v1/playlists/\(playlistID)/tracks") else { print("urlSongs"); return }
-//
-//                        let requestSongsHeaders: [String:String] = [HeaderField.accept : "application/json",
-//                                                                    HeaderField.contentType : "application/json",
-//                                                                    HeaderField.authorization : "Bearer \(OAuthtoken)"]
-//
-//                        let parametersSongs: [String: Any] = ["uris" : songs]
-//                        let jsonSongsData = try? JSONSerialization.data(withJSONObject: parametersSongs)
-//
-//                        var requestSongs                 = URLRequest(url: urlSongs)
-//                        requestSongs.httpMethod          = "POST"
-//                        requestSongs.allHTTPHeaderFields = requestSongsHeaders
-//                        requestSongs.httpBody            = jsonSongsData
-//
-//                        let taskSongs = URLSession.shared.dataTask(with: requestSongs) { data, response, error in
-//
-//                            if let _        = error { print("taskSongs: error"); return }
-//                            guard let data  = data else { print("taskSongs: data"); return }
-//
-//                            do {
-//                                let decoder                 = JSONDecoder()
-//                                decoder.keyDecodingStrategy = .convertFromSnakeCase
-//                                let snapshot                = try decoder.decode(Snapshot.self, from: data)
-//                                completed(snapshot.snapshotId); return
-//                            } catch { print("taskSongs: catch") }
-//                        }
-//                        taskSongs.resume()
-//                    } catch { print("taskPlaylist: catch") }
-//                }
-//                taskPlaylist.resume()
-//            } catch { print("taskUserID: catch") }
-//        }
-//        taskUserID.resume()
-//    }
-
 }

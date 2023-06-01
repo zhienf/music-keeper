@@ -7,34 +7,26 @@
 
 import UIKit
 
+/**
+ A view controller that generates a random playlist based on a given artist name.
+
+ This class is a subclass of UIViewController.
+
+ Usage:
+ 1. Generates a random playlist based on a given artist name.
+ 2. Artist name input will be used to get track recommendations for the new playlist.
+ 3. Allows user to name the new playlist to be generated.
+ */
 class GeneratePlaylistViewController: UIViewController {
 
     @IBOutlet weak var artistInput: UITextField!
-    
     @IBOutlet weak var playlistNameInput: UITextField!
-    
-    @IBAction func generatePlaylist(_ sender: Any) {
-//        artistInput.text =
-//        performSegue(withIdentifier: "showPlaylistGenerated", sender: sender)
-    }
-    
-    weak var databaseController: DatabaseProtocol?
-    var token: String?
+    @IBOutlet weak var generatePlaylistButton: UIButton!
     
     override func viewDidLoad() {
         super.viewDidLoad()
 
         // Do any additional setup after loading the view.
-        
-        // get a reference to the database from the appDelegate
-        let appDelegate = (UIApplication.shared.delegate as? AppDelegate)
-        databaseController = appDelegate?.databaseController
-        
-        // Retrieve the token from Core Data
-        token = databaseController?.fetchAccessToken()
-        let refreshToken = databaseController?.fetchRefreshToken()
-        print("gen playlist token:", token!)
-        print("gen playlist refresh token:", refreshToken)
     }
     
     // MARK: - Navigation
@@ -51,6 +43,9 @@ class GeneratePlaylistViewController: UIViewController {
     }
     
     override func shouldPerformSegue(withIdentifier: String, sender: Any?) -> Bool {
+        /**
+         Validates the text field input and makes sure they are not left empty.
+         */
         if withIdentifier == "showPlaylistGenerated" {
             guard let artistInput = artistInput.text, !artistInput.isEmpty else {
                 displayMessage(title: "Error", message: "Please enter an artist")

@@ -4,6 +4,8 @@
 //
 //  Created by Zhi'en Foo on 29/05/2023.
 //
+// References:
+// 1) FIT3178 Week 2 Lab Exercise - Sliders
 
 import UIKit
 
@@ -12,21 +14,25 @@ protocol MoodChangeDelegate: AnyObject {
     func resetValues()
 }
 
+/**
+ A view controller that allows filters to be applied to user's liked songs library.
+
+ This class is a subclass of UIViewController.
+
+ Usage:
+ 1. Apply filters to liked songs library using sliders for danceability, energy and valence
+ */
 class FilterSongViewController: UIViewController {
 
     @IBOutlet weak var songsCountLabel: UILabel!
-    
     @IBOutlet weak var danceabilitySlider: UISlider!
-    
     @IBOutlet weak var energySlider: UISlider!
-    
     @IBOutlet weak var valenceSlider: UISlider!
     
-    @IBOutlet weak var minTempoTextField: UITextField!
-    
-    @IBOutlet weak var maxTempoTextField: UITextField!
-    
     @IBAction func sliderValueChanged(_ sender: Any) {
+        /**
+         Detects if there is a change in any of the three sliders and informs its delegate.
+         */
         let danceabilityValue = Double(danceabilitySlider.value)
         let energyValue = Double(energySlider.value)
         let valenceValue = Double(valenceSlider.value)
@@ -35,6 +41,9 @@ class FilterSongViewController: UIViewController {
     }
     
     @IBAction func clearFilters(_ sender: Any) {
+        /**
+         Resets slider values to 0 when clear all button is selected and informs its delegate.
+         */
         danceabilitySlider.setValue(0.0, animated: false)
         energySlider.setValue(0.0, animated: false)
         valenceSlider.setValue(0.0, animated: false)
@@ -43,49 +52,30 @@ class FilterSongViewController: UIViewController {
     }
     
     @IBAction func showResults(_ sender: Any) {
+        /**
+         Return to previous view controller when show results button is selected
+         */
         navigationController?.popViewController(animated: true)
     }
     
-    var token: String?
-    weak var databaseController: DatabaseProtocol?
-    var songsCount: Int?
-    var librarySongs: [Track]?
+    // properties for keeping track of sliders' values
     var initialValues: (Double, Double, Double) = (0, 0, 0)
     weak var delegate: MoodChangeDelegate?
     
+    // properties for filtering library
+    var songsCount: Int?
+    var librarySongs: [Track]?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Do any additional setup after loading the view.
-        
-        // get a reference to the database from the appDelegate
-        let appDelegate = (UIApplication.shared.delegate as? AppDelegate)
-        databaseController = appDelegate?.databaseController
-        
-        // Retrieve the token from Core Data
-        token = databaseController?.fetchAccessToken()
-        let refreshToken = databaseController?.fetchRefreshToken()
-        print("filter token:", token!)
-        print("filter refresh token:", refreshToken)
-        
+    
         if let songsCount = songsCount {
             songsCountLabel.text = "\(songsCount) songs"
         }
         
+        // initialise sliders' values
         danceabilitySlider.setValue(Float(initialValues.0), animated: false)
         energySlider.setValue(Float(initialValues.1), animated: false)
         valenceSlider.setValue(Float(initialValues.2), animated: false)
     }
-    
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
-    }
-    */
-
 }

@@ -4,42 +4,60 @@
 //
 //  Created by Zhi'en Foo on 15/05/2023.
 //
+// References:
+// 1) FIT3178 Week 5 Lab Exercise - Adding a loading indicator view
+// 2) https://developer.apple.com/documentation/uikit/uicollectionviewdelegateflowlayout
+// 3) https://youtu.be/F6JNvzuldxg (How to UICollectionView Flow Layout)
 
 import UIKit
 
-private let reuseIdentifier = "playlistToAnalyse"
-
+/**
+ A model representing the playlist information required for collection view display.
+ 
+ Usage:
+ 1. Data is used for displaying the playlist information in the collection view.
+ */
 struct PlaylistInfo {
     var playlistTitle: String
     var playlistImage: UIImage
     var playlistID: String
 }
 
-class PlaylistAnalysisCollectionViewController: UICollectionViewController {
+/**
+ A view controller that displays a list of playlists from user's Spotify library.
+
+ This class is a subclass of UICollectionViewController and conforms to UICollectionViewDelegateFlowLayout protocols.
+
+ Usage:
+ 1. Displays a collection of playlists from user's Spotify library, allows selection for playlist analysis.
+ */
+class PlaylistAnalysisCollectionViewController: UICollectionViewController, UICollectionViewDelegateFlowLayout {
     
-    var indicator = UIActivityIndicatorView()   // displays a spinning animation to indicate loading
-    weak var databaseController: DatabaseProtocol?
+    private let reuseIdentifier = "playlistToAnalyse"
+    
+    // properties to retrieve access token for API calls
     var token: String?
-    var allPlaylists: [Playlist] = []
-    var allPlaylistInfo: [PlaylistInfo] = []
-    var totalNumberOfPlaylists: Int = 0
+    weak var databaseController: DatabaseProtocol?
+    
+    // displays a spinning animation to indicate loading
+    var indicator = UIActivityIndicatorView()
+    
+    // properties for collection view flow layout
     private let itemsPerRow: CGFloat = 2
     private let sectionInsets = UIEdgeInsets(
       top: 50.0,
       left: 20.0,
       bottom: 50.0,
       right: 20.0)
-
+    
+    // properties to store data fetched from API
+    var allPlaylists: [Playlist] = []
+    var allPlaylistInfo: [PlaylistInfo] = []
+    var totalNumberOfPlaylists: Int = 0
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Uncomment the following line to preserve selection between presentations
-        // self.clearsSelectionOnViewWillAppear = false
-
-        // Register cell classes
-//        self.collectionView!.register(PlaylistToAnalyseCell.self, forCellWithReuseIdentifier: reuseIdentifier)
-
+        
         // Do any additional setup after loading the view.
         
         // get a reference to the database from the appDelegate
@@ -48,10 +66,14 @@ class PlaylistAnalysisCollectionViewController: UICollectionViewController {
         
         // Retrieve the token from Core Data
         token = databaseController?.fetchAccessToken()
-        let refreshToken = databaseController?.fetchRefreshToken()
-        print("analyser token:", token!)
-        print("analyser refresh token:", refreshToken)
         
+        // Add a loading indicator view
+        setupIndicator()
+        
+        fetchPlaylists()
+    }
+    
+    func setupIndicator() {
         // Add a loading indicator view
         indicator.style = UIActivityIndicatorView.Style.large
         indicator.translatesAutoresizingMaskIntoConstraints = false
@@ -60,14 +82,15 @@ class PlaylistAnalysisCollectionViewController: UICollectionViewController {
         NSLayoutConstraint.activate([indicator.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor), indicator.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor)
         ])
         indicator.startAnimating()
-        
-        fetchPlaylists()
     }
     
     private func fetchPlaylists() {
+        /**
+         Retrieves all playlists from the API using pagination to fetch a specified number of playlists per request. It also downloads playlist images asynchronously and processes the fetched data.
+         */
         guard let token = token else { return }
         let limit = 50 // Number of playlists to fetch per request
-        var offset = 0 // Initial offset
+        let offset = 0 // Initial offset
         
         // Create a dispatch group to track the completion of image downloads
         let downloadGroup = DispatchGroup()
@@ -90,7 +113,6 @@ class PlaylistAnalysisCollectionViewController: UICollectionViewController {
                 if playlistFetched.count < limit {
                     DispatchQueue.main.async {
                         // Update UI or perform other tasks related to fetched playlists
-                        print("All playlists fetched")
                         for playlist in self.allPlaylists {
                             let playlistTitle = playlist.name
                             let playlistID = playlist.id
@@ -125,7 +147,6 @@ class PlaylistAnalysisCollectionViewController: UICollectionViewController {
                 }
             }
         }
-        
         // Start fetching playlists recursively with initial offset
         fetchPlaylistsRecursive(offset: offset)
     }
@@ -137,9 +158,7 @@ class PlaylistAnalysisCollectionViewController: UICollectionViewController {
          // Get the new view controller using [segue destinationViewController].
          // Pass the selected object to the new view controller.
         if segue.identifier == "showPlaylistSummary" {
-            
             if let cell = sender as? UICollectionViewCell, let indexPath = collectionView.indexPath(for: cell) {
-                
                 let controller = segue.destination as! PlaylistSummaryViewController
                 controller.currentPlaylist = allPlaylistInfo[indexPath.row]
             }
@@ -149,13 +168,12 @@ class PlaylistAnalysisCollectionViewController: UICollectionViewController {
     // MARK: UICollectionViewDataSource
 
     override func numberOfSections(in collectionView: UICollectionView) -> Int {
-        // #warning Incomplete implementation, return the number of sections
+        // return the number of sections
         return 1
     }
 
-
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        // #warning Incomplete implementation, return the number of items
+        // return the number of items
         return allPlaylists.count
     }
 
@@ -166,67 +184,34 @@ class PlaylistAnalysisCollectionViewController: UICollectionViewController {
         // Configure the cell using the playlist data
         cell.playlistTitle.text = playlist.playlistTitle
         cell.playlistImage.image = playlist.playlistImage
-        // Configure other cell properties
     
         return cell
     }
-
-    // MARK: UICollectionViewDelegate
-
-    /*
-    // Uncomment this method to specify if the specified item should be highlighted during tracking
-    override func collectionView(_ collectionView: UICollectionView, shouldHighlightItemAt indexPath: IndexPath) -> Bool {
-        return true
-    }
-    */
-
-    /*
-    // Uncomment this method to specify if the specified item should be selected
-    override func collectionView(_ collectionView: UICollectionView, shouldSelectItemAt indexPath: IndexPath) -> Bool {
-        return true
-    }
-    */
-
-    /*
-    // Uncomment these methods to specify if an action menu should be displayed for the specified item, and react to actions performed on the item
-    override func collectionView(_ collectionView: UICollectionView, shouldShowMenuForItemAt indexPath: IndexPath) -> Bool {
-        return false
-    }
-
-    override func collectionView(_ collectionView: UICollectionView, canPerformAction action: Selector, forItemAt indexPath: IndexPath, withSender sender: Any?) -> Bool {
-        return false
-    }
-
-    override func collectionView(_ collectionView: UICollectionView, performAction action: Selector, forItemAt indexPath: IndexPath, withSender sender: Any?) {
     
-    }
-    */
-
-}
-
-// MARK: - Collection View Flow Layout Delegate
-extension PlaylistAnalysisCollectionViewController: UICollectionViewDelegateFlowLayout {
-  func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-    let paddingSpace = sectionInsets.left * (itemsPerRow + 1)
-    let availableWidth = view.frame.width - paddingSpace
-    let widthPerItem = availableWidth / itemsPerRow
+    // MARK: - UICollectionViewDelegateFlowLayout
     
-    return CGSize(width: widthPerItem, height: widthPerItem * 1.2)
-  }
-  
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+      let paddingSpace = sectionInsets.left * (itemsPerRow + 1)
+      let availableWidth = view.frame.width - paddingSpace
+      let widthPerItem = availableWidth / itemsPerRow
+      
+      return CGSize(width: widthPerItem, height: widthPerItem * 1.2)
+    }
+    
 
-  func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
-    return sectionInsets
-  }
-  
-  func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
-    return sectionInsets.left
-  }
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
+      return sectionInsets
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+      return sectionInsets.left
+    }
 }
-
 
 class PlaylistToAnalyseCell: UICollectionViewCell {
-    
+    /**
+     Custom collection view cell used in PlaylistAnalysisCollectionViewController.
+     */
     @IBOutlet weak var playlistImage: UIImageView!
     @IBOutlet weak var playlistTitle: UILabel!
 }

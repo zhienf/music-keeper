@@ -4,27 +4,43 @@
 //
 //  Created by Zhi'en Foo on 28/04/2023.
 //
+// References:
+// 1) https://youtu.be/WIT4f23M2DI (Custom PopUp Overlayer View)
+// 2) https://youtu.be/LeRReD56TgI (Custom UITextField in Swift)
 
 import UIKit
 
+/**
+ A view controller that displays an overlayer for user to create a new playlist for the filtered tracks with a custom playlist name.
+
+ This class is a subclass of UIViewController.
+
+ Usage:
+ 1. Displays an overlayer for user to create a new playlist for the filtered tracks.
+ 2. Allows user to provide a custom playlist name to be saved.
+ */
 class OverLayerPopUp: UIViewController {
     
-    var songsCount: Int?
-    var songListToSave: [Track]?
-    var token: String?
-    weak var databaseController: DatabaseProtocol?
-
     @IBOutlet weak var songsCountLabel: UILabel!
     @IBOutlet weak var playlistNameTextField: UITextField!
     @IBOutlet weak var backView: UIView!
     @IBOutlet weak var popUpView: UIView!
+    @IBOutlet weak var saveButton: UIButton!
+    
+    // properties storing track information for new playlist
+    var songsCount: Int?
+    var songListToSave: [Track]?
+    
+    // properties to retrieve access token for API calls
+    var token: String?
+    weak var databaseController: DatabaseProtocol?
     
     @IBAction func cancelButton(_ sender: Any) {
         hide()
     }
-    @IBOutlet weak var saveButton: UIButton!
     
     @IBAction func saveButton(_ sender: Any) {
+        // checks the text field and makes sure it is not left empty
         guard let playlistName = playlistNameTextField.text, !playlistName.isEmpty else {
             displayMessage(title: "Error", message: "Please enter a playlist name")
             return
@@ -34,12 +50,10 @@ class OverLayerPopUp: UIViewController {
         let trackURIsArray = songListToSave.map { $0.uri }
         
         NetworkManager.shared.createPlaylist(with: token, songs: trackURIsArray, playlistName: playlistName) { playlist in
-            guard let playlist = playlist else { return }
-            print("playlist created:", playlist.name)
+            guard playlist != nil else { return }
             
             DispatchQueue.main.async {
-//                self.hide()
-//                self.displayMessage(title: "New Playlist", message: "Playlist saved!")
+                // displays a pop up message to inform playlist successfully saved before dismissing the overlayer
                 self.displayMessage(title: "New Playlist", message: "Playlist saved!") {
                     self.hide()
                 }
@@ -65,9 +79,6 @@ class OverLayerPopUp: UIViewController {
         
         // Retrieve the token from Core Data
         token = databaseController?.fetchAccessToken()
-        let refreshToken = databaseController?.fetchRefreshToken()
-        print("overlayer token:", token!)
-        print("overlayer refresh token:", refreshToken)
 
         configView()
     }
@@ -100,12 +111,6 @@ class OverLayerPopUp: UIViewController {
         self.dismiss(animated: false)
         self.removeFromParent()
     }
-    
-//    func displayMessage(title: String, message: String) {
-//        let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
-//        alertController.addAction(UIAlertAction(title: "Dismiss", style: .default, handler: nil))
-//        self.present(alertController, animated: true, completion: nil)
-//    }
     
     func displayMessage(title: String, message: String, completion: (() -> Void)? = nil) {
         let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)

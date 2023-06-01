@@ -10,11 +10,7 @@ import CoreData
 
 class CoreDataController: NSObject, DatabaseProtocol, NSFetchedResultsControllerDelegate {
     
-    var listeners = MulticastDelegate<DatabaseListener>()
     var persistentContainer: NSPersistentContainer
-//    var allBooksFetchedResultsController: NSFetchedResultsController<Book>?
-    
-    var token: String?
     
     override init() {
         persistentContainer = NSPersistentContainer(name: "AccessTokenDataModel")
@@ -28,6 +24,9 @@ class CoreDataController: NSObject, DatabaseProtocol, NSFetchedResultsController
     }
     
     func saveTokens(token: String, refreshToken: String) {
+        /**
+         Save tokens retrieved from Spotify API to core data.
+         */
         guard let entity = NSEntityDescription.entity(forEntityName: "AccessToken", in: persistentContainer.viewContext) else {
             fatalError("Failed to create entity description")
         }
@@ -45,7 +44,9 @@ class CoreDataController: NSObject, DatabaseProtocol, NSFetchedResultsController
     }
     
     func fetchAccessToken() -> String {
-        // Fetch the AccessToken entity from the Core Data store
+        /**
+         Fetch the AccessToken entity from the Core Data store.
+         */
         let fetchRequest: NSFetchRequest<AccessToken> = AccessToken.fetchRequest()
         let sortDescriptor = NSSortDescriptor(key: "timestamp", ascending: false)
         fetchRequest.sortDescriptors = [sortDescriptor]
@@ -65,7 +66,9 @@ class CoreDataController: NSObject, DatabaseProtocol, NSFetchedResultsController
     }
     
     func fetchRefreshToken() -> String {
-        // Fetch the AccessToken entity from the Core Data store
+        /**
+         Fetch the AccessToken entity from the Core Data store.
+         */
         let fetchRequest: NSFetchRequest<AccessToken> = AccessToken.fetchRequest()
         let sortDescriptor = NSSortDescriptor(key: "timestamp", ascending: false)
         fetchRequest.sortDescriptors = [sortDescriptor]
@@ -83,26 +86,6 @@ class CoreDataController: NSObject, DatabaseProtocol, NSFetchedResultsController
         }
         return "no token"
     }
-
-    
-//    func fetchAllBooks() -> [Book] {
-//        if allBooksFetchedResultsController == nil {
-//            let fetchRequest: NSFetchRequest<Book> = Book.fetchRequest()
-//            let nameSortDescriptor = NSSortDescriptor(key: "title", ascending: true)
-//            fetchRequest.sortDescriptors = [nameSortDescriptor]
-//            allBooksFetchedResultsController = NSFetchedResultsController<Book>( fetchRequest:fetchRequest, managedObjectContext: persistentContainer.viewContext, sectionNameKeyPath: nil, cacheName: nil)
-//            allBooksFetchedResultsController?.delegate = self
-//            do {
-//                try allBooksFetchedResultsController?.performFetch()
-//            } catch {
-//                print("Fetch Request failed: \(error)")
-//            }
-//        }
-//        if let books = allBooksFetchedResultsController?.fetchedObjects {
-//            return books
-//        }
-//        return [Book]()
-//    }
     
     // MARK: - DatabaseProtocol protocol methods
     
@@ -115,39 +98,4 @@ class CoreDataController: NSObject, DatabaseProtocol, NSFetchedResultsController
             }
         }
     }
-    
-    func addListener(listener: DatabaseListener) {
-        listeners.addDelegate(listener)
-//        listener.onBookListChange(bookList: fetchAllBooks())
-    }
-    
-    func removeListener(listener: DatabaseListener) {
-        listeners.removeDelegate(listener)
-    }
-    
-//    func addBook(bookData: BookData) -> Book {
-//        let book = NSEntityDescription.insertNewObject(forEntityName: "Book", into: persistentContainer.viewContext) as! Book
-//
-//        book.authors = bookData.authors
-//        book.bookDescription = bookData.bookDescription
-//        book.imageURL = bookData.imageURL
-//        book.isbn13 = bookData.isbn13
-//        book.publicationDate = bookData.publicationDate
-//        book.publisher = bookData.publisher
-//        book.title = bookData.title
-//
-//        return book
-//    }
-    
-//    func removeBook(book: Book) {
-//        persistentContainer.viewContext.delete(book)
-//    }
-    
-    // MARK: - Fetched Results Controller Protocol methods
-    
-//    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-//        listeners.invoke() { listener in
-//            listener.onBookListChange(bookList: fetchAllBooks())
-//        }
-//    }
 }
