@@ -103,22 +103,6 @@
 			name = ViewControllers;
 			sourceTree = "<group>";
 		};
-		F20377192A03F5BB00553183 /* Spotify */ = {
-			isa = PBXGroup;
-			children = (
-				F26A899429EE49C100FF3A59 /* Track.swift */,
-				F26A899629EE4A0600FF3A59 /* Artist.swift */,
-				F26A899829EE4A1500FF3A59 /* Album.swift */,
-				F2E3944B29FFA779001CD918 /* Image.swift */,
-				F2E3944D29FFA87E001CD918 /* PlayHistory.swift */,
-				F203771A2A03F61300553183 /* AudioFeatures.swift */,
-				F203771C2A0638A700553183 /* ExternalURLs.swift */,
-				F2E03D392A11277C00B03980 /* Playlist.swift */,
-				F28EFAD729FC092700B942C8 /* Token.swift */,
-			);
-			name = Spotify;
-			sourceTree = "<group>";
-		};
 		F26A896E29EE1EB200FF3A59 = {
 			isa = PBXGroup;
 			children = (
@@ -140,7 +124,7 @@
 		F26A897929EE1EB200FF3A59 /* Music Keeper */ = {
 			isa = PBXGroup;
 			children = (
-				F20377192A03F5BB00553183 /* Spotify */,
+				F2B3BFF42A2832F10057019B /* Spotify */,
 				F20377182A03F5A400553183 /* ViewControllers */,
 				F29762FA29FCC39A0013FC8D /* Database */,
 				F29762F229FCC1070013FC8D /* DataModel */,
@@ -151,7 +135,6 @@
 				F26A898329EE1EB400FF3A59 /* Assets.xcassets */,
 				F26A898529EE1EB400FF3A59 /* LaunchScreen.storyboard */,
 				F26A898829EE1EB400FF3A59 /* Info.plist */,
-				F28EFAD129FBFE3900B942C8 /* NetworkManager.swift */,
 			);
 			path = "Music Keeper";
 			sourceTree = "<group>";
@@ -171,6 +154,23 @@
 				F29762FD29FCC43F0013FC8D /* DatabaseProtocol.swift */,
 			);
 			path = Database;
+			sourceTree = "<group>";
+		};
+		F2B3BFF42A2832F10057019B /* Spotify */ = {
+			isa = PBXGroup;
+			children = (
+				F26A899429EE49C100FF3A59 /* Track.swift */,
+				F26A899629EE4A0600FF3A59 /* Artist.swift */,
+				F26A899829EE4A1500FF3A59 /* Album.swift */,
+				F2E3944B29FFA779001CD918 /* Image.swift */,
+				F2E3944D29FFA87E001CD918 /* PlayHistory.swift */,
+				F203771A2A03F61300553183 /* AudioFeatures.swift */,
+				F203771C2A0638A700553183 /* ExternalURLs.swift */,
+				F2E03D392A11277C00B03980 /* Playlist.swift */,
+				F28EFAD729FC092700B942C8 /* Token.swift */,
+				F28EFAD129FBFE3900B942C8 /* NetworkManager.swift */,
+			);
+			path = Spotify;
 			sourceTree = "<group>";
 		};
 		F2BC696D29FB8AB600F13AA9 /* OverLayerPopUp */ = {
