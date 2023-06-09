@@ -164,36 +164,58 @@ class LibraryViewController: UIViewController, UITableViewDelegate, UITableViewD
          This method retrieves the audio features for the provided tracks and applies filtering based on danceability, energy, and valence values. The filtered tracks are returned through the completion closure.
          */
         guard let token = token else { return }
-        
-        let trackIDs = tracks.map { $0.id }.joined(separator: ",")
-        
-        NetworkManager.shared.getAudioFeatures(with: token, ids: trackIDs) { audioFeaturesResult in
-            guard let audioFeaturesResult = audioFeaturesResult else { return }
-            let audioFeaturesItems = audioFeaturesResult
-            
-            DispatchQueue.main.async {
-                // Filtering songs based on danceability, energy, and valence
-                if let danceabilityValue = self.danceabilityValue,
-                   let energyValue = self.energyValue,
-                   let valenceValue = self.valenceValue {
-                    print(danceabilityValue, energyValue, valenceValue)
-                    let filteredSongs = tracks.filter { savedTrack in
-                        guard let audioFeature = audioFeaturesItems.first(where: { $0.id == savedTrack.id }) else {
-                            return false
-                        }
-                        
-                        let (danceabilityLowerBound, danceabilityUpperBound) = self.calculateBounds(value: danceabilityValue)
-                        let (energyLowerBound, energyUpperBound) = self.calculateBounds(value: energyValue)
-                        let (valenceLowerBound, valenceUpperBound) = self.calculateBounds(value: valenceValue)
-                        
-                        return (danceabilityLowerBound...danceabilityUpperBound).contains(audioFeature.danceability) &&
+
+        let trackIDs = tracks.map { $0.id }
+        let batchSize = 100
+        var batchedTrackIDs: [[String]] = []
+
+        // trackIDs array is split into batches of 100 using a loop
+        for index in stride(from: 0, to: trackIDs.count, by: batchSize) {
+            let endIndex = min(index + batchSize, trackIDs.count)
+            let batch = Array(trackIDs[index..<endIndex])
+            batchedTrackIDs.append(batch)
+        }
+
+        DispatchQueue.main.async {
+            // initialise filteredSongs with all tracks in library if no filters being applied
+            var filteredSongs: [Track] = tracks
+            let dispatchGroup = DispatchGroup()
+
+            // Iterate through each batch of track IDs
+            for batch in batchedTrackIDs {
+                dispatchGroup.enter()
+
+                let batchTrackIDs = batch.joined(separator: ",")
+                NetworkManager.shared.getAudioFeatures(with: token, ids: batchTrackIDs) { audioFeaturesResult in
+                    guard let audioFeaturesResult = audioFeaturesResult else {
+                        dispatchGroup.leave()
+                        return
+                    }
+                    
+                    // Filtering songs based on danceability, energy, and valence
+                    if let danceabilityValue = self.danceabilityValue,
+                       let energyValue = self.energyValue,
+                       let valenceValue = self.valenceValue {
+                        print(danceabilityValue, energyValue, valenceValue)
+                        filteredSongs = tracks.filter { savedTrack in
+                            guard let audioFeature = audioFeaturesResult.first(where: { $0.id == savedTrack.id }) else {
+                                return false
+                            }
+
+                            let (danceabilityLowerBound, danceabilityUpperBound) = self.calculateBounds(value: danceabilityValue)
+                            let (energyLowerBound, energyUpperBound) = self.calculateBounds(value: energyValue)
+                            let (valenceLowerBound, valenceUpperBound) = self.calculateBounds(value: valenceValue)
+                            
+                            return (danceabilityLowerBound...danceabilityUpperBound).contains(audioFeature.danceability) &&
                             (energyLowerBound...energyUpperBound).contains(audioFeature.energy) &&
                             (valenceLowerBound...valenceUpperBound).contains(audioFeature.valence)
+                        }
                     }
-                    completion(filteredSongs) // Return the filtered songs through the completion closure
-                } else {
-                    completion(tracks) // Return the original list of tracks
+                    dispatchGroup.leave()
                 }
+            }
+            dispatchGroup.notify(queue: .main) {
+                completion(filteredSongs) // Return the filtered songs through the completion closure
             }
         }
     }
