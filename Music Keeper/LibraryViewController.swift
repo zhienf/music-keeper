@@ -9,6 +9,7 @@
 // 2) https://developer.apple.com/documentation/avfaudio/avaudioplayer
 // 3) https://medium.com/swift-productions/swiftui-play-an-audio-with-avaudioplayer-1c4085e2052c
 // 4) https://www.ralfebert.com/ios-examples/uikit/uitableviewcontroller/custom-cells/
+// 5) https://developer.apple.com/forums/thread/663479
 
 import UIKit
 import AVFoundation
