@@ -33,12 +33,11 @@ class LoginAccountViewController: UIViewController {
     */
     private let redirectURI = "https://www.google.com"
     private let clientID    = "***REMOVED***"
-//    private let scope       = "user-top-read,"
-//                                + "user-read-private,user-read-email,user-read-currently-playing,user-read-recently-played,"
-//                                +
-//                                    "user-library-read,"
-//                                + "playlist-modify-public,playlist-modify-private,playlist-read-private,playlist-read-collaborative"
-    private let scope       = "user-top-read,user-read-private,user-read-email,user-read-currently-playing,user-read-recently-played,user-library-read,playlist-modify-public,playlist-modify-private,playlist-read-private,playlist-read-collaborative"
+    private let scope       = "user-top-read,"
+                                + "user-read-private,user-read-email,user-read-currently-playing,user-read-recently-played,"
+                                +
+                                    "user-library-read,"
+                                + "playlist-modify-public,playlist-modify-private,playlist-read-private,playlist-read-collaborative"
     
     // core data to store access token
     weak var databaseController: DatabaseProtocol?
@@ -76,7 +75,6 @@ class LoginAccountViewController: UIViewController {
         // get token from the URL, index start from 29 (start after the redirect url)
         let index = urlString.index(urlString.startIndex, offsetBy: 29)
         var code = String(urlString.suffix(from: index))
-        print("token:", code)
         
         // if user logs in using facebook, remove unwanted characters from code retrieved from url
         if code.hasSuffix("#_=_") {
@@ -179,7 +177,6 @@ extension LoginAccountViewController: CustomWebViewControllerDelegate {
         guard url.absoluteString.contains("https://www.google.com/?code=") else { return }
         
         // NOTE: current implementation is user have to be authorised everytime to get new access token upon launching app, both access & refresh token will be saved, and retrieved when needed.(mostly only access token will be retrieved for now, no need for refreshing) assuming user doesnt spend more than an hour on the app, it should work fine
-        print("url:", url)
         authoriseUser(with: url.absoluteString)
         closeCustomWebViewController()
     }

@@ -91,11 +91,25 @@ class ReportViewController: UIViewController, UITableViewDelegate, UITableViewDa
         timeRangeSegmentedControl.setTitleTextAttributes([NSAttributedString.Key.foregroundColor: UIColor.white], for: .normal)
         timeRangeSegmentedControl.setTitleTextAttributes([NSAttributedString.Key.foregroundColor: UIColor.white], for: .selected)
         
+        // Allows sound playback regardless of the silent mode switch position
+        configureAudioSession()
+        
         // fetch data from API
         fetchArtist()
         fetchTracks()
         fetchEnergyAndValence()
         fetchGenreAndDecade()
+    }
+    
+    func configureAudioSession() {
+        // Allows sound playback regardless of the silent mode switch position
+        do {
+            let audioSession = AVAudioSession.sharedInstance()
+            try audioSession.setCategory(.playback)
+            try audioSession.setActive(true)
+        } catch {
+            print("Error configuring audio session: \(error.localizedDescription)")
+        }
     }
     
     private func getTimeRange() -> String {

@@ -88,6 +88,9 @@ class LibraryViewController: UIViewController, UITableViewDelegate, UITableViewD
         // Add a loading indicator view
         setupIndicator()
         
+        // Allows sound playback regardless of the silent mode switch position
+        configureAudioSession()
+        
         fetchLibrary()
     }
     
@@ -118,6 +121,17 @@ class LibraryViewController: UIViewController, UITableViewDelegate, UITableViewD
         NSLayoutConstraint.activate([indicator.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor), indicator.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor)
         ])
         indicator.startAnimating()
+    }
+    
+    func configureAudioSession() {
+        // Allows sound playback regardless of the silent mode switch position
+        do {
+            let audioSession = AVAudioSession.sharedInstance()
+            try audioSession.setCategory(.playback)
+            try audioSession.setActive(true)
+        } catch {
+            print("Error configuring audio session: \(error.localizedDescription)")
+        }
     }
     
     private func fetchLibrary() {
