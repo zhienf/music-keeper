@@ -8,6 +8,7 @@
 // 1) https://developer.spotify.com/documentation/ios/tutorials/content-linking
 
 import UIKit
+import AVFoundation
 
 /**
  A view controller that displays the newly generated playlist information based on a given artist name from the previous view controller.
@@ -18,7 +19,7 @@ import UIKit
  1. Displays the playlist information of the newly generated playlist information based on a given artist name from the previous view controller.
  2. Allows user to view the playlist in Spotify app through deep linking.
  */
-class NewPlaylistViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+class NewPlaylistViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, AVAudioPlayerDelegate {
     
     @IBOutlet weak var playlistImage: UIImageView!
     @IBOutlet weak var playlistTitle: UILabel!
@@ -45,6 +46,11 @@ class NewPlaylistViewController: UIViewController, UITableViewDelegate, UITableV
     var playlistURI: String?
     var playlistID: String?
     
+    // properties for audio player
+    var audioPlayer: AVAudioPlayer?
+    var selectedAudioURL: URL?
+    var previousSelectedIndexPath: IndexPath?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -57,6 +63,9 @@ class NewPlaylistViewController: UIViewController, UITableViewDelegate, UITableV
         // Retrieve the token from Core Data
         token = databaseController?.fetchAccessToken()
         
+        // Allows sound playback regardless of the silent mode switch position
+        configureAudioSession()
+        
         // Add a loading indicator view
         setupIndicator()
         
@@ -66,7 +75,18 @@ class NewPlaylistViewController: UIViewController, UITableViewDelegate, UITableV
         playlistTitle.text = playlistName
     }
     
-    @IBAction func openSpotifyPlaylist(_ sender: Any) {        
+    func configureAudioSession() {
+        // Allows sound playback regardless of the silent mode switch position
+        do {
+            let audioSession = AVAudioSession.sharedInstance()
+            try audioSession.setCategory(.playback)
+            try audioSession.setActive(true)
+        } catch {
+            print("Error configuring audio session: \(error.localizedDescription)")
+        }
+    }
+    
+    @IBAction func openSpotifyPlaylist(_ sender: Any) {
         guard let playlistURI = playlistURI, let spotifyDeepLinkURL = URL(string: playlistURI) else { print("invalid playlist URI"); return }
     
         guard let playlistID = playlistID, let spotifyExternalURL = URL(string: "https://open.spotify.com/playlist/\(playlistID)") else { print("invalid playlist external URL"); return }
@@ -149,6 +169,24 @@ class NewPlaylistViewController: UIViewController, UITableViewDelegate, UITableV
         }
     }
     
+    private func downloadAndPlayAudio(from url: URL) {
+        /**
+         Handle the asynchronous downloading of the audio file. It creates a URLSession data task to download the audio data, and upon completion, it attempts to create an AVAudioPlayer instance using the downloaded data.
+         */
+        URLSession.shared.dataTask(with: url) { [weak self] (data, response, error) in
+            guard let data = data, let audioPlayer = try? AVAudioPlayer(data: data) else {
+                if let error = error {
+                    print("Failed to load audio: \(error)")
+                }
+                return
+            }
+
+            self?.audioPlayer = audioPlayer
+            self?.selectedAudioURL = url    // current mp3 url to play
+            self?.audioPlayer?.delegate = self  // to keep track of the state of audio player
+            audioPlayer.play()
+        }.resume()
+    }
     
     // MARK: - UITableViewDataSource
 
@@ -157,10 +195,83 @@ class NewPlaylistViewController: UIViewController, UITableViewDelegate, UITableV
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "playlistTrackCell", for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: "playlistTrackCell", for: indexPath) as! NewPlaylistTrackCell
         let playlistTrack = playlistTracks[indexPath.row]
-        cell.textLabel?.text = playlistTrack.name
-        cell.detailTextLabel?.text = playlistTrack.artists[0].name
+        cell.trackLabel.text = playlistTrack.name
+        cell.artistLabel.text = playlistTrack.artists[0].name
+        cell.audioURL = URL(string: playlistTrack.preview_url)
         return cell
     }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        // Get the selected cell and its associated MP3 URL
+        let selectedCell = tableView.cellForRow(at: indexPath) as! NewPlaylistTrackCell
+        guard let mp3URL = selectedCell.audioURL else { return }
+
+        // Check if the selected cell is the same as the previously selected cell
+        if mp3URL == selectedAudioURL {
+            if let audioPlayer = audioPlayer {
+                if audioPlayer.isPlaying {
+                    // If it is currently playing, pause the audio player
+                    audioPlayer.pause()
+                    selectedCell.playButton.setImage(UIImage(systemName: "play.circle"), for: .normal)
+                } else {
+                    // If it is currently paused, resume playing the audio
+                    audioPlayer.play()
+                    selectedCell.playButton.setImage(UIImage(systemName: "pause.circle"), for: .normal)
+                }
+            }
+        } else {
+            // Stop the previous audio if it's playing
+            if let audioPlayer = audioPlayer, audioPlayer.isPlaying {
+                audioPlayer.stop()
+                // Reset the play button image of the previously selected cell to default (play button)
+                // NOTE: won't enter block when table is scrolled, since previous cell has been reused.
+                if let previousIndexPath = previousSelectedIndexPath, let previousCell = tableView.cellForRow(at: previousIndexPath) as? NewPlaylistTrackCell {
+                    previousCell.playButton.setImage(UIImage(systemName: "play.circle"), for: .normal)
+                }
+            }
+            // Play the selected audio
+            downloadAndPlayAudio(from: mp3URL)
+            selectedCell.playButton.setImage(UIImage(systemName: "pause.circle"), for: .normal)
+        }
+
+        // Store the currently selected index path as the previous selected index path
+        previousSelectedIndexPath = indexPath
+        
+        tableView.deselectRow(at: indexPath, animated: true)
+    }
+    
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        if let topTrackCell = cell as? NewPlaylistTrackCell {
+            // Update the reused cell when the view scrolls back to it
+            // Check if the cell's index path matches the previously selected index path
+            if indexPath == previousSelectedIndexPath {
+                topTrackCell.playButton.setImage(UIImage(systemName: "pause.circle"), for: .normal)
+            } else {
+                topTrackCell.playButton.setImage(UIImage(systemName: "play.circle"), for: .normal)
+            }
+        }
+    }
+
+    // MARK: - AVAudioPlayerDelegate
+    
+    func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+        if let selectedIndexPath = previousSelectedIndexPath {
+            let selectedCell = tableView.cellForRow(at: selectedIndexPath) as? NewPlaylistTrackCell
+            selectedCell?.playButton.setImage(UIImage(systemName: "play.circle"), for: .normal)
+        }
+    }
 }
+
+class NewPlaylistTrackCell: UITableViewCell {
+    /**
+     Custom table view cell used in NewPlaylistViewController.
+     */
+    @IBOutlet weak var playButton: UIButton!
+    @IBOutlet weak var artistLabel: UILabel!
+    @IBOutlet weak var trackLabel: UILabel!
+    
+    var audioURL: URL?
+}
+
