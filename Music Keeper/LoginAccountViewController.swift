@@ -32,7 +32,7 @@ class LoginAccountViewController: UIViewController {
       - encodedID = our Basic Auth which is "clientID:clientSecret", base64 encoded using https://www.base64encode.org/
     */
     private let redirectURI = "https://www.google.com"
-    private let clientID    = "***REMOVED***"
+    private let clientID    = "b8a60d894569482aa55897a613352a39"
     private let scope       = "user-top-read,"
                                 + "user-read-private,user-read-email,user-read-currently-playing,user-read-recently-played,"
                                 +

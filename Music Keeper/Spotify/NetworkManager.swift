@@ -643,7 +643,7 @@ class NetworkManager {
                         let taskAddSongs = URLSession.shared.dataTask(with: requestSongs) { data, response, error in
                             guard error == nil else { print("addSongs: error", error!); return }
                             guard let response = response as? HTTPURLResponse else { print("addSongs: NO RESPONSE"); return }
-                            guard response.statusCode == 201 else { print("addSongs: BAD RESPONSE: ", response.statusCode); return }
+                            guard response.statusCode == 200 else { print("addSongs: BAD RESPONSE: ", response.statusCode); return }
                             guard let data = data else { print("NO DATA"); return }
                             
                             do {
