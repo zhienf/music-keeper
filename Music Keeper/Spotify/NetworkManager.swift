@@ -21,11 +21,11 @@ class NetworkManager {
     static let shared   = NetworkManager()
     
     private let offset          = "0"
-    private let clientID        = Config.getClientID(<#T##self: Config##Config#>)
-    private let clientSecret    = Config.getClientSecret(<#T##self: Config##Config#>)
+    private let clientID        = Config.getClientID()
+    private let clientSecret    = Config.getClientSecret()
     
     // Base64 Encoded Client ID:Client secret
-    private let encodedID = Config.getEncodedID(<#T##self: Config##Config#>)
+    private let encodedID = Config.getEncodedID()
     
     private let redirectUrl = "https://www.google.com"
     
