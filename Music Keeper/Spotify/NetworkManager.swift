@@ -21,11 +21,11 @@ class NetworkManager {
     static let shared   = NetworkManager()
     
     private let offset          = "0"
-    private let clientID        = "***REMOVED***"
-    private let clientSecret    = "***REMOVED***"
+    private let clientID        = Config.getClientID(<#T##self: Config##Config#>)
+    private let clientSecret    = Config.getClientSecret(<#T##self: Config##Config#>)
     
     // Base64 Encoded Client ID:Client secret
-    private let encodedID  = "***REMOVED***"
+    private let encodedID = Config.getEncodedID(<#T##self: Config##Config#>)
     
     private let redirectUrl = "https://www.google.com"
     
@@ -44,7 +44,7 @@ class NetworkManager {
          */
         var bodyComponents = URLComponents()
         let requestHeader: [String: String] = [
-            "Authorization": "Basic \(encodedID)",
+            "Authorization": "Basic \(String(describing: encodedID))",
             "Content-Type": "application/x-www-form-urlencoded"
         ]
 
@@ -95,7 +95,7 @@ class NetworkManager {
         
         var requestBodyComponents = URLComponents()
         let requestHeader: [String: String] = [
-            "Authorization": "Basic \(encodedID)",
+            "Authorization": "Basic \(String(describing: encodedID))",
             "Content-Type": "application/x-www-form-urlencoded"
         ]
 
