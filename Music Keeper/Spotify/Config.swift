@@ -23,4 +23,6 @@ class Config {
     func getEncodedID() -> String {
         return encodedID
     }
+    
+    // test
 }
